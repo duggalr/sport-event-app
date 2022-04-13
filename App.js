@@ -12,9 +12,10 @@ import Icon from 'react-native-ico';
 
 
 // TODO:   
+  // tab-navigation
   // organizing the event-page and comments (add icons again for home/event-page)
   // create-event-page (just basic form-ui)
-  // user-profile/settings page (just create the user-profile page first)
+  // user-profile/settings page (just create the user-profile page first; no need for seeing which events I clicked going/saved, etc.)
   // **modal speed**
   // **scroll-header**
   // colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
@@ -83,9 +84,23 @@ const MainHeading = () => {
 // }
 
 
+const ExampleSettings = () => {
+  return (
 
-const MainScreen = ({ navigation }) => {
-  // data={this.state} scrollFunction={this._onScroll}
+    <Text>
+      Settings
+    </Text>
+  )
+
+}
+
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+
+
+const EventListNew = ({navigation}) => {
 
   const data = [
     {
@@ -117,23 +132,10 @@ const MainScreen = ({ navigation }) => {
     },
   ]
 
-  // const [showModal, setShowModal] = useState(false);
-  // const [isModalVisible, setModalVisible] = useState(false);
-  // const toggleModal = () => {
-  //   setModalVisible(!isModalVisible);
-  // };
-
 
   return (
-    
-    // <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}>
-    // f8fafc
-    // <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
 
     <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
-    {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}> */}
-
-      <MainHeading />
 
       <FlatList data={data} renderItem={({ 
         item 
@@ -141,7 +143,6 @@ const MainScreen = ({ navigation }) => {
 
         <Pressable onPress={() => navigation.navigate('EventPage')}>
 
-          {/* <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="2" p="5" mt="6" rounded="22" backgroundColor="white"> */}
           <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
 
             <HStack alignItems="center">
@@ -151,7 +152,6 @@ const MainScreen = ({ navigation }) => {
               {/* <Icon name="soccer-ball-outline" group="lodgicons"/> */}
               <Spacer />
               
-              {/* colorScheme="#88e1f7" */}
               <Badge backgroundColor="#0284c7" _text={{
                 color: "white", fontSize: "13"
               }} variant="solid" rounded="10" >
@@ -202,19 +202,20 @@ const MainScreen = ({ navigation }) => {
             <HStack pt="5">
               
               <Pressable onPress={() => setShowModal(true)}>
-              {/* <Pressable> */}
+
                 <Avatar.Group size="12" max={2}>
 
-                    <Avatar bg="green.500" source={{
+                  <Avatar bg="green.500" source={{
                       uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
                     }}>
-                    </Avatar>
+                  </Avatar>
 
                   <Avatar bg="cyan.500" source={{
                   uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
                 }}>
                     TE
                   </Avatar>
+                  
                   <Avatar bg="indigo.500" source={{
                   uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
                 }}>
@@ -256,122 +257,6 @@ const MainScreen = ({ navigation }) => {
 
             </HStack>
 
-
-            {/* <Button title="Show modal" onPress={toggleModal} >Click for Modal</Button>
-            <Modal
-              testID={'modal'}
-              isVisible={isModalVisible}
-              hasBackdrop={true}
-              backdropOpacity={0.2}
-              backgroundColor= 'white'
-              onBackdropPress={toggleModal}
-              style={{ flex: 1, alignItems: 'center', justifyContent: 'center'}}
-            >
-              <View>
-                <Text>Hi 👋!</Text>
-                <Button testID={'close-button'} title="Close" />
-              </View>
-            </Modal> */}
-
-
-            {/* <Modal size="lg" isOpen={showModal} onClose={() => setShowModal(false)}>
-              <Modal.Content maxWidth="400px">
-                <Modal.CloseButton />
-
-                <Modal.Header>People who are Going:</Modal.Header>
-
-                <Modal.Body>
-
-                  <ScrollView>
-
-                    <Pressable onPress={() => console.log('avatar-pressed...')}>
-
-                      <HStack>
-                        <Avatar bg="green.500" source={{
-                          uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                        }}>
-                          AJ
-                        </Avatar>
-
-                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                      </HStack>
-
-                    </Pressable>
-
-                    <Divider my="1" />
-
-                    <Pressable onPress={() => console.log('avatar-pressed...')}>
-
-                      <HStack>
-                        <Avatar bg="green.500" source={{
-                          uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                        }}>
-                          AJ
-                        </Avatar>
-
-                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">Smith Johnathon</Text>
-                      </HStack>
-
-                    </Pressable>
-
-                    <Divider my="1" />
-
-                    <Pressable onPress={() => console.log('avatar-pressed...')}>
-
-                      <HStack>
-                        <Avatar bg="green.500" source={{
-                          uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                        }}>
-                          AJ
-                        </Avatar>
-
-                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">Luis Ravel</Text>
-                      </HStack>
-
-                    </Pressable>
-
-                    <Divider my="1" />
-
-                    <Pressable onPress={() => console.log('avatar-pressed...')}>
-
-                      <HStack>
-                        <Avatar bg="green.500" source={{
-                          uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                        }}>
-                          AJ
-                        </Avatar>
-
-                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">Luis Ravel</Text>
-                      </HStack>
-
-                    </Pressable>
-
-                    <Divider my="1" />
-
-                    <Pressable onPress={() => console.log('avatar-pressed...')}>
-
-                      <HStack>
-                        <Avatar bg="green.500" source={{
-                          uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                        }}>
-                          AJ
-                        </Avatar>
-
-                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">Luis Ravel</Text>
-                      </HStack>
-
-                    </Pressable>
-
-
-                  </ScrollView>
-
-                </Modal.Body>
-
-              </Modal.Content>
-
-            </Modal> */}
-
-
           </Box>
 
         </Pressable>
@@ -382,31 +267,56 @@ const MainScreen = ({ navigation }) => {
 
       </FlatList>
 
+    </View>
 
+
+  )
+
+
+}
+
+
+
+
+
+const MainScreen = ({ navigation }) => {
+  // data={this.state} scrollFunction={this._onScroll}
+
+  // const [showModal, setShowModal] = useState(false);
+  // const [isModalVisible, setModalVisible] = useState(false);
+  // const toggleModal = () => {
+  //   setModalVisible(!isModalVisible);
+  // };
+
+
+  return (
+    
+    // <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}>
+    // f8fafc
+    // <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
+
+    // <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
+    // {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}> */}
+
+      // <MainHeading />
 
       <Tab.Navigator screenOptions={{
-        tabBarOptions: {
+            tabBarOptions: {
           style: {
             backgroundColor: '#f9f9f9',
           }
         }
       }}>
-    
-      {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-        <Icon name="event" group="basic" />
-      )}} 
-      name="Home" component={MainScreen}  /> */}
 
-      <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleEventPage} />
+        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
+        
+        <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
+        
+        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />        
+        
+      </Tab.Navigator> 
 
-      <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><MainScreen navigation={navigation}/>} />
-      
-      <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
-
-    </Tab.Navigator>
-
-
-    </View> 
+    // </View> 
     
   )
 
@@ -454,7 +364,7 @@ const ExampleEventPage = () => {
 
       </HStack>
 
-      <Text mt="3" fontWeight="medium" fontSize="24">
+      <Text mt="3" fontWeight="medium" fontSize="24"> 
         Basketball Run this Friday at Smithfield
       </Text>
 
@@ -567,16 +477,13 @@ const CreateEventPage = () => {
 
 
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
-
 
 
 const TestingMain = ({ navigation }) => {
   return (
 
-
     <MainScreen navigation={navigation}/>
+
     // <ExampleEventPage />
 
     // <Tab.Navigator screenOptions={{
