@@ -6,6 +6,8 @@ import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.horcrux.svg.SvgPackage;
 import com.horcrux.svg.SvgPackage;
+import com.horcrux.svg.SvgPackage;
+import com.horcrux.svg.SvgPackage;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;

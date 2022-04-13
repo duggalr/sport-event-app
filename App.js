@@ -1,48 +1,33 @@
 import * as React from 'react';
+import { useState } from "react";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
-  Badge, FlatList, Button, Avatar, Image, Fab, ScrollView } from "native-base";
+  Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Modal } from "native-base";
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Icon from 'react-native-ico';
+// import Icon from 'react-native-ico';
+// import Modal from "react-native-modal";
 
 
 
-// const HomeScreen = () => {
-//   return (
 
-//     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}>
-//       <Text>Home</Text>
-//     </View>
-    
-//   )
-// }
-
-
-// const SettingsScreen = () => {
-//   return (
-
-//     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}>
-//       <Text>Settings</Text>
-//     </View>
-    
-//   )
-// }
-
-
-// const FilterScreen = () => {
-//   return (
-
-//     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}>
-//       <Text>Filter</Text>
-//     </View>
-
-//   )
-// }
-
+// TODO:   
+  // organizing the event-page and comments?
+  // create-event-page (just basic form-ui)    
+  // user-profile/settings page (just create the user-profile page first)
+  // **modal speed**
+  // **scroll-header**
+  // colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
+    // re-adding all the 
+  // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
+    // experiment with animations a bit...
+  // need to make responsive and test on bunch of different android phones (along with virtual/physical Iphone)
 
 
 
 const MainHeading = () => {
+
+  let [service, setService] = React.useState("");
 
   return (
 
@@ -52,8 +37,8 @@ const MainHeading = () => {
         Open Runs Nearby
       </Heading>
       <Spacer />
-      <Icon name="filter-results-button" group="material-design" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/>
-      
+
+      {/* <Icon name="filter-results-button" group="material-design" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
       {/* <Icon name="plus" group="ui-interface" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
       {/* <Button backgroundColor="#0284c7">
         Create Event
@@ -67,33 +52,38 @@ const MainHeading = () => {
 
 
 
-// TODO:   
-  // scroll-header**
-  // filter by date/location/active/completed
-  // event-page link to main-page-cards
-  // button press & avatar-list press
-  // colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
-  // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
-    // experiment with animations a bit...
-  // need to make responsive and test on bunch of different android phones (along with virtual/physical Iphone)
+// const BottomMainBar = () => {
+
+//   return (
+
+//     <Tab.Navigator screenOptions={{
+//       tabBarOptions: {
+//         style: {
+//           backgroundColor: '#f9f9f9',
+//         }
+//       }
+//     }}>
+    
+//       {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
+//         <Icon name="event" group="basic" />
+//       )}} 
+//       name="Home" component={MainScreen}  /> */}
+
+//       <Tab.Screen options={{headerShown: false}} name="Home" children={()=><MainScreen />} />
+      
+//       <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
+
+//       <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleEventPage} />
+
+//     </Tab.Navigator>
+
+//   )
+
+// }
 
 
-function _onScroll(e, mainState) {
-  console.log(e.nativeEvent.contentOffset.y);
-  var current_y_amt = e.nativeEvent.contentOffset.y
-  if (mainState.previous_y_amount < current_y_amt){
-    console.log('one')
-    mainState = {previous_y_amount: current_y_amt, hide: true}
-    // this.setState({hide: true, previous_y_amount: current_y_amt})
-  } else {
-    console.log('two')
-    mainState = {previous_y_amount: current_y_amt, hide: false}
-    // this.setState({hide: false, previous_y_amount: current_y_amt})
-  }
-}
 
-
-const MainScreen = ({stateData, scrollFunction}) => {
+const MainScreen = ({ navigation }) => {
   // data={this.state} scrollFunction={this._onScroll}
 
   const data = [
@@ -126,32 +116,36 @@ const MainScreen = ({stateData, scrollFunction}) => {
     },
   ]
 
+  const [showModal, setShowModal] = useState(false);
+  // const [isModalVisible, setModalVisible] = useState(false);
+  // const toggleModal = () => {
+  //   setModalVisible(!isModalVisible);
+  // };
+
+
   return (
     
     // <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}>
     // f8fafc
     // <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
 
-
     <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
     {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}> */}
 
       <MainHeading />
 
-      {stateData.hide == true ? (console.log(stateData.hide)) : (console.log(stateData.hide))}
-
-      <FlatList onScroll={e => scrollFunction(e, stateData)} data={data} renderItem={({ 
+      <FlatList data={data} renderItem={({ 
         item 
       }) => <Box>
 
-        <Pressable onPress={() => console.log("I'm Pressed")}>
+        <Pressable onPress={() => navigation.navigate('EventPage')}>
 
           {/* <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="2" p="5" mt="6" rounded="22" backgroundColor="white"> */}
           <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
 
             <HStack alignItems="center">
 
-              {item.icon_name == 'basketball'? <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />: <Icon height="26" width="26" name="football" group="miscellaneous" color="black"/> }
+              {/* {item.icon_name == 'basketball'? <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />: <Icon height="26" width="26" name="football" group="miscellaneous" color="black"/> } */}
               {/* <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" /> */}
               {/* <Icon name="soccer-ball-outline" group="lodgicons"/> */}
               <Spacer />
@@ -164,7 +158,7 @@ const MainScreen = ({stateData, scrollFunction}) => {
               </Badge>
             
               <Text ml="1"></Text>
-              <Icon name="location" group="logistics-delivery" height="24" width="24"/>
+              {/* <Icon name="location" group="logistics-delivery" height="24" width="24"/> */}
               <Text fontSize="13" fontWeight="medium">
                 {item.location_distance}
               </Text>
@@ -190,13 +184,13 @@ const MainScreen = ({stateData, scrollFunction}) => {
             <HStack mt="0.5">
 
               <Text ml="0.5"></Text>
-              <Icon name="calendar" group="ui-interface" color="gray" />
+              {/* <Icon name="calendar" group="ui-interface" color="gray" /> */}
               <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
                 01/01/2022
               </Text>
 
               <Text ml="4"></Text>
-              <Icon ml="2" name="time" group="essential" color="gray"/>
+              {/* <Icon ml="2" name="time" group="essential" color="gray"/> */}
               {/* <Text ml="1" color="gray.500"> */}
               <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
                 6:00PM
@@ -206,55 +200,176 @@ const MainScreen = ({stateData, scrollFunction}) => {
             
             <HStack pt="5">
               
-              <Avatar.Group size="12" max={2}>
-                <Avatar bg="green.500" source={{
-                uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-              }}>
-                  AJ
-                </Avatar>
-                <Avatar bg="cyan.500" source={{
-                uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-              }}>
-                  TE
-                </Avatar>
-                <Avatar bg="indigo.500" source={{
-                uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-              }}>
-                  JB
-                </Avatar>
-                <Avatar bg="amber.500" source={{
-                uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-              }}>
-                  TS
-                </Avatar>
-                <Avatar bg="green.500" source={{
-                uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-              }}>
-                  AJ
-                </Avatar>
-                <Avatar bg="cyan.500" source={{
-                uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-              }}>
-                  TE
-                </Avatar>
-                <Avatar bg="indigo.500" source={{
-                uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-              }}>
-                  JB
-                </Avatar>
-                <Avatar bg="amber.500" source={{
-                uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-              }}>
-                  TS
-                </Avatar>
-              </Avatar.Group>
+              <Pressable onPress={() => setShowModal(true)}>
+              {/* <Pressable> */}
+                <Avatar.Group size="12" max={2}>
 
+                    <Avatar bg="green.500" source={{
+                      uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                    }}>
+                    </Avatar>
+
+                  <Avatar bg="cyan.500" source={{
+                  uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                }}>
+                    TE
+                  </Avatar>
+                  <Avatar bg="indigo.500" source={{
+                  uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                }}>
+                    JB
+                  </Avatar>
+                  <Avatar bg="amber.500" source={{
+                  uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                }}>
+                    TS
+                  </Avatar>
+                  <Avatar bg="green.500" source={{
+                  uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                }}>
+                    AJ
+                  </Avatar>
+                  <Avatar bg="cyan.500" source={{
+                  uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                }}>
+                    TE
+                  </Avatar>
+                  <Avatar bg="indigo.500" source={{
+                  uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                }}>
+                    JB
+                  </Avatar>
+                  <Avatar bg="amber.500" source={{
+                  uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                }}>
+                    TS
+                  </Avatar>
+                </Avatar.Group>
+
+              </Pressable>
+
+              
               <Spacer />
               {/* <Button variant="outline">Going?</Button> */}
               <Button backgroundColor="#0ea5e9">Going?</Button>
 
             </HStack>
-            
+
+
+            {/* <Button title="Show modal" onPress={toggleModal} >Click for Modal</Button>
+            <Modal
+              testID={'modal'}
+              isVisible={isModalVisible}
+              hasBackdrop={true}
+              backdropOpacity={0.2}
+              backgroundColor= 'white'
+              onBackdropPress={toggleModal}
+              style={{ flex: 1, alignItems: 'center', justifyContent: 'center'}}
+            >
+              <View>
+                <Text>Hi 👋!</Text>
+                <Button testID={'close-button'} title="Close" />
+              </View>
+            </Modal> */}
+
+            <Modal size="lg" isOpen={showModal} onClose={() => setShowModal(false)}>
+              <Modal.Content maxWidth="400px">
+                <Modal.CloseButton />
+
+                <Modal.Header>People who are Going:</Modal.Header>
+
+                <Modal.Body>
+
+                  <ScrollView>
+
+                    <Pressable onPress={() => console.log('avatar-pressed...')}>
+
+                      <HStack>
+                        <Avatar bg="green.500" source={{
+                          uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                        }}>
+                          AJ
+                        </Avatar>
+
+                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
+                      </HStack>
+
+                    </Pressable>
+
+                    <Divider my="1" />
+
+                    <Pressable onPress={() => console.log('avatar-pressed...')}>
+
+                      <HStack>
+                        <Avatar bg="green.500" source={{
+                          uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                        }}>
+                          AJ
+                        </Avatar>
+
+                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">Smith Johnathon</Text>
+                      </HStack>
+
+                    </Pressable>
+
+                    <Divider my="1" />
+
+                    <Pressable onPress={() => console.log('avatar-pressed...')}>
+
+                      <HStack>
+                        <Avatar bg="green.500" source={{
+                          uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                        }}>
+                          AJ
+                        </Avatar>
+
+                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">Luis Ravel</Text>
+                      </HStack>
+
+                    </Pressable>
+
+                    <Divider my="1" />
+
+                    <Pressable onPress={() => console.log('avatar-pressed...')}>
+
+                      <HStack>
+                        <Avatar bg="green.500" source={{
+                          uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                        }}>
+                          AJ
+                        </Avatar>
+
+                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">Luis Ravel</Text>
+                      </HStack>
+
+                    </Pressable>
+
+                    <Divider my="1" />
+
+                    <Pressable onPress={() => console.log('avatar-pressed...')}>
+
+                      <HStack>
+                        <Avatar bg="green.500" source={{
+                          uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                        }}>
+                          AJ
+                        </Avatar>
+
+                        <Text fontSize="16" fontWeight="medium" pl="2" pt="3">Luis Ravel</Text>
+                      </HStack>
+
+                    </Pressable>
+
+
+                  </ScrollView>
+
+                </Modal.Body>
+
+              </Modal.Content>
+
+            </Modal>
+
+
           </Box>
 
         </Pressable>
@@ -267,15 +382,14 @@ const MainScreen = ({stateData, scrollFunction}) => {
 
     </View> 
     
-    
   )
 
 }
 
 
 
-const ExampleEventPage = () => {
 
+const ExampleEventPage = () => {
   
   return (
 
@@ -285,7 +399,7 @@ const ExampleEventPage = () => {
 
       <HStack alignItems="center">
 
-        <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />
+        {/* <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" /> */}
         {/* <Icon name="soccer-ball-outline" group="lodgicons"/> */}
         <Spacer />
 
@@ -296,7 +410,7 @@ const ExampleEventPage = () => {
         </Badge>
 
         <Text ml="1"></Text>
-        <Icon name="location" group="logistics-delivery" height="24" width="24"/>
+        {/* <Icon name="location" group="logistics-delivery" height="24" width="24"/> */}
         <Text fontSize="13" fontWeight="medium">
           9KM
         </Text>
@@ -308,13 +422,13 @@ const ExampleEventPage = () => {
       </Text>
 
       <HStack mt="5">
-        <Icon name="calendar" group="ui-interface" color="gray" />
+        {/* <Icon name="calendar" group="ui-interface" color="gray" /> */}
         <Text color="gray" ml="2" fontSize="15" fontWeight="medium">
           01/01/2022
         </Text>
 
         <Text ml="6"></Text>
-        <Icon ml="2" name="time" group="essential" color="gray"/>
+        {/* <Icon ml="2" name="time" group="essential" color="gray"/> */}
         <Text ml="1" color="gray" fontSize="15" fontWeight="medium">
           6:00PM
         </Text>
@@ -325,7 +439,6 @@ const ExampleEventPage = () => {
         I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach. 
         I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach. 
       </Text>
-
 
       <HStack pt="5">
         
@@ -382,52 +495,10 @@ const ExampleEventPage = () => {
         Comments (1) ; TODO
       </Text>
 
-  </View>
-
-
-  )
-
-}
-
-
-
-
-
-const Tab = createBottomTabNavigator();
-
-const BottomBar = () => {
-  return (
-
-    <NavigationContainer>
-
-      <Tab.Navigator screenOptions={{
-          tabBarOptions: {
-            style: {
-              backgroundColor: '#f9f9f9',
-            }
-          }
-        }}>
-        
-        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-          <Icon name="event" group="basic" />
-        )}} 
-        name="Home" component={HomeScreen}  />
-        
-        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-          <Icon name="settings" group="miscellaneous" />
-        )}}  
-        name="Settings" component={SettingsScreen} />
-
-        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-          <Icon name="filter-results-button" group="material-design" />
-        )}}  
-        name="Filter" component={FilterScreen} />
-
-      </Tab.Navigator>
-
-    </NavigationContainer>
+    </View>
 
   )
+
 }
 
 
@@ -442,7 +513,42 @@ const CreateEventPage = () => {
 
 
 
-// export default function App(){
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+
+
+const TestingMain = ({ navigation }) => {
+  return (
+    
+    <Tab.Navigator screenOptions={{
+      tabBarOptions: {
+        style: {
+          backgroundColor: '#f9f9f9',
+        }
+      }
+    }}>
+    
+      {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
+        <Icon name="event" group="basic" />
+      )}} 
+      name="Home" component={MainScreen}  /> */}
+
+      <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><MainScreen navigation={navigation}/>} />
+      
+      <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
+
+      <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleEventPage} />
+
+    </Tab.Navigator>
+
+  )
+}
+
+
+
+
 export default class App extends React.Component{
 
   constructor(props) {
@@ -454,19 +560,6 @@ export default class App extends React.Component{
   }
 
 
-  _onScroll(e, stateData) {
-    console.log("y-amt:", e.nativeEvent.contentOffset.y);
-    var current_y_amt = e.nativeEvent.contentOffset.y
-    if (stateData.previous_y_amount < current_y_amt){
-      stateData = {hide: true, previous_y_amount: current_y_amt}
-      // this.setState({hide: true, previous_y_amount: current_y_amt})
-    } else {
-      stateData = {hide: false, previous_y_amount: current_y_amt}
-      // this.setState({hide: false, previous_y_amount: current_y_amt})
-    }
-  }
-  
-
   render() {
 
     return (
@@ -476,38 +569,17 @@ export default class App extends React.Component{
         {/* <MainScreen /> */}
   
         <NavigationContainer>
-  
-          <Tab.Navigator screenOptions={{
-              tabBarOptions: {
-                style: {
-                  backgroundColor: '#f9f9f9',
-                }
-              }
-            }}>
-            
-            {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-              <Icon name="event" group="basic" />
-            )}} 
-            name="Home" component={MainScreen}  /> */}
 
-            <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-              <Icon name="event" group="basic" />
-            )}} 
-            name="Home" children={()=><MainScreen stateData={this.state} scrollFunction={this._onScroll} />} />
+          <Stack.Navigator>
             
-            <Tab.Screen options={{headerShown: false, tabBarLabelStyle: {fontSize: 11}, 
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="plus" group="ui-interface" height="24" width="24"/>
-            )}}  
-            name="Create Event" component={CreateEventPage} />
-  
-            <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-              <Icon name="settings" group="miscellaneous"/>
-            )}}  
-            name="Settings" component={ExampleEventPage} />
-  
-  
-          </Tab.Navigator>
+            <Stack.Screen
+              name="Home"
+              component={TestingMain}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen name="EventPage" component={ExampleEventPage} />
+
+          </Stack.Navigator>
   
         </NavigationContainer>
   
@@ -515,11 +587,12 @@ export default class App extends React.Component{
   
     )
 
-
   }
 
-
 }
+
+
+
 
 
 
