@@ -1,28 +1,29 @@
 import * as React from 'react';
 import { useState } from "react";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
-  Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Modal } from "native-base";
+  Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView } from "native-base";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-// import Icon from 'react-native-ico';
+import Icon from 'react-native-ico';
 // import Modal from "react-native-modal";
 
 
 
 
 // TODO:   
-  // organizing the event-page and comments?
-  // create-event-page (just basic form-ui)    
+  // organizing the event-page and comments (add icons again for home/event-page)
+  // create-event-page (just basic form-ui)
   // user-profile/settings page (just create the user-profile page first)
   // **modal speed**
   // **scroll-header**
   // colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
-    // re-adding all the 
+    // re-add all the icons (deal with icon/modal issue)
   // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
     // experiment with animations a bit...
   // need to make responsive and test on bunch of different android phones (along with virtual/physical Iphone)
 
+  
 
 
 const MainHeading = () => {
@@ -116,7 +117,7 @@ const MainScreen = ({ navigation }) => {
     },
   ]
 
-  const [showModal, setShowModal] = useState(false);
+  // const [showModal, setShowModal] = useState(false);
   // const [isModalVisible, setModalVisible] = useState(false);
   // const toggleModal = () => {
   //   setModalVisible(!isModalVisible);
@@ -272,7 +273,8 @@ const MainScreen = ({ navigation }) => {
               </View>
             </Modal> */}
 
-            <Modal size="lg" isOpen={showModal} onClose={() => setShowModal(false)}>
+
+            {/* <Modal size="lg" isOpen={showModal} onClose={() => setShowModal(false)}>
               <Modal.Content maxWidth="400px">
                 <Modal.CloseButton />
 
@@ -367,7 +369,7 @@ const MainScreen = ({ navigation }) => {
 
               </Modal.Content>
 
-            </Modal>
+            </Modal> */}
 
 
           </Box>
@@ -380,6 +382,30 @@ const MainScreen = ({ navigation }) => {
 
       </FlatList>
 
+
+
+      <Tab.Navigator screenOptions={{
+        tabBarOptions: {
+          style: {
+            backgroundColor: '#f9f9f9',
+          }
+        }
+      }}>
+    
+      {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
+        <Icon name="event" group="basic" />
+      )}} 
+      name="Home" component={MainScreen}  /> */}
+
+      <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleEventPage} />
+
+      <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><MainScreen navigation={navigation}/>} />
+      
+      <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
+
+    </Tab.Navigator>
+
+
     </View> 
     
   )
@@ -390,9 +416,20 @@ const MainScreen = ({ navigation }) => {
 
 
 const ExampleEventPage = () => {
+
+  function handleClick(){
+    console.log("input-button-click")
+  }
+
+  const [selected, setSelected] = React.useState(1);
   
   return (
 
+    <KeyboardAvoidingView h={{
+      base: "400px",
+      lg: "auto"
+    }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+  
     <View p="8" pt="10" backgroundColor="white" > 
 
     {/* <Image shadow={2} source={{uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80" }} alt="asd Text" size="2xl" />  */}
@@ -421,7 +458,7 @@ const ExampleEventPage = () => {
         Basketball Run this Friday at Smithfield
       </Text>
 
-      <HStack mt="5">
+      <HStack mt="2">
         {/* <Icon name="calendar" group="ui-interface" color="gray" /> */}
         <Text color="gray" ml="2" fontSize="15" fontWeight="medium">
           01/01/2022
@@ -435,7 +472,7 @@ const ExampleEventPage = () => {
 
       </HStack>
 
-      <Text mt="6" fontSize="16" color="coolGray.700">
+      <Text mt="6" fontSize="16" color="black">
         I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach. 
         I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach. 
       </Text>
@@ -491,11 +528,27 @@ const ExampleEventPage = () => {
 
       </HStack>
 
-      <Text mt="3" fontWeight="medium" fontSize="20">
-        Comments (1) ; TODO
-      </Text>
+
+      
+      {/* <VStack pt="20">
+
+        <Icon name="add-comment-button" group="material-design" />
+
+        <Text mt="3" fontWeight="medium" fontSize="20">
+          Comments (1) ; TODO
+        </Text>
+        
+          <Box alignItems="center">
+            <Input type={"text"} w="100%" maxW="300px" height="12" py="0" placeholder="got something to say?" />
+          </Box>
+        
+      </VStack> */}
+
 
     </View>
+
+    </KeyboardAvoidingView>
+
 
   )
 
@@ -521,27 +574,31 @@ const Tab = createBottomTabNavigator();
 
 const TestingMain = ({ navigation }) => {
   return (
-    
-    <Tab.Navigator screenOptions={{
-      tabBarOptions: {
-        style: {
-          backgroundColor: '#f9f9f9',
-        }
-      }
-    }}>
-    
-      {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-        <Icon name="event" group="basic" />
-      )}} 
-      name="Home" component={MainScreen}  /> */}
 
-      <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><MainScreen navigation={navigation}/>} />
+
+    <MainScreen navigation={navigation}/>
+    // <ExampleEventPage />
+
+    // <Tab.Navigator screenOptions={{
+    //   tabBarOptions: {
+    //     style: {
+    //       backgroundColor: '#f9f9f9',
+    //     }
+    //   }
+    // }}>
+    
+    //   {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
+    //     <Icon name="event" group="basic" />
+    //   )}} 
+    //   name="Home" component={MainScreen}  /> */}
+
+    //   <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleEventPage} />
+
+    //   <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><MainScreen navigation={navigation}/>} />
       
-      <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
+    //   <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
 
-      <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleEventPage} />
-
-    </Tab.Navigator>
+    // </Tab.Navigator>
 
   )
 }
