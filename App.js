@@ -12,10 +12,11 @@ import Icon from 'react-native-ico';
 
 
 // TODO:   
-  // tab-navigation
   // organizing the event-page and comments (add icons again for home/event-page)
-  // create-event-page (just basic form-ui)
-  // user-profile/settings page (just create the user-profile page first; no need for seeing which events I clicked going/saved, etc.)
+    // comment padding/spacing and scrollview with input at bottom
+    // change 'EventPage' title to something else on event-page-detail
+  // Event Page Form (just basic form-ui)
+  // User Profile/Settings-Page (just create the user-profile page first; no need for seeing which events I clicked going/saved, etc.)
   // **modal speed**
   // **scroll-header**
   // colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
@@ -23,7 +24,7 @@ import Icon from 'react-native-ico';
   // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
     // experiment with animations a bit...
   // need to make responsive and test on bunch of different android phones (along with virtual/physical Iphone)
-
+  // Start implementation (will be interfaced with UI/backend <-- but basic core UI is laid out)
   
 
 
@@ -102,6 +103,13 @@ const Tab = createBottomTabNavigator();
 
 const EventListNew = ({navigation}) => {
 
+  // const [showModal, setShowModal] = useState(false);
+  // const [isModalVisible, setModalVisible] = useState(false);
+  // const toggleModal = () => {
+  //   setModalVisible(!isModalVisible);
+  // };
+
+
   const data = [
     {
       id: "bd7acbea-c1b1-46c2-aed5-3a123d53abb28ba",
@@ -132,10 +140,11 @@ const EventListNew = ({navigation}) => {
     },
   ]
 
-
   return (
 
     <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
+
+      <MainHeading />
 
       <FlatList data={data} renderItem={({ 
         item 
@@ -269,9 +278,7 @@ const EventListNew = ({navigation}) => {
 
     </View>
 
-
   )
-
 
 }
 
@@ -280,33 +287,16 @@ const EventListNew = ({navigation}) => {
 
 
 const MainScreen = ({ navigation }) => {
-  // data={this.state} scrollFunction={this._onScroll}
-
-  // const [showModal, setShowModal] = useState(false);
-  // const [isModalVisible, setModalVisible] = useState(false);
-  // const toggleModal = () => {
-  //   setModalVisible(!isModalVisible);
-  // };
-
 
   return (
-    
-    // <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}>
-    // f8fafc
-    // <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
-
-    // <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
-    // {/* <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'white'}}> */}
-
-      // <MainHeading />
 
       <Tab.Navigator screenOptions={{
-            tabBarOptions: {
-          style: {
-            backgroundColor: '#f9f9f9',
+              tabBarOptions: {
+            style: {
+              backgroundColor: '#f9f9f9',
+            }
           }
-        }
-      }}>
+        }}>
 
         <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
         
@@ -316,8 +306,6 @@ const MainScreen = ({ navigation }) => {
         
       </Tab.Navigator> 
 
-    // </View> 
-    
   )
 
 }
@@ -335,129 +323,276 @@ const ExampleEventPage = () => {
   
   return (
 
-    <KeyboardAvoidingView h={{
-      base: "400px",
-      lg: "auto"
-    }} behavior={Platform.OS === "ios" ? "padding" : "height"}>
+    // <KeyboardAvoidingView h={{
+    //   base: "400px",
+    //   lg: "auto"
+    // }} behavior={Platform.OS === "ios" ? "padding" : "height"} backgroundColor="white">
+
+    <ScrollView>
   
-    <View p="8" pt="10" backgroundColor="white" > 
+      <View p="8" pt="5" pb="4" backgroundColor="white">
 
-    {/* <Image shadow={2} source={{uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80" }} alt="asd Text" size="2xl" />  */}
+      {/* <Image shadow={2} source={{uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80" }} alt="asd Text" size="2xl" />  */}
 
-      <HStack alignItems="center">
+        <HStack alignItems="center">
 
-        {/* <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" /> */}
-        {/* <Icon name="soccer-ball-outline" group="lodgicons"/> */}
-        <Spacer />
+          <Icon name="basketball" group="miscellaneous" height="30" width="30" color="orange" />
+          {/* <Icon name="soccer-ball-outline" group="lodgicons"/> */}
+          <Spacer />
 
-        <Badge colorScheme="lightBlue" _text={{
-          color: "white", fontSize: "13"
-        }} variant="solid" rounded="10" >
-          Smithfield Park
-        </Badge>
+          <Badge colorScheme="lightBlue" _text={{
+            color: "white", fontSize: "13"
+          }} variant="solid" rounded="10" >
+            Smithfield Park
+          </Badge>
 
-        <Text ml="1"></Text>
-        {/* <Icon name="location" group="logistics-delivery" height="24" width="24"/> */}
-        <Text fontSize="13" fontWeight="medium">
-          9KM
+          <Text ml="1"></Text>
+          <Icon name="location" group="logistics-delivery" height="24" width="24"/>
+          <Text fontSize="13" fontWeight="medium">
+            9KM
+          </Text>
+
+        </HStack>
+
+        <Text mt="3" fontWeight="medium" fontSize="23"> 
+          Basketball Run this Friday at Smithfield
         </Text>
 
-      </HStack>
+        <HStack mt="2">
+          <Icon name="calendar" group="ui-interface" color="gray" />
+          <Text color="gray" ml="2" fontSize="15" fontWeight="medium">
+            01/01/2022
+          </Text>
 
-      <Text mt="3" fontWeight="medium" fontSize="24"> 
-        Basketball Run this Friday at Smithfield
-      </Text>
+          <Text ml="6"></Text>
+          <Icon ml="2" name="time" group="essential" color="gray"/>
+          <Text ml="1" color="gray" fontSize="15" fontWeight="medium">
+            6:00PM
+          </Text>
 
-      <HStack mt="2">
-        {/* <Icon name="calendar" group="ui-interface" color="gray" /> */}
-        <Text color="gray" ml="2" fontSize="15" fontWeight="medium">
-          01/01/2022
+        </HStack>
+
+        <Text mt="6" fontSize="16" color="black">
+          I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach. 
         </Text>
 
-        <Text ml="6"></Text>
-        {/* <Icon ml="2" name="time" group="essential" color="gray"/> */}
-        <Text ml="1" color="gray" fontSize="15" fontWeight="medium">
-          6:00PM
-        </Text>
+        <HStack pt="5">
+          
+          <Avatar.Group size="12" max={2}>
+            <Avatar bg="green.500" source={{
+            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+          }}>
+              AJ
+            </Avatar>
+            <Avatar bg="cyan.500" source={{
+            uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+          }}>
+              TE
+            </Avatar>
+            <Avatar bg="indigo.500" source={{
+            uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+          }}>
+              JB
+            </Avatar>
+            <Avatar bg="amber.500" source={{
+            uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+          }}>
+              TS
+            </Avatar>
+            <Avatar bg="green.500" source={{
+            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+          }}>
+              AJ
+            </Avatar>
+            <Avatar bg="cyan.500" source={{
+            uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+          }}>
+              TE
+            </Avatar>
+            <Avatar bg="indigo.500" source={{
+            uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+          }}>
+              JB
+            </Avatar>
+            <Avatar bg="amber.500" source={{
+            uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+          }}>
+              TS
+            </Avatar>
+          </Avatar.Group>
 
-      </HStack>
+          <Spacer />
 
-      <Text mt="6" fontSize="16" color="black">
-        I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach. 
-        I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach. 
-      </Text>
+          <Button colorScheme="info">Attend</Button>
 
-      <HStack pt="5">
-        
-        <Avatar.Group size="12" max={2}>
-          <Avatar bg="green.500" source={{
-          uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-        }}>
-            AJ
-          </Avatar>
-          <Avatar bg="cyan.500" source={{
-          uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-        }}>
-            TE
-          </Avatar>
-          <Avatar bg="indigo.500" source={{
-          uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-        }}>
-            JB
-          </Avatar>
-          <Avatar bg="amber.500" source={{
-          uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-        }}>
-            TS
-          </Avatar>
-          <Avatar bg="green.500" source={{
-          uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-        }}>
-            AJ
-          </Avatar>
-          <Avatar bg="cyan.500" source={{
-          uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-        }}>
-            TE
-          </Avatar>
-          <Avatar bg="indigo.500" source={{
-          uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-        }}>
-            JB
-          </Avatar>
-          <Avatar bg="amber.500" source={{
-          uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-        }}>
-            TS
-          </Avatar>
-        </Avatar.Group>
+        </HStack>
 
-        <Spacer />
+      </View>
 
-        <Button colorScheme="info">Attend</Button>
+    
+        <HStack backgroundColor="white">
+          {/* <Icon name="comment-white-oval-bubble" group="font-awesome" height="30" width="30" />
+          <Text fontSize="18" pl="2">(13)</Text> */}
 
-      </HStack>
+          <Text pl="5" fontWeight="medium" fontSize="20">Comments (1)</Text>
+
+        </HStack>
 
 
+        <VStack pl="4" pr="4"  backgroundColor="white">
+
+        <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+          borderColor: "gray.600" 
+          }} borderColor="coolGray.200" pl="0" pr="4" py="2">
+
+            <HStack space={3} justifyContent="space-between">
+
+              <Avatar size="48px" source={{
+                uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
+              }} />
+
+              <VStack>
+
+                <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                  John Doe
+                </Text>
+
+                <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                  Hello There! Hello There!
+                </Text>
+
+              </VStack>
+
+              <Spacer />
+              <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                11:15 PM
+              </Text>
+
+            </HStack>
+
+        </Box>
+
+        <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+          borderColor: "gray.600" 
+          }} borderColor="coolGray.200" pl="0" pr="4" py="2">
+
+            <HStack space={3} justifyContent="space-between">
+
+              <Avatar size="48px" source={{
+                uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
+              }} />
+
+              <VStack>
+
+                <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                  John Doe
+                </Text>
+
+                <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                  Hello There! Hello There!
+                </Text>
+
+              </VStack>
+
+              <Spacer />
+              <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                11:15 PM
+              </Text>
+
+            </HStack>
+
+        </Box>
+
+        <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+          borderColor: "gray.600" 
+          }} borderColor="coolGray.200" pl="0" pr="4" py="2">
+
+            <HStack space={3} justifyContent="space-between">
+
+              <Avatar size="48px" source={{
+                uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
+              }} />
+
+              <VStack>
+
+                <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                  John Doe
+                </Text>
+
+                <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                  Hello There! Hello There!
+                </Text>
+
+              </VStack>
+
+              <Spacer />
+              <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                11:15 PM
+              </Text>
+
+            </HStack>
+
+        </Box>
+
+        <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+          borderColor: "gray.600" 
+          }} borderColor="coolGray.200" pl="0" pr="4" py="2">
+
+            <HStack space={3} justifyContent="space-between">
+
+              <Avatar size="48px" source={{
+                uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
+              }} />
+
+              <VStack>
+
+                <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                  John Doe
+                </Text>
+
+                <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                  Hello There! Hello There!
+                </Text>
+
+              </VStack>
+
+              <Spacer />
+              <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                11:15 PM
+              </Text>
+
+            </HStack>
+
+        </Box>
       
-      {/* <VStack pt="20">
-
-        <Icon name="add-comment-button" group="material-design" />
-
-        <Text mt="3" fontWeight="medium" fontSize="20">
+        {/* <Text mt="3" fontWeight="medium" fontSize="20">
           Comments (1) ; TODO
-        </Text>
-        
-          <Box alignItems="center">
-            <Input type={"text"} w="100%" maxW="300px" height="12" py="0" placeholder="got something to say?" />
-          </Box>
-        
-      </VStack> */}
+        </Text> */}
+
+          {/* <Box alignItems="center"> */}
+          {/* <Box>
+            <HStack>
+              <Input type={"text"} w="100%" height="12" py="0" placeholder="got something to say?" />
+              <Button>Send</Button>
+            </HStack>
+          </Box> */}
+
+        </VStack>
+
+         <Box backgroundColor="white"pb="5" pt="0" pl="4">
+          <HStack>
+            <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" placeholder="got something to say?" />
+            {/* <Button>Send</Button> */}
+            <Text pl="1"></Text>
+            <Button height="12" width="12">
+              <Icon name="send-button" group="material-design" height="25" width="25" color="white" />
+            </Button>
+          </HStack>
+        </Box>
 
 
-    </View>
+    </ScrollView>
 
-    </KeyboardAvoidingView>
 
 
   )
@@ -479,36 +614,13 @@ const CreateEventPage = () => {
 
 
 
-const TestingMain = ({ navigation }) => {
-  return (
+// const TestingMain = ({ navigation }) => {
+//   return (
 
-    <MainScreen navigation={navigation}/>
+//     <MainScreen navigation={navigation}/>
 
-    // <ExampleEventPage />
-
-    // <Tab.Navigator screenOptions={{
-    //   tabBarOptions: {
-    //     style: {
-    //       backgroundColor: '#f9f9f9',
-    //     }
-    //   }
-    // }}>
-    
-    //   {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-    //     <Icon name="event" group="basic" />
-    //   )}} 
-    //   name="Home" component={MainScreen}  /> */}
-
-    //   <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleEventPage} />
-
-    //   <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><MainScreen navigation={navigation}/>} />
-      
-    //   <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
-
-    // </Tab.Navigator>
-
-  )
-}
+//   )
+// }
 
 
 
@@ -538,7 +650,7 @@ export default class App extends React.Component{
             
             <Stack.Screen
               name="Home"
-              component={TestingMain}
+              component={MainScreen}
               options={{ headerShown: false }}
             />
             <Stack.Screen name="EventPage" component={ExampleEventPage} />
