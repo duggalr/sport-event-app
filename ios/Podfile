@@ -24,6 +24,8 @@ target 'event_app' do
   pod 'react-native-safe-area-context', :path => '../node_modules/react-native-safe-area-context'
 
 
+  pod 'react-native-splash-screen', :path => '../node_modules/react-native-splash-screen'
+
   target 'event_appTests' do
     inherit! :complete
     # Pods for testing

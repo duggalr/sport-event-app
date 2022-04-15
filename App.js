@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from "react";
-import { Platform, Dimensions } from "react-native"
+import { TouchableOpacity } from "react-native";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
   FormControl, Select, CheckIcon, TextArea, Modal } from "native-base";
@@ -10,21 +10,17 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-ico';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+import SplashScreen from 'react-native-splash-screen'
 
 
 
-
-// const ExtraDimensions = require('react-native-extra-dimensions-android');
-// const window = Dimensions.get('window');
 
 // TODO:   
-  // fix the modal
   // start with the functionality/ui-intermix 
     // first, splash-screen
   
   // Do User-Profile/Settings/Notifications when I start backend-implementation
     // User Profile/Settings-Page (just create the user-profile page first; no need for seeing which events I clicked going/saved, etc.)
-  
   // colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
     // re-add all the icons (deal with icon/modal issue)
   // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
@@ -32,6 +28,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
   // need to make responsive and test on bunch of different android phones (along with virtual/physical Iphone)
   // Start implementation (will be interfaced with UI/backend <-- but basic core UI is laid out)
   
+
 
 
 const Stack = createNativeStackNavigator();
@@ -767,31 +764,32 @@ export default class App extends React.Component{
     };
   }
 
+  componentDidMount() {
+    SplashScreen.hide();
+  }
 
   render() {
 
     return (
 
-      <NativeBaseProvider>
-  
-        {/* <MainScreen /> */}
-  
-        <NavigationContainer>
+        <NativeBaseProvider>
+    
+          <NavigationContainer>
 
-          <Stack.Navigator>
-            
-            <Stack.Screen
-              name="Home"
-              component={MainScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen name="Event Detail" component={ExampleEventPage} />
+            <Stack.Navigator>
+              
+              <Stack.Screen
+                name="Home"
+                component={MainScreen}
+                options={{ headerShown: false}}                
+              />
+              <Stack.Screen name="Event Detail" component={ExampleEventPage}/>
 
-          </Stack.Navigator>
-  
-        </NavigationContainer>
-  
-      </NativeBaseProvider>
+            </Stack.Navigator>
+
+          </NavigationContainer>
+
+        </NativeBaseProvider>
   
     )
 
