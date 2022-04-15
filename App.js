@@ -3,14 +3,13 @@ import { useState } from "react";
 import { Platform, Dimensions } from "react-native"
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
-  FormControl, Select, CheckIcon, TextArea } from "native-base";
+  FormControl, Select, CheckIcon, TextArea, Modal } from "native-base";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-ico';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-import Modal from "react-native-modal";
 
 
 
@@ -68,30 +67,7 @@ const MainHeading = () => {
 
 const EventListNew = ({navigation}) => {
 
-  // const [showModal, setShowModal] = useState(false);
-  // const [isModalVisible, setModalVisible] = useState(false);
-  // const toggleModal = () => {
-  //   setModalVisible(!isModalVisible);
-  // };
-
-  // // RN-Default Modal
-  // const [modalVisible, setModalVisible] = useState(false);
-
-  // RN-Library Modal 
-  const [isModalVisible, setModalVisible] = useState(false);
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  }
-  const deviceWidth = Dimensions.get("window").width;
-  const deviceHeight =
-    Platform.OS === "ios"
-      ? Dimensions.get("window").height
-      : require("react-native-extra-dimensions-android").get(
-          "REAL_WINDOW_HEIGHT"
-        );
-
-  // // NativeBase Modal
-  // const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   
   const data = [
@@ -192,10 +168,7 @@ const EventListNew = ({navigation}) => {
             
             <HStack pt="5">
               
-              {/* <Pressable onPress={() => setShowModal(true)}> */}
-              <Pressable onPress={() => setModalVisible(true)}>
-              {/* <Pressable onPress={toggleModal}> */}
-              {/* <Pressable onPress={() => setShowModal(true)}> */}
+              <Pressable onPress={() => setShowModal(true)}>
 
                 <Avatar.Group size="12" max={2}>
 
@@ -244,144 +217,57 @@ const EventListNew = ({navigation}) => {
 
               </Pressable>
 
-
-              {/* <Modal
-                animationType={"slide"}
-                transparent={true}
-                visible={true}
-              >
-                <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "white"}}>
-                  <View >
-                    <Text>Testing One</Text>
-                    <Text>Testing One</Text>
-                    <Text>Testing One</Text>
-                    <Text>Testing One</Text>
-                  </View>
-                </View>
-              </Modal> */}
-
-              {/* <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+              <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                 <Modal.Content maxWidth="400px">
-                  <Modal.CloseButton />
-                  <Modal.Header>Contact Us</Modal.Header>
+
+                <Modal.Header>People who are Going:</Modal.Header>
                   <Modal.Body>
-                    <FormControl>
-                      <FormControl.Label>Name</FormControl.Label>
-                      <Input />
-                    </FormControl>
-                    <FormControl mt="3">
-                      <FormControl.Label>Email</FormControl.Label>
-                      <Input />
-                    </FormControl>
+
+                    <ScrollView>
+
+                      <Pressable onPress={() => console.log('avatar-pressed...')}>
+                        <HStack>
+                          <Avatar bg="green.500" source={{
+                            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                          }}>
+                            AJ
+                          </Avatar>
+                          <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
+                        </HStack>
+                      </Pressable>
+                      <Divider my="1" />
+
+                      <Pressable onPress={() => console.log('avatar-pressed...')}>
+                        <HStack>
+                          <Avatar bg="green.500" source={{
+                            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                          }}>
+                            AJ
+                          </Avatar>
+                          <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
+                        </HStack>
+                      </Pressable>
+                      <Divider my="1" />
+
+                      <Pressable onPress={() => console.log('avatar-pressed...')}>
+                        <HStack>
+                          <Avatar bg="green.500" source={{
+                            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                          }}>
+                            AJ
+                          </Avatar>
+                          <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
+                        </HStack>
+                      </Pressable>
+                      <Divider my="1" />
+
+                    </ScrollView>
+
                   </Modal.Body>
-                  <Modal.Footer>
-                    <Button.Group space={2}>
-                      <Button variant="ghost" colorScheme="blueGray" onPress={() => {
-                      setShowModal(false);
-                    }}>
-                        Cancel
-                      </Button>
-                      <Button onPress={() => {
-                      setShowModal(false);
-                    }}>
-                        Save
-                      </Button>
-                    </Button.Group>
-                  </Modal.Footer>
+
                 </Modal.Content>
-              </Modal> */}
 
-
-              {/* <Modal isVisible={isModalVisible}>
-                <View style={{ flex: 1 }}>
-                  <Text>Hello!</Text>
-
-                  <Button title="Hide modal" onPress={toggleModal} />
-                </View>
-              </Modal> */}
-
-            {/* <Modal
-              testID={'modal'}
-              isVisible={isModalVisible}
-              deviceWidth={deviceWidth}
-              deviceHeight={deviceHeight}
-              hasBackdrop={true}
-              backdropOpacity={0.2}
-              backgroundColor= 'white'
-              onBackdropPress={toggleModal}
-              transparent={true}
-            > */}
-
-            <Modal
-              testID={'modal'}
-              isVisible={isModalVisible}
-              hasBackdrop={true}
-              backdropOpacity={0.2}
-              backgroundColor= 'white'
-              onBackdropPress={toggleModal}
-              transparent={true}
-              style={{ borderRadius: 10, flex: 0, height: '40%'}}
-            >
-
-              <View padding="5" mt="-5">
-                {/* <Text>Hi 👋!</Text>
-                <Button testID={'close-button'} title="Close">
-                  Close 
-                </Button> */}
-
-                <Text>People who are Going:</Text>
-                <Spacer />
-
-                <ScrollView>
-
-                  <Pressable onPress={() => console.log('avatar-pressed...')}>
-                    <HStack>
-                      <Avatar bg="green.500" source={{
-                        uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                      }}>
-                        AJ
-                      </Avatar>
-                      <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                    </HStack>
-                  </Pressable>
-
-                <Divider my="1" />
-
-                  <Pressable onPress={() => console.log('avatar-pressed...')}>
-                    <HStack>
-                      <Avatar bg="green.500" source={{
-                        uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                      }}>
-                        AJ
-                      </Avatar>
-                      <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                    </HStack>
-                  </Pressable>
-
-                <Divider my="1" />
-
-                  <Pressable onPress={() => console.log('avatar-pressed...')}>
-                    <HStack>
-                      <Avatar bg="green.500" source={{
-                        uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                      }}>
-                        AJ
-                      </Avatar>
-                      <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                    </HStack>
-                  </Pressable>
-
-                {/* <Divider my="1" /> */}
-
-
-                </ScrollView>
-
-
-
-              </View>
-
-            </Modal> 
-
+              </Modal>
               
               <Spacer />
               {/* <Button variant="outline">Going?</Button> */}
