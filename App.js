@@ -1,24 +1,26 @@
 import * as React from 'react';
 import { useState } from "react";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
-  Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView } from "native-base";
+  Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
+  FormControl, Select, CheckIcon, TextArea } from "native-base";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-ico';
+import DateTimePicker from '@react-native-community/datetimepicker';
 // import Modal from "react-native-modal";
 
 
 
 
 // TODO:   
-  // organizing the event-page and comments (add icons again for home/event-page)
-    // comment padding/spacing and scrollview with input at bottom
-    // change 'EventPage' title to something else on event-page-detail
-  // Event Page Form (just basic form-ui)
-  // User Profile/Settings-Page (just create the user-profile page first; no need for seeing which events I clicked going/saved, etc.)
-  // **modal speed**
-  // **scroll-header**
+  // **modal speed**  
+  // start with the functionality/ui-intermix 
+    // first, splash-screen
+  
+  // Do User-Profile/Settings/Notifications when I start backend-implementation
+    // User Profile/Settings-Page (just create the user-profile page first; no need for seeing which events I clicked going/saved, etc.)
+  
   // colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
     // re-add all the icons (deal with icon/modal issue)
   // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
@@ -26,6 +28,11 @@ import Icon from 'react-native-ico';
   // need to make responsive and test on bunch of different android phones (along with virtual/physical Iphone)
   // Start implementation (will be interfaced with UI/backend <-- but basic core UI is laid out)
   
+
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
 
 
 const MainHeading = () => {
@@ -53,54 +60,6 @@ const MainHeading = () => {
 
 }
 
-
-
-// const BottomMainBar = () => {
-
-//   return (
-
-//     <Tab.Navigator screenOptions={{
-//       tabBarOptions: {
-//         style: {
-//           backgroundColor: '#f9f9f9',
-//         }
-//       }
-//     }}>
-    
-//       {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-//         <Icon name="event" group="basic" />
-//       )}} 
-//       name="Home" component={MainScreen}  /> */}
-
-//       <Tab.Screen options={{headerShown: false}} name="Home" children={()=><MainScreen />} />
-      
-//       <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
-
-//       <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleEventPage} />
-
-//     </Tab.Navigator>
-
-//   )
-
-// }
-
-
-const ExampleSettings = () => {
-  return (
-
-    <Text>
-      Settings
-    </Text>
-  )
-
-}
-
-
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
-
-
-
 const EventListNew = ({navigation}) => {
 
   // const [showModal, setShowModal] = useState(false);
@@ -122,7 +81,7 @@ const EventListNew = ({navigation}) => {
     },
     {
       id: "bd7acbea-c1b1-46c2-aed5-3ad222253abb28334ba",
-      title: "Ball Run this Friday at Harbourfront Center, 2PM",
+      title: "Soccer Run this Friday at Harbourfront Center, 2PM",
       date_of_event: "01/01/2020",
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
       location_distance: "9KM",
@@ -150,15 +109,13 @@ const EventListNew = ({navigation}) => {
         item 
       }) => <Box>
 
-        <Pressable onPress={() => navigation.navigate('EventPage')}>
+        <Pressable onPress={() => navigation.navigate('Event Detail')}>
 
           <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
 
             <HStack alignItems="center">
 
-              {/* {item.icon_name == 'basketball'? <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />: <Icon height="26" width="26" name="football" group="miscellaneous" color="black"/> } */}
-              {/* <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" /> */}
-              {/* <Icon name="soccer-ball-outline" group="lodgicons"/> */}
+              {item.icon_name == 'basketball'? <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />: <Icon height="26" width="26" name="football" group="miscellaneous" color="black"/> }
               <Spacer />
               
               <Badge backgroundColor="#0284c7" _text={{
@@ -168,7 +125,7 @@ const EventListNew = ({navigation}) => {
               </Badge>
             
               <Text ml="1"></Text>
-              {/* <Icon name="location" group="logistics-delivery" height="24" width="24"/> */}
+              <Icon name="location" group="logistics-delivery" height="24" width="24"/>
               <Text fontSize="13" fontWeight="medium">
                 {item.location_distance}
               </Text>
@@ -194,13 +151,13 @@ const EventListNew = ({navigation}) => {
             <HStack mt="0.5">
 
               <Text ml="0.5"></Text>
-              {/* <Icon name="calendar" group="ui-interface" color="gray" /> */}
+              <Icon name="calendar" group="ui-interface" color="gray" />
               <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
                 01/01/2022
               </Text>
 
               <Text ml="4"></Text>
-              {/* <Icon ml="2" name="time" group="essential" color="gray"/> */}
+              <Icon ml="2" name="time" group="essential" color="gray"/>
               {/* <Text ml="1" color="gray.500"> */}
               <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
                 6:00PM
@@ -282,51 +239,11 @@ const EventListNew = ({navigation}) => {
 
 }
 
-
-
-
-
-const MainScreen = ({ navigation }) => {
-
-  return (
-
-      <Tab.Navigator screenOptions={{
-              tabBarOptions: {
-            style: {
-              backgroundColor: '#f9f9f9',
-            }
-          }
-        }}>
-
-        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
-        
-        <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
-        
-        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />        
-        
-      </Tab.Navigator> 
-
-  )
-
-}
-
-
-
-
 const ExampleEventPage = () => {
-
-  function handleClick(){
-    console.log("input-button-click")
-  }
 
   const [selected, setSelected] = React.useState(1);
   
   return (
-
-    // <KeyboardAvoidingView h={{
-    //   base: "400px",
-    //   lg: "auto"
-    // }} behavior={Platform.OS === "ios" ? "padding" : "height"} backgroundColor="white">
 
     <ScrollView>
   
@@ -534,7 +451,7 @@ const ExampleEventPage = () => {
 
         </Box>
 
-        <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+        <Box borderBottomWidth="0" backgroundColor="white" _dark={{
           borderColor: "gray.600" 
           }} borderColor="coolGray.200" pl="0" pr="4" py="2">
 
@@ -564,22 +481,10 @@ const ExampleEventPage = () => {
             </HStack>
 
         </Box>
-      
-        {/* <Text mt="3" fontWeight="medium" fontSize="20">
-          Comments (1) ; TODO
-        </Text> */}
-
-          {/* <Box alignItems="center"> */}
-          {/* <Box>
-            <HStack>
-              <Input type={"text"} w="100%" height="12" py="0" placeholder="got something to say?" />
-              <Button>Send</Button>
-            </HStack>
-          </Box> */}
 
         </VStack>
 
-         <Box backgroundColor="white"pb="5" pt="0" pl="4">
+         <Box backgroundColor="white"pb="5" pt="1" pl="4">
           <HStack>
             <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" placeholder="got something to say?" />
             {/* <Button>Send</Button> */}
@@ -593,34 +498,207 @@ const ExampleEventPage = () => {
 
     </ScrollView>
 
-
-
   )
 
 }
 
 
 const CreateEventPage = () => {
+
+  let [service, setService] = React.useState("");
+
+  const [date, setDate] = useState(new Date(1649967016478));
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false);
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShow(false);
+    setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDatepicker = () => {
+    showMode('date');
+  };
+
+
   return (
+    
+    <ScrollView w="100%" backgroundColor="white">
+      {/* <Stack space={2.5} alignSelf="center" px="4" safeArea mt="4" w={{base: "100%", md: "25%"}}> */}
+      <HStack paddingTop="6" paddingLeft="2">
+
+        <View pl="4" pt="2">
+          <Icon name="pencil" group="ui-interface" />  
+        </View>
+        
+        <Text bold fontSize="24" pl="4">
+          Create A Run        
+        </Text>
+
+      </HStack>
+      
+      <VStack p="5">
+
+        <Box pt="2" >
+          <FormControl>
+            <FormControl.Label>
+              <Text fontSize="16" fontWeight="medium">
+                Project Title
+              </Text>
+            </FormControl.Label>
+            <Input placeholder="ie. Ball Run this Friday at 6PM at Smithfield Park" w="80"/>
+          </FormControl>
+        </Box>
+
+        {/* <Box w="3/4" maxW="300"> */}
+        <Box pt="4">
+          <FormControl>
+            <FormControl.Label>
+              <Text fontSize="16" fontWeight="medium">
+                Activity Type 
+              </Text>
+            </FormControl.Label>
+            <Select selectedValue={service} minWidth="200" accessibilityLabel="Type of Activity" placeholder="Type of Activity" _selectedItem={{
+            bg: "teal.600",
+            endIcon: <CheckIcon size="5" />
+          }} mt={1} onValueChange={itemValue => setService(itemValue)}>
+              <Select.Item label="Basketball" value="basketball" />
+              <Select.Item label="Soccer" value="soccer" />
+            </Select>
+          </FormControl>
+        </Box>
+
+        <View pt="4">
+          <HStack>
+            {/* <Button onPress={showDatepicker} title="Show date picker!" w="1/2">
+              Choose Date
+            </Button> */}
+            
+            <Button size="sm" variant="outline" onPress={showDatepicker}>
+              Choose Date
+            </Button>
+
+            <Text pl="4" pt="2" fontWeight="medium">
+              Date Selected: {date.getFullYear() + '/' + parseInt(date.getMonth()+1) + '/' + date.getDate()}
+            </Text>
+
+          </HStack>
+
+          {show && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode={mode}
+              is24Hour={true}
+              onChange={onChange}
+            />
+          )}
+
+        </View>
+   
+        <Box pt="4">
+
+          <FormControl>
+
+            <FormControl.Label>
+              <Text fontSize="16" fontWeight="medium">
+                Choose Time
+              </Text>
+            </FormControl.Label>
+
+            <Select selectedValue={service}  accessibilityLabel="Choose Time" placeholder="Choose Time" _selectedItem={{
+              bg: "teal.600",
+              endIcon: <CheckIcon size="5" />
+            }} mt={1} onValueChange={itemValue => setService(itemValue)}>
+              <Select.Item label="12:00PM" value="12:00" />
+              <Select.Item label="1:00PM" value="1:00" />
+              <Select.Item label="2:00PM" value="2:00" />
+              <Select.Item label="3:00PM" value="3:00" />
+              <Select.Item label="4:00PM" value="4:00" />
+              <Select.Item label="5:00PM" value="5:00" />
+              <Select.Item label="6:00PM" value="6:00" />
+              <Select.Item label="7:00PM" value="7:00" />
+              <Select.Item label="8:00PM" value="8:00" />
+              <Select.Item label="9:00PM" value="9:00" />
+            </Select>
+
+            {/* <FormControl.HelperText>
+              this is an approximate time on when you plan on coming.
+            </FormControl.HelperText> */}
+            
+          </FormControl>
+    
+        </Box>
+
+
+        {/* <Box alignItems="center" w="100%"> */}
+        <FormControl pt="4">
+          <FormControl.Label>
+            <Text fontSize="16" fontWeight="medium">
+              Event Description
+            </Text>
+          </FormControl.Label>
+          <TextArea h={20} placeholder="ie. looking to play a 5v5 friday. Any skill-level is fine... I'll bring some water for everyone" />
+        </FormControl>
+        
+        {/* </Box>; */}
+
+      </VStack>
+        
+      {/* </Stack> */}
+      
+      <Box alignItems="center">
+        <Button w="1/2">Create Event</Button>
+      </Box>
+      
+
+    </ScrollView>
+
+  )
+
+}
+
+const ExampleSettings = () => {
+  return (
+
     <Text>
-      Create Event
+      Settings
     </Text>
   )
+
 }
 
 
 
+const MainScreen = ({ navigation }) => {
 
+  return (
 
+      <Tab.Navigator screenOptions={{
+              tabBarOptions: {
+            style: {
+              backgroundColor: '#f9f9f9',
+            }
+          }
+        }}>
 
+        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
 
-// const TestingMain = ({ navigation }) => {
-//   return (
+        <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />        
+      
+        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />        
+        
+      </Tab.Navigator> 
 
-//     <MainScreen navigation={navigation}/>
+  )
 
-//   )
-// }
+}
 
 
 
@@ -653,7 +731,7 @@ export default class App extends React.Component{
               component={MainScreen}
               options={{ headerShown: false }}
             />
-            <Stack.Screen name="EventPage" component={ExampleEventPage} />
+            <Stack.Screen name="Event Detail" component={ExampleEventPage} />
 
           </Stack.Navigator>
   
