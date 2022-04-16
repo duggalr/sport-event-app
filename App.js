@@ -16,12 +16,9 @@ import SplashScreen from 'react-native-splash-screen'
 
 
 // TODO:   
-  // start with the functionality/ui-intermix 
-    // first, splash-screen
-  
-  // Do User-Profile/Settings/Notifications when I start backend-implementation
-    // User Profile/Settings-Page (just create the user-profile page first; no need for seeing which events I clicked going/saved, etc.)
-  // colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
+  // fix splash screen design before continuing
+    
+  // backdrop-shadows/colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
     // re-add all the icons (deal with icon/modal issue)
   // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
     // experiment with animations a bit...
@@ -222,7 +219,7 @@ const EventListNew = ({navigation}) => {
 
                     <ScrollView>
 
-                      <Pressable onPress={() => console.log('avatar-pressed...')}>
+                      <Pressable>
                         <HStack>
                           <Avatar bg="green.500" source={{
                             uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
@@ -234,7 +231,7 @@ const EventListNew = ({navigation}) => {
                       </Pressable>
                       <Divider my="1" />
 
-                      <Pressable onPress={() => console.log('avatar-pressed...')}>
+                      <Pressable>
                         <HStack>
                           <Avatar bg="green.500" source={{
                             uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
@@ -246,7 +243,7 @@ const EventListNew = ({navigation}) => {
                       </Pressable>
                       <Divider my="1" />
 
-                      <Pressable onPress={() => console.log('avatar-pressed...')}>
+                      <Pressable >
                         <HStack>
                           <Avatar bg="green.500" source={{
                             uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
