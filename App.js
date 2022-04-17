@@ -16,6 +16,9 @@ import SplashScreen from 'react-native-splash-screen'
 
 
 // TODO:   
+  // start backend/frontend-functionality**
+    // start with login
+
   // backdrop-shadows/colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
     // re-add all the icons (deal with icon/modal issue)
   // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
