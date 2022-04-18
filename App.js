@@ -559,7 +559,48 @@ const ExampleEventPage = () => {
 }
 
 
-const CreateEventPage = () => {
+async function google_sign_in(cb, tmp_navigation) {
+  
+  // console.log('function-tmp-navigation', tmp_navigation)
+  // tmp_navigation.navigate('Home')
+  // console.log(tmp_navigation)
+
+  try {
+    // await GoogleSignin.hasPlayServices()
+    // const userInfo = await GoogleSignin.signIn()
+    // const tokenData = await GoogleSignin.getTokens()
+    // console.log('google-user-info:', userInfo)
+    // console.log('google-token-data:', tokenData)
+    
+    // // update parent-state
+    cb('this is update val')
+    // tmp_navigation.navigate('Home')
+    // var tmp_routes = tmp_navigation.getState()?.routes
+    // console.log('tmp-routes:', tmp_routes, tmp_routes[tmp_routes.length - 2])
+
+    // console.log('navg:', navigation)
+    // console.log('ua-navig:', useNavigation())
+
+  //   // response_to_google_auth({'user_info': userInfo, 'token_data': tokenData})
+
+  } catch(error) {
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      // user cancelled the login flow
+    } else if (error.code === statusCodes.IN_PROGRESS) {
+      // operation (e.g. sign in) is in progress already
+    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      // play services not available or outdated
+    } else {
+      // some other error happened
+    }
+  }
+  
+}
+
+
+
+// TODO: ensure user-id and other user-based information is passed to validate form (ie. double-check on postman/mitmproxy)
+const EventFormComponent = ({ userData }) => {
 
   let [service, setService] = React.useState("");
 
@@ -584,7 +625,7 @@ const CreateEventPage = () => {
 
 
   return (
-    
+
     <ScrollView w="100%" backgroundColor="white">
       {/* <Stack space={2.5} alignSelf="center" px="4" safeArea mt="4" w={{base: "100%", md: "25%"}}> */}
       <HStack paddingTop="6" paddingLeft="2">
@@ -721,6 +762,50 @@ const CreateEventPage = () => {
 }
 
 
+const UserLoginComponent = ({handler}) => {
+
+  var tmp_navigation = useNavigation()
+  // console.log('ua-ndavig:', tmp_navigation, handler)
+
+  return (
+
+    <View alignItems="center">
+
+      <GoogleSigninButton
+        style={{ width: 192, height: 48 }}
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={() => google_sign_in(handler, tmp_navigation)}
+      />
+
+    </View>
+
+  )
+
+}
+
+
+const CreateEventPage = ({ userData, handler }) => {
+
+  // if user is logged-in, render-form, else, render login-screen
+
+  if (typeof userData !== "undefined"){
+    return <EventFormComponent userData={userData} />
+  } else {
+    return <UserLoginComponent handler={handler} />
+  }
+
+  // // var param = route.params
+  // // if (param.userInfo) {
+  // if (typeof param.userState.userInfo !== "undefined"){
+  //   return <ExampleSettings initialParams={route} />;
+  // } else {
+  //   return <UserAuthComponent handleFn={route.params.handler} />;
+  // }
+
+}
+
+
 const ExampleSettings = () => {
   return (
 
@@ -740,43 +825,7 @@ function response_to_google_auth(){
 }
 
 
-async function google_sign_in(cb, tmp_navigation) {
-  
-  // console.log('function-tmp-navigation', tmp_navigation)
-  // tmp_navigation.navigate('Home')
-  // console.log(tmp_navigation)
 
-  try {
-    // await GoogleSignin.hasPlayServices()
-    // const userInfo = await GoogleSignin.signIn()
-    // const tokenData = await GoogleSignin.getTokens()
-    // console.log('google-user-info:', userInfo)
-    // console.log('google-token-data:', tokenData)
-    
-    // // update parent-state
-    cb('this is update val')
-    tmp_navigation.navigate('Home')
-    // var tmp_routes = tmp_navigation.getState()?.routes
-    // console.log('tmp-routes:', tmp_routes, tmp_routes[tmp_routes.length - 2])
-
-    // console.log('navg:', navigation)
-    // console.log('ua-navig:', useNavigation())
-
-  //   // response_to_google_auth({'user_info': userInfo, 'token_data': tokenData})
-
-  } catch(error) {
-    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-      // user cancelled the login flow
-    } else if (error.code === statusCodes.IN_PROGRESS) {
-      // operation (e.g. sign in) is in progress already
-    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-      // play services not available or outdated
-    } else {
-      // some other error happened
-    }
-  }
-  
-}
 
 
 
@@ -830,29 +879,35 @@ const UserAuthComponent = ({ handleFn }) => {
 }
 
 
+// userData={userData} handler={handler
+const UserAuthCheck = ({userData, handler, route}) => {
+  console.log("user-auth-state:", userData, handler)
 
-const UserAuthCheck = ({route}) => {
-  // console.log('props', route)
-  console.log("user-auth-state:", route)
-  
-  var param = route.params
-  // if (param.userInfo) {
-  if (typeof param.userState.userInfo !== "undefined"){
-    return <ExampleSettings initialParams={route} />;
-  } else {
-    return <UserAuthComponent handleFn={route.params.handler} />;
-  }
+  // if (typeof userData !== "undefined"){
+  //   {...props} userData={userData} handler={handler}/>}
+  //   return <ExampleSettings initialParams={route} />
+  // } else {
+  //   return <UserAuthComponent handleFn={route.params.handler} />
+  // }
+
+  // // var param = route.params
+  // // if (param.userInfo) {
+  // if (typeof param.userState.userInfo !== "undefined"){
+  //   return <ExampleSettings initialParams={route} />;
+  // } else {
+  //   return <UserAuthComponent handleFn={route.params.handler} />;
+  // }
   
 }
 
 
-const MainScreen = ({ userFirstName, handler, route, navigation }) => {
+const MainScreen = ({ userData, handler, route, navigation }) => {
 
   // console.log('navigation-state', navigation.getState())
   // console.log('ms-params:', route.params)
   // console.log('ms-navigation:', navigation)  
 
-  console.log('main-props:', userFirstName, handler)
+  console.log('main-props:', userData, handler)
 
   // console.log('rp:', route.params)
   // var first_name = route.params.userState.first_name
@@ -860,35 +915,39 @@ const MainScreen = ({ userFirstName, handler, route, navigation }) => {
   
   return (
 
-      <View>
-        <Text>Greetings, {userFirstName}!</Text>
-        <Input onChangeText={val => handler(val)} ></Input>
+      <Tab.Navigator screenOptions={{
+          tabBarOptions: {
+            style: {
+              backgroundColor: '#f9f9f9',
+            }
+          }
+        }}>
 
-      </View>
+        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
 
-      // <Tab.Navigator screenOptions={{
-      //     tabBarOptions: {
-      //       style: {
-      //         backgroundColor: '#f9f9f9',
-      //       }
-      //     }
-      //   }}>
+        {/* <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} /> */}
+        <Tab.Screen options={{headerShown: false}} name="Create Event">
+          {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
+        </Tab.Screen>
+
+        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />
+
+
+        {/* <Tab.Screen name="User Auth" options={{headerShown: false}}>
+          {props => <UserAuthCheck {...props} userData={userData} handler={handler}/>}
+        </Tab.Screen>
+
+        <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthCheck} initialParams={route.params} />
         
-      //   {/* TODO: 
-      //     - Settings will be 3rd-tab; if user authenticated, show notifs/settings, else show user-auth-component
-      //     - On create-event-page, show user-auth-component 
-      //   */}
-      //   {/* <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthCheck} initialParams={route.params} /> */}
-        
-      //   {/* <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthComponent} /> */}
+        <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthComponent} />
 
-      //   {/* <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} /> */}
+        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
 
-      //   {/* <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} /> */}
+        <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
       
-      //   {/* <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />         */}
+        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />         */}
         
-      // {/* </Tab.Navigator>  */}
+      </Tab.Navigator> 
 
   )
 
@@ -908,10 +967,6 @@ export default class App extends React.Component{
 
     this.handler = this.handler.bind(this)
 
-    // const [currentUserInfo, setUserInfo] = useState('');
-    // const updateUserInfo = userInfo => {
-    //   setUserInfo(userInfo)
-    // }
   }
 
   handler = (update_val) => {
@@ -979,10 +1034,6 @@ export default class App extends React.Component{
           <NavigationContainer>
 
             <Stack.Navigator>
-              
-              <Stack.Screen name="Home">
-                {props => <MainScreen {...props} userData={this.state.first_name} handler={this.handler}/>}
-              </Stack.Screen>
 
               {/* <Stack.Screen
                 name="Home"
@@ -990,6 +1041,11 @@ export default class App extends React.Component{
                 initialParams={{ 'userState': this.state, 'handler': this.handler }}
                 options={{ headerShown: false}}
               /> */}
+
+              <Stack.Screen name="Home" options={{ headerShown: false}}>
+                {props => <MainScreen {...props} userData={this.state.userInfo} handler={this.handler}/>}
+              </Stack.Screen>
+
               <Stack.Screen name="Event Detail" component={ExampleEventPage}/>
 
             </Stack.Navigator>
