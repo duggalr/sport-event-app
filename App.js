@@ -4,7 +4,7 @@ import { TouchableOpacity } from "react-native";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
   FormControl, Select, CheckIcon, TextArea, Modal } from "native-base";
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-ico';
@@ -740,14 +740,29 @@ function response_to_google_auth(){
 }
 
 
-async function google_sign_in() {
+async function google_sign_in(cb, tmp_navigation) {
+  
+  // console.log('function-tmp-navigation', tmp_navigation)
+  // tmp_navigation.navigate('Home')
+  // console.log(tmp_navigation)
+
   try {
-    await GoogleSignin.hasPlayServices()
-    const userInfo = await GoogleSignin.signIn()
-    const tokenData = await GoogleSignin.getTokens()
-    console.log('google-user-info:', userInfo)
-    console.log('google-token-data:', tokenData)
-    response_to_google_auth({'user_info': userInfo, 'token_data': tokenData})
+    // await GoogleSignin.hasPlayServices()
+    // const userInfo = await GoogleSignin.signIn()
+    // const tokenData = await GoogleSignin.getTokens()
+    // console.log('google-user-info:', userInfo)
+    // console.log('google-token-data:', tokenData)
+    
+    // // update parent-state
+    cb('this is update val')
+    tmp_navigation.navigate('Home')
+    // var tmp_routes = tmp_navigation.getState()?.routes
+    // console.log('tmp-routes:', tmp_routes, tmp_routes[tmp_routes.length - 2])
+
+    // console.log('navg:', navigation)
+    // console.log('ua-navig:', useNavigation())
+
+  //   // response_to_google_auth({'user_info': userInfo, 'token_data': tokenData})
 
   } catch(error) {
     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
@@ -763,7 +778,9 @@ async function google_sign_in() {
   
 }
 
-const UserAuthComponent = () => {
+
+
+const UserAuthComponent = ({ handleFn }) => {
 
   // _google_sign_in = async () => {
   //   await GoogleSignin.hasPlayServices()
@@ -771,6 +788,10 @@ const UserAuthComponent = () => {
   //   console.log('google-user-info:', userInfo)
   // }
 
+  // TODO: how do we redirect user to home-page after signin (or to previous page they were coming from)
+  
+  var tmp_navigation = useNavigation()
+  // console.log('ua-ndavig:', tmp_navigation)
 
   return (
 
@@ -799,7 +820,7 @@ const UserAuthComponent = () => {
         style={{ width: 192, height: 48 }}
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
-        onPress={() => google_sign_in()}
+        onPress={() => google_sign_in(handleFn, tmp_navigation)}
       />
 
     </View>
@@ -809,32 +830,65 @@ const UserAuthComponent = () => {
 }
 
 
-const MainScreen = ({ navigation }) => {
 
+const UserAuthCheck = ({route}) => {
+  // console.log('props', route)
+  console.log("user-auth-state:", route)
+  
+  var param = route.params
+  // if (param.userInfo) {
+  if (typeof param.userState.userInfo !== "undefined"){
+    return <ExampleSettings initialParams={route} />;
+  } else {
+    return <UserAuthComponent handleFn={route.params.handler} />;
+  }
+  
+}
+
+
+const MainScreen = ({ userFirstName, handler, route, navigation }) => {
+
+  // console.log('navigation-state', navigation.getState())
+  // console.log('ms-params:', route.params)
+  // console.log('ms-navigation:', navigation)  
+
+  console.log('main-props:', userFirstName, handler)
+
+  // console.log('rp:', route.params)
+  // var first_name = route.params.userState.first_name
+  // var cb = route.params.handler
+  
   return (
 
-      <Tab.Navigator screenOptions={{
-              tabBarOptions: {
-            style: {
-              backgroundColor: '#f9f9f9',
-            }
-          }
-        }}>
+      <View>
+        <Text>Greetings, {userFirstName}!</Text>
+        <Input onChangeText={val => handler(val)} ></Input>
 
+      </View>
+
+      // <Tab.Navigator screenOptions={{
+      //     tabBarOptions: {
+      //       style: {
+      //         backgroundColor: '#f9f9f9',
+      //       }
+      //     }
+      //   }}>
         
-        {/* TODO: 
-          - Settings will be 3rd-tab; if user authenticated, show notifs/settings, else show user-auth-component
-          - On create-event-page, show user-auth-component 
-        */}
-        <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthComponent} />
+      //   {/* TODO: 
+      //     - Settings will be 3rd-tab; if user authenticated, show notifs/settings, else show user-auth-component
+      //     - On create-event-page, show user-auth-component 
+      //   */}
+      //   {/* <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthCheck} initialParams={route.params} /> */}
+        
+      //   {/* <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthComponent} /> */}
 
-        {/* <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} /> */}
+      //   {/* <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} /> */}
 
-        {/* <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} /> */}
+      //   {/* <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} /> */}
       
-        {/* <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />         */}
+      //   {/* <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />         */}
         
-      </Tab.Navigator> 
+      // {/* </Tab.Navigator>  */}
 
   )
 
@@ -847,18 +901,43 @@ export default class App extends React.Component{
 
   constructor(props) {
     super(props);
+    
     this.state = {
-      previous_y_amount: 0,
-      hide: false,
+      userInfo: undefined
     };
+
+    this.handler = this.handler.bind(this)
+
+    // const [currentUserInfo, setUserInfo] = useState('');
+    // const updateUserInfo = userInfo => {
+    //   setUserInfo(userInfo)
+    // }
   }
+
+  handler = (update_val) => {
+    console.log('handle-update:', update_val)
+    this.setState({
+      userInfo: update_val
+    })
+
+  }
+  
 
   async getCurrentUser() {
     try {
       const userInfo = await GoogleSignin.signInSilently();
-      console.log('currnet-user-info:', userInfo)
+      console.log('current-user-info:', userInfo)
+      // TODO: 
+        // get any other information from backend-DB if needed
+
+      // this.setState({ userInfo: userInfo })
+
     } catch (error) {
-      console.log('current-error:', error)
+      
+      // // user is not signed in; 
+      // console.log('current-error:', error)
+      // this.setState({ userInfo: undefined })
+
       // const typedError = error as NativeModuleError;
       // const errorMessage =
       //   typedError.code === statusCodes.SIGN_IN_REQUIRED
@@ -873,7 +952,10 @@ export default class App extends React.Component{
 
 
   async componentDidMount() {
+    console.log('state-info:', this.state)
+
     SplashScreen.hide();
+
     GoogleSignin.configure({
       webClientId:"770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
       forceCodeForRefreshToken: true,
@@ -884,6 +966,10 @@ export default class App extends React.Component{
   }
 
 
+  componentDidUpdate(){
+    console.log('STATE HAS UPDATED:', this.state)
+  }
+ 
   render() {
 
     return (
@@ -894,11 +980,16 @@ export default class App extends React.Component{
 
             <Stack.Navigator>
               
-              <Stack.Screen
+              <Stack.Screen name="Home">
+                {props => <MainScreen {...props} userData={this.state.first_name} handler={this.handler}/>}
+              </Stack.Screen>
+
+              {/* <Stack.Screen
                 name="Home"
                 component={MainScreen}
-                options={{ headerShown: false}}                
-              />
+                initialParams={{ 'userState': this.state, 'handler': this.handler }}
+                options={{ headerShown: false}}
+              /> */}
               <Stack.Screen name="Event Detail" component={ExampleEventPage}/>
 
             </Stack.Navigator>
