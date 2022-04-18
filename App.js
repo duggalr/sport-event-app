@@ -9,11 +9,19 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-ico';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
 import SplashScreen from 'react-native-splash-screen'
 
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  NativeModuleError,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 
+
+// sudo keytool -genkey -v -keystore proximity-personal.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
+// keytool -keystore path-to-debug-or-production-keystore -list -v
 
 // TODO:   
   // start backend/frontend-functionality**
@@ -724,6 +732,82 @@ const ExampleSettings = () => {
 }
 
 
+function response_to_google_auth(){
+  // TODO: 
+    // pass the user-info/data to backend and save; (this is for a new user signup); (use user-table, include is_auth(), etc.)
+    // everytime on app-open, in componentdidmount, check if user is authenticated, if so, display the right info along with user's name
+  return ''
+}
+
+
+async function google_sign_in() {
+  try {
+    await GoogleSignin.hasPlayServices()
+    const userInfo = await GoogleSignin.signIn()
+    const tokenData = await GoogleSignin.getTokens()
+    console.log('google-user-info:', userInfo)
+    console.log('google-token-data:', tokenData)
+    response_to_google_auth({'user_info': userInfo, 'token_data': tokenData})
+
+  } catch(error) {
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      // user cancelled the login flow
+    } else if (error.code === statusCodes.IN_PROGRESS) {
+      // operation (e.g. sign in) is in progress already
+    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      // play services not available or outdated
+    } else {
+      // some other error happened
+    }
+  }
+  
+}
+
+const UserAuthComponent = () => {
+
+  // _google_sign_in = async () => {
+  //   await GoogleSignin.hasPlayServices()
+  //   const userInfo = await GoogleSignin.signIn()
+  //   console.log('google-user-info:', userInfo)
+  // }
+
+
+  return (
+
+    // <View>
+
+    //   <VStack space={4} w="100%" alignItems="center" p="6">
+
+    //     <Input w={{
+    //       base: "75%",
+    //       md: "25%"
+    //     }} placeholder="Email" />
+          
+    //     <Input w={{
+    //       base: "75%",
+    //       md: "25%"
+    //     }} type={"password"} placeholder="Password" />
+
+    //   </VStack>
+
+    // </View>
+
+    <View alignItems="center">
+
+      {/* TODO: add functionality for the sign-in (do we need allauth?); ie. just save user-token/info and redirect to main screen */}
+      <GoogleSigninButton
+        style={{ width: 192, height: 48 }}
+        size={GoogleSigninButton.Size.Wide}
+        color={GoogleSigninButton.Color.Dark}
+        onPress={() => google_sign_in()}
+      />
+
+    </View>
+
+  )
+
+}
+
 
 const MainScreen = ({ navigation }) => {
 
@@ -737,11 +821,18 @@ const MainScreen = ({ navigation }) => {
           }
         }}>
 
-        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
+        
+        {/* TODO: 
+          - Settings will be 3rd-tab; if user authenticated, show notifs/settings, else show user-auth-component
+          - On create-event-page, show user-auth-component 
+        */}
+        <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthComponent} />
 
-        <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />        
+        {/* <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} /> */}
+
+        {/* <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} /> */}
       
-        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />        
+        {/* <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />         */}
         
       </Tab.Navigator> 
 
@@ -762,9 +853,36 @@ export default class App extends React.Component{
     };
   }
 
-  componentDidMount() {
-    SplashScreen.hide();
+  async getCurrentUser() {
+    try {
+      const userInfo = await GoogleSignin.signInSilently();
+      console.log('currnet-user-info:', userInfo)
+    } catch (error) {
+      console.log('current-error:', error)
+      // const typedError = error as NativeModuleError;
+      // const errorMessage =
+      //   typedError.code === statusCodes.SIGN_IN_REQUIRED
+      //     ? 'User not signed it yet, please sign in :)'
+      //     : typedError.message;
+      // this.setState({
+      //   error: new Error(errorMessage),
+      // });
+
+    }
   }
+
+
+  async componentDidMount() {
+    SplashScreen.hide();
+    GoogleSignin.configure({
+      webClientId:"770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
+      forceCodeForRefreshToken: true,
+    });
+
+    await this.getCurrentUser();
+    
+  }
+
 
   render() {
 
