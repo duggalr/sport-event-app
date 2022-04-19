@@ -18,9 +18,6 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 
-// import GetLocation from 'react-native-get-location'
-import RNLocation from 'react-native-location';
-import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 import NetInfo from "@react-native-community/netinfo";
 
 
@@ -42,11 +39,6 @@ import NetInfo from "@react-native-community/netinfo";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-
-
-RNLocation.configure({
-  distanceFilter: 0.0
- })
 
 
 
@@ -76,7 +68,7 @@ const MainHeading = () => {
 }
 
 
-const EventListNew = ({navigation}) => {
+const EventListNew = ({internetConnected, navigation}) => {
 
   const [showModal, setShowModal] = useState(false);
 
@@ -112,197 +104,209 @@ const EventListNew = ({navigation}) => {
   ]
 
   
+  if (internetConnected){
 
-  return (
+    return (
 
-    <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
-
-      <MainHeading />
-
-      <FlatList data={data} renderItem={({ 
-        item 
-      }) => <Box>
-
-        <Pressable onPress={() => navigation.navigate('Event Detail')}>
-
-          <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
-
-            <HStack alignItems="center">
-
-              {item.icon_name == 'basketball'? <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />: <Icon height="26" width="26" name="football" group="miscellaneous" color="black"/> }
-              <Spacer />
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
+  
+        <MainHeading />
+  
+        <FlatList data={data} renderItem={({ 
+          item 
+        }) => <Box>
+  
+          <Pressable onPress={() => navigation.navigate('Event Detail')}>
+  
+            <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
+  
+              <HStack alignItems="center">
+  
+                {item.icon_name == 'basketball'? <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />: <Icon height="26" width="26" name="football" group="miscellaneous" color="black"/> }
+                <Spacer />
+                
+                <Badge backgroundColor="#0284c7" _text={{
+                  color: "white", fontSize: "13"
+                }} variant="solid" rounded="10" >
+                  {item.park_name}
+                </Badge>
               
-              <Badge backgroundColor="#0284c7" _text={{
-                color: "white", fontSize: "13"
-              }} variant="solid" rounded="10" >
-                {item.park_name}
-              </Badge>
-            
-              <Text ml="1"></Text>
-              <Icon name="location" group="logistics-delivery" height="24" width="24"/>
-              <Text fontSize="13" fontWeight="medium">
-                {item.location_distance}
-              </Text>
-
-            </HStack>
-            
-            <Text mt="3" fontWeight="medium" fontSize="xl">
-              {item.title}
-            </Text>
-            
-            {/* <HStack>
-              <Icon name="basketball" group="miscellaneous" />
-              <Text color="coolGray.800" mt="0" fontWeight="medium" fontSize="xl">
-                {item.title}            
-              </Text>
-              <Image shadow={2} source={{uri: "http://clipart-library.com/newimages/basketball-clip-art-1.jpg" }} alt="asd Text" size="sm" /> 
-            </HStack> */}
-            
-            {/* <Text mt="2" fontSize="sm" color="coolGray.700">
-              Lorem ipsum dolor sit amet, consectetur asd...
-            </Text> */}
-
-            <HStack mt="0.5">
-
-              <Text ml="0.5"></Text>
-              <Icon name="calendar" group="ui-interface" color="gray" />
-              <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
-                01/01/2022
-              </Text>
-
-              <Text ml="4"></Text>
-              <Icon ml="2" name="time" group="essential" color="gray"/>
-              {/* <Text ml="1" color="gray.500"> */}
-              <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
-                6:00PM
-              </Text>
-
-            </HStack>
-            
-            <HStack pt="5">
+                <Text ml="1"></Text>
+                <Icon name="location" group="logistics-delivery" height="24" width="24"/>
+                <Text fontSize="13" fontWeight="medium">
+                  {item.location_distance}
+                </Text>
+  
+              </HStack>
               
-              <Pressable onPress={() => setShowModal(true)}>
-
-                <Avatar.Group size="12" max={2}>
-
-                  <Avatar bg="green.500" source={{
-                      uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                    }}>
-                  </Avatar>
-
-                  <Avatar bg="cyan.500" source={{
-                  uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-                }}>
-                    TE
-                  </Avatar>
-                  
-                  <Avatar bg="indigo.500" source={{
-                  uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                }}>
-                    JB
-                  </Avatar>
-                  <Avatar bg="amber.500" source={{
-                  uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-                }}>
-                    TS
-                  </Avatar>
-                  <Avatar bg="green.500" source={{
-                  uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                }}>
-                    AJ
-                  </Avatar>
-                  <Avatar bg="cyan.500" source={{
-                  uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-                }}>
-                    TE
-                  </Avatar>
-                  <Avatar bg="indigo.500" source={{
-                  uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                }}>
-                    JB
-                  </Avatar>
-                  <Avatar bg="amber.500" source={{
-                  uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-                }}>
-                    TS
-                  </Avatar>
-                </Avatar.Group>
-
-              </Pressable>
-
-              <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-                <Modal.Content maxWidth="400px">
-
-                <Modal.Header>People who are Going:</Modal.Header>
-                  <Modal.Body>
-
-                    <ScrollView>
-
-                      <Pressable>
-                        <HStack>
-                          <Avatar bg="green.500" source={{
-                            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                          }}>
-                            AJ
-                          </Avatar>
-                          <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                        </HStack>
-                      </Pressable>
-                      <Divider my="1" />
-
-                      <Pressable>
-                        <HStack>
-                          <Avatar bg="green.500" source={{
-                            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                          }}>
-                            AJ
-                          </Avatar>
-                          <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                        </HStack>
-                      </Pressable>
-                      <Divider my="1" />
-
-                      <Pressable >
-                        <HStack>
-                          <Avatar bg="green.500" source={{
-                            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                          }}>
-                            AJ
-                          </Avatar>
-                          <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                        </HStack>
-                      </Pressable>
-                      <Divider my="1" />
-
-                    </ScrollView>
-
-                  </Modal.Body>
-
-                </Modal.Content>
-
-              </Modal>
+              <Text mt="3" fontWeight="medium" fontSize="xl">
+                {item.title}
+              </Text>
               
-              <Spacer />
-              {/* <Button variant="outline">Going?</Button> */}
-              <Button backgroundColor="#0ea5e9">Going?</Button>
+              {/* <HStack>
+                <Icon name="basketball" group="miscellaneous" />
+                <Text color="coolGray.800" mt="0" fontWeight="medium" fontSize="xl">
+                  {item.title}            
+                </Text>
+                <Image shadow={2} source={{uri: "http://clipart-library.com/newimages/basketball-clip-art-1.jpg" }} alt="asd Text" size="sm" /> 
+              </HStack> */}
+              
+              {/* <Text mt="2" fontSize="sm" color="coolGray.700">
+                Lorem ipsum dolor sit amet, consectetur asd...
+              </Text> */}
+  
+              <HStack mt="0.5">
+  
+                <Text ml="0.5"></Text>
+                <Icon name="calendar" group="ui-interface" color="gray" />
+                <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
+                  01/01/2022
+                </Text>
+  
+                <Text ml="4"></Text>
+                <Icon ml="2" name="time" group="essential" color="gray"/>
+                {/* <Text ml="1" color="gray.500"> */}
+                <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
+                  6:00PM
+                </Text>
+  
+              </HStack>
+              
+              <HStack pt="5">
+                
+                <Pressable onPress={() => setShowModal(true)}>
+  
+                  <Avatar.Group size="12" max={2}>
+  
+                    <Avatar bg="green.500" source={{
+                        uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                      }}>
+                    </Avatar>
+  
+                    <Avatar bg="cyan.500" source={{
+                    uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                  }}>
+                      TE
+                    </Avatar>
+                    
+                    <Avatar bg="indigo.500" source={{
+                    uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                  }}>
+                      JB
+                    </Avatar>
+                    <Avatar bg="amber.500" source={{
+                    uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                  }}>
+                      TS
+                    </Avatar>
+                    <Avatar bg="green.500" source={{
+                    uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                  }}>
+                      AJ
+                    </Avatar>
+                    <Avatar bg="cyan.500" source={{
+                    uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                  }}>
+                      TE
+                    </Avatar>
+                    <Avatar bg="indigo.500" source={{
+                    uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                  }}>
+                      JB
+                    </Avatar>
+                    <Avatar bg="amber.500" source={{
+                    uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+                  }}>
+                      TS
+                    </Avatar>
+                  </Avatar.Group>
+  
+                </Pressable>
+  
+                <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                  <Modal.Content maxWidth="400px">
+  
+                  <Modal.Header>People who are Going:</Modal.Header>
+                    <Modal.Body>
+  
+                      <ScrollView>
+  
+                        <Pressable>
+                          <HStack>
+                            <Avatar bg="green.500" source={{
+                              uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                            }}>
+                              AJ
+                            </Avatar>
+                            <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
+                          </HStack>
+                        </Pressable>
+                        <Divider my="1" />
+  
+                        <Pressable>
+                          <HStack>
+                            <Avatar bg="green.500" source={{
+                              uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                            }}>
+                              AJ
+                            </Avatar>
+                            <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
+                          </HStack>
+                        </Pressable>
+                        <Divider my="1" />
+  
+                        <Pressable >
+                          <HStack>
+                            <Avatar bg="green.500" source={{
+                              uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+                            }}>
+                              AJ
+                            </Avatar>
+                            <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
+                          </HStack>
+                        </Pressable>
+                        <Divider my="1" />
+  
+                      </ScrollView>
+  
+                    </Modal.Body>
+  
+                  </Modal.Content>
+  
+                </Modal>
+                
+                <Spacer />
+                {/* <Button variant="outline">Going?</Button> */}
+                <Button backgroundColor="#0ea5e9">Going?</Button>
+  
+              </HStack>
+  
+            </Box>
+  
+          </Pressable>
+  
+        </Box>
+        
+        }>
+  
+        </FlatList>
+  
+      </View>
+  
+    )
 
-            </HStack>
+  } else{
 
-          </Box>
+    return (
+      <View>
+        <Text>Internet Not Connected! Please reload app after connecting to the internet.</Text>
+      </View>
+    )
 
-        </Pressable>
-
-      </Box>
-      
-      }>
-
-      </FlatList>
-
-    </View>
-
-  )
+  }
 
 }
+
 
 
 const ExampleEventPage = () => {
@@ -806,87 +810,8 @@ const ExampleSettings = () => {
 
 }
 
-const permissionHandle = async () => {
-
-  let permission = await RNLocation.checkPermission({
-    ios: 'whenInUse', // or 'always'
-    android: {
-      detail: 'coarse' // or 'fine'
-    }
-  });
-
-  console.log('current-permission:', permission)
-
-  if (permission === false) {
-
-    permission = await RNLocation.requestPermission({
-      ios: "whenInUse",
-      android: {
-        detail: "coarse",
-        rationale: {
-          title: "Are you sure?",
-          message: "We only use your location to show nearby runs!",
-          buttonPositive: "OK",
-          buttonNegative: "Cancel"
-        }
-      }
-    })
-
-    RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-      interval: 10000,
-      fastInterval: 5000,
-    }).then((data) => {
-      console.log('data', data)
-      // location = await RNLocation.getLatestLocation({timeout: 100})
-      // console.log('location-now:', location)
-      // The user has accepted to enable the location services
-      // data can be :
-      //  - "already-enabled" if the location services has been already enabled
-      //  - "enabled" if user has clicked on OK button in the popup
-    }).catch((err) => {
-      console.log('errer', err)
-      // The user has not accepted to enable the location services or something went wrong during the process
-      // "err" : { "code" : "ERR00|ERR01|ERR02|ERR03", "message" : "message"}
-      // codes :
-      //  - ERR00 : The user has clicked on Cancel button in the popup
-      //  - ERR01 : If the Settings change are unavailable
-      //  - ERR02 : If the popup has failed to open
-      //  - ERR03 : Internal error
-    });
-
-    console.log('new-permission', permission)
-    location = await RNLocation.getLatestLocation({timeout: 100})
-    console.log('location-details:', location, location.longitude, location.latitude, location.timestamp)
-
-  } else {
-    // console.log('location-details:', location)
-    try{
-      location = await RNLocation.getLatestLocation({timeout: 100})
-      // console.log('location-details:', location)
-      // if (location !== null){ //send back to django before returning events; this should be first thing done in componentDidMount()
-      //   console.log('location-details-new:', location, location.longitude, location.latitude, location.timestamp)
-      // }
-      
-    } catch(err){
-      console.log('error', err)
-    }
 
 
-  }
-
-}
-
-
-
-const ExampleLocation = () => {
-  return (
-    
-    <Button onPress={() => permissionHandle()}>
-      Testing Location
-    </Button>
-
-  )
-}
 
 
 const MainScreen = ({ internetConnected, userData, handler, route, navigation }) => {
@@ -911,14 +836,12 @@ const MainScreen = ({ internetConnected, userData, handler, route, navigation })
           }
         }}>
 
-        <Tab.Screen options={{headerShown: false}} name="MainEventList" component={ExampleLocation} />
-
         {/* TODO: do check for internetConnected in MainEventList and if false, display middle screen with no internet, sorry */}
           {/* add eventlistener and this should be change dynamically */}
 
-        {/* <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
+        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation} internetConnected={internetConnected}/>} />
 
-        <Tab.Screen options={{headerShown: false}} name="Create Event">
+        {/* <Tab.Screen options={{headerShown: false}} name="Create Event">
           {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
         </Tab.Screen>
 
@@ -966,6 +889,13 @@ export default class App extends React.Component{
     }
   }
 
+  // Thanks: https://stackoverflow.com/questions/57296756/how-to-check-internet-connection-in-react-native-application-for-both-ios-and-an
+  network_unsubscribe = NetInfo.addEventListener(state => {
+    console.log("UPDATED Connection type", state.type);
+    console.log("UPDATED Is connected?", state.isConnected);
+    this.setState({ internetConnected: state.isConnected })
+  });
+
 
   async componentDidMount() {
     console.log('state-info:', this.state)
@@ -984,6 +914,8 @@ export default class App extends React.Component{
       console.log("Connection type", state.type);
       console.log("Is connected?", state.isConnected);
       this.setState({ internetConnected: state.isConnected })
+
+    this.network_unsubscribe();
 
       // if (state.isConnected) {
         
