@@ -25,12 +25,10 @@ import NetInfo from "@react-native-community/netinfo";
 
 
 
-// sudo keytool -genkey -v -keystore proximity-personal.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
-// keytool -keystore path-to-debug-or-production-keystore -list -v
 
 // TODO:   
   // start backend/frontend-functionality**
-    // start with login
+    // location/login/create-event-form logic
 
   // backdrop-shadows/colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
     // re-add all the icons (deal with icon/modal issue)
@@ -833,6 +831,29 @@ const permissionHandle = async () => {
         }
       }
     })
+
+    RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+      interval: 10000,
+      fastInterval: 5000,
+    }).then((data) => {
+      console.log('data', data)
+      // location = await RNLocation.getLatestLocation({timeout: 100})
+      // console.log('location-now:', location)
+      // The user has accepted to enable the location services
+      // data can be :
+      //  - "already-enabled" if the location services has been already enabled
+      //  - "enabled" if user has clicked on OK button in the popup
+    }).catch((err) => {
+      console.log('errer', err)
+      // The user has not accepted to enable the location services or something went wrong during the process
+      // "err" : { "code" : "ERR00|ERR01|ERR02|ERR03", "message" : "message"}
+      // codes :
+      //  - ERR00 : The user has clicked on Cancel button in the popup
+      //  - ERR01 : If the Settings change are unavailable
+      //  - ERR02 : If the popup has failed to open
+      //  - ERR03 : Internal error
+    });
+
     console.log('new-permission', permission)
     location = await RNLocation.getLatestLocation({timeout: 100})
     console.log('location-details:', location, location.longitude, location.latitude, location.timestamp)
@@ -939,27 +960,9 @@ export default class App extends React.Component{
     try {
       const userInfo = await GoogleSignin.signInSilently();
       console.log('current-user-info:', userInfo)
-      // TODO: 
-        // get any other information from backend-DB if needed
-
       this.setState({ userInfo: userInfo })
-
     } catch (error) {
-      // TODO: display error message on fail signin
-
-      // // user is not signed in; 
-      // console.log('current-error:', error)
-      // this.setState({ userInfo: undefined })
-
-      // const typedError = error as NativeModuleError;
-      // const errorMessage =
-      //   typedError.code === statusCodes.SIGN_IN_REQUIRED
-      //     ? 'User not signed it yet, please sign in :)'
-      //     : typedError.message;
-      // this.setState({
-      //   error: new Error(errorMessage),
-      // });
-
+      this.setState({ userInfo: undefined })
     }
   }
 
@@ -976,31 +979,7 @@ export default class App extends React.Component{
 
     await this.getCurrentUser();
 
-
-    // add this in componentDidMount()
-    RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-      interval: 10000,
-      fastInterval: 5000,
-    }).then((data) => {
-      console.log('data', data)
-      // location = await RNLocation.getLatestLocation({timeout: 100})
-      // console.log('location-now:', location)
-      // The user has accepted to enable the location services
-      // data can be :
-      //  - "already-enabled" if the location services has been already enabled
-      //  - "enabled" if user has clicked on OK button in the popup
-    }).catch((err) => {
-      console.log('errer', err)
-      // The user has not accepted to enable the location services or something went wrong during the process
-      // "err" : { "code" : "ERR00|ERR01|ERR02|ERR03", "message" : "message"}
-      // codes :
-      //  - ERR00 : The user has clicked on Cancel button in the popup
-      //  - ERR01 : If the Settings change are unavailable
-      //  - ERR02 : If the popup has failed to open
-      //  - ERR03 : Internal error
-    });
-
-
+    // TODO: need to addListener here (https://stackoverflow.com/questions/57296756/how-to-check-internet-connection-in-react-native-application-for-both-ios-and-an)
     NetInfo.fetch().then(state => {
       console.log("Connection type", state.type);
       console.log("Is connected?", state.isConnected);
