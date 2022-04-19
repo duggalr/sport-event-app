@@ -793,14 +793,28 @@ const UserLoginComponent = ({handler}) => {
 
   return (
 
-    <View alignItems="center">
+    <View style={{
+      flex: 1, 
+      alignItems: 'center',
+      justifyContent: 'center', 
+      backgroundColor: 'white'}}>
 
-      <GoogleSigninButton
-        style={{ width: 192, height: 48 }}
-        size={GoogleSigninButton.Size.Wide}
-        color={GoogleSigninButton.Color.Dark}
-        onPress={() => google_sign_in(handler)}
-      />
+      {/* <Icon name="basketball-court" group="miscellaneous" height="30" width="30"/> */}
+      <Icon name="log-in" group="ui-interface" height="30" width="30"/>
+
+      <Text fontSize={20} fontWeight={'medium'}>Signup or Login</Text>
+      
+      <HStack>        
+        <GoogleSigninButton
+          style={{ width: 195, height: 50 }}
+          size={GoogleSigninButton.Size.Wide}
+          color={GoogleSigninButton.Color.Dark}
+          onPress={() => google_sign_in(handler)}
+        />
+
+      </HStack>
+
+      
 
     </View>
 
@@ -814,7 +828,7 @@ const CreateEventPage = ({ userData, handler }) => {
   // if user is logged-in, render-form, else, render login-screen
   if (typeof userData !== "undefined"){
     return <EventFormComponent userData={userData} />
-  } else {
+  } else { 
     return <UserLoginComponent handler={handler} />
   }
 
@@ -868,23 +882,22 @@ const MainScreen = ({ mainState, handler, navigation }) => {
           }
         }}>
 
-        {/* TODO: do check for internetConnected in MainEventList and if false, display middle screen with no internet, sorry */}
-          {/* add eventlistener and this should be change dynamically */}
-
-        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
-        <Ionicons name="home" color={color} size={size} />
-      ),}} name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} /> */}
+        
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
         name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} />
 
+        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
+        name="Create Event" children={()=><CreateEventPage mainState={mainState} navigation={navigation}/>} />
+        
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
         name="Settings" children={()=><ExampleSettings mainState={mainState} navigation={navigation} handler={handler}/>} />
 
+
         {/* <Tab.Screen options={{headerShown: false}} name="Create Event">
           {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
-        </Tab.Screen>
-
-        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} /> */}
+        </Tab.Screen> */}
+      
+        {/* <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} /> */}
         
       </Tab.Navigator> 
 
