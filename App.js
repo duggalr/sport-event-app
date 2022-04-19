@@ -559,41 +559,64 @@ const ExampleEventPage = () => {
 }
 
 
-async function google_sign_in(cb, tmp_navigation) {
-  
-  // console.log('function-tmp-navigation', tmp_navigation)
-  // tmp_navigation.navigate('Home')
-  // console.log(tmp_navigation)
+async function google_sign_in(cb) {
 
-  try {
-    // await GoogleSignin.hasPlayServices()
-    // const userInfo = await GoogleSignin.signIn()
-    // const tokenData = await GoogleSignin.getTokens()
-    // console.log('google-user-info:', userInfo)
-    // console.log('google-token-data:', tokenData)
-    
-    // // update parent-state
-    cb('this is update val')
-    // tmp_navigation.navigate('Home')
-    // var tmp_routes = tmp_navigation.getState()?.routes
-    // console.log('tmp-routes:', tmp_routes, tmp_routes[tmp_routes.length - 2])
+    try {
+      await GoogleSignin.hasPlayServices()
+      const userInfo = await GoogleSignin.signIn()
+      const tokenData = await GoogleSignin.getTokens()
+      console.log('google-user-info:', userInfo)
+      console.log('google-token-data:', tokenData)
+      // // cb(userInfo)
 
-    // console.log('navg:', navigation)
-    // console.log('ua-navig:', useNavigation())
-
-  //   // response_to_google_auth({'user_info': userInfo, 'token_data': tokenData})
-
-  } catch(error) {
-    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-      // user cancelled the login flow
-    } else if (error.code === statusCodes.IN_PROGRESS) {
-      // operation (e.g. sign in) is in progress already
-    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-      // play services not available or outdated
-    } else {
-      // some other error happened
+    } 
+    catch(error) {
+      console.log(error)
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
     }
-  }
+
+
+  // // console.log('function-tmp-navigation', tmp_navigation)
+  // // tmp_navigation.navigate('Home')
+  // // console.log(tmp_navigation)
+
+  // try {
+  //   // await GoogleSignin.hasPlayServices()
+  //   // const userInfo = await GoogleSignin.signIn()
+  //   // const tokenData = await GoogleSignin.getTokens()
+  //   // console.log('google-user-info:', userInfo)
+  //   // console.log('google-token-data:', tokenData)
+    
+  //   // // update parent-state
+  //   cb('this is update val')
+  //   // tmp_navigation.navigate('Home')
+  //   // var tmp_routes = tmp_navigation.getState()?.routes
+  //   // console.log('tmp-routes:', tmp_routes, tmp_routes[tmp_routes.length - 2])
+
+  //   // console.log('navg:', navigation)
+  //   // console.log('ua-navig:', useNavigation())
+
+  // //   // response_to_google_auth({'user_info': userInfo, 'token_data': tokenData})
+
+  // } catch(error) {
+  //   if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+  //     // user cancelled the login flow
+  //   } else if (error.code === statusCodes.IN_PROGRESS) {
+  //     // operation (e.g. sign in) is in progress already
+  //   } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+  //     // play services not available or outdated
+  //   } else {
+  //     // some other error happened
+  //   }
+  // }
   
 }
 
@@ -764,7 +787,7 @@ const EventFormComponent = ({ userData }) => {
 
 const UserLoginComponent = ({handler}) => {
 
-  var tmp_navigation = useNavigation()
+  // var tmp_navigation = useNavigation()
   // console.log('ua-ndavig:', tmp_navigation, handler)
 
   return (
@@ -775,7 +798,7 @@ const UserLoginComponent = ({handler}) => {
         style={{ width: 192, height: 48 }}
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
-        onPress={() => google_sign_in(handler, tmp_navigation)}
+        onPress={() => google_sign_in(handler)}
       />
 
     </View>
@@ -788,20 +811,11 @@ const UserLoginComponent = ({handler}) => {
 const CreateEventPage = ({ userData, handler }) => {
 
   // if user is logged-in, render-form, else, render login-screen
-
   if (typeof userData !== "undefined"){
     return <EventFormComponent userData={userData} />
   } else {
     return <UserLoginComponent handler={handler} />
   }
-
-  // // var param = route.params
-  // // if (param.userInfo) {
-  // if (typeof param.userState.userInfo !== "undefined"){
-  //   return <ExampleSettings initialParams={route} />;
-  // } else {
-  //   return <UserAuthComponent handleFn={route.params.handler} />;
-  // }
 
 }
 
@@ -816,89 +830,6 @@ const ExampleSettings = () => {
 
 }
 
-
-function response_to_google_auth(){
-  // TODO: 
-    // pass the user-info/data to backend and save; (this is for a new user signup); (use user-table, include is_auth(), etc.)
-    // everytime on app-open, in componentdidmount, check if user is authenticated, if so, display the right info along with user's name
-  return ''
-}
-
-
-
-
-
-
-const UserAuthComponent = ({ handleFn }) => {
-
-  // _google_sign_in = async () => {
-  //   await GoogleSignin.hasPlayServices()
-  //   const userInfo = await GoogleSignin.signIn()
-  //   console.log('google-user-info:', userInfo)
-  // }
-
-  // TODO: how do we redirect user to home-page after signin (or to previous page they were coming from)
-  
-  var tmp_navigation = useNavigation()
-  // console.log('ua-ndavig:', tmp_navigation)
-
-  return (
-
-    // <View>
-
-    //   <VStack space={4} w="100%" alignItems="center" p="6">
-
-    //     <Input w={{
-    //       base: "75%",
-    //       md: "25%"
-    //     }} placeholder="Email" />
-          
-    //     <Input w={{
-    //       base: "75%",
-    //       md: "25%"
-    //     }} type={"password"} placeholder="Password" />
-
-    //   </VStack>
-
-    // </View>
-
-    <View alignItems="center">
-
-      {/* TODO: add functionality for the sign-in (do we need allauth?); ie. just save user-token/info and redirect to main screen */}
-      <GoogleSigninButton
-        style={{ width: 192, height: 48 }}
-        size={GoogleSigninButton.Size.Wide}
-        color={GoogleSigninButton.Color.Dark}
-        onPress={() => google_sign_in(handleFn, tmp_navigation)}
-      />
-
-    </View>
-
-  )
-
-}
-
-
-// userData={userData} handler={handler
-const UserAuthCheck = ({userData, handler, route}) => {
-  console.log("user-auth-state:", userData, handler)
-
-  // if (typeof userData !== "undefined"){
-  //   {...props} userData={userData} handler={handler}/>}
-  //   return <ExampleSettings initialParams={route} />
-  // } else {
-  //   return <UserAuthComponent handleFn={route.params.handler} />
-  // }
-
-  // // var param = route.params
-  // // if (param.userInfo) {
-  // if (typeof param.userState.userInfo !== "undefined"){
-  //   return <ExampleSettings initialParams={route} />;
-  // } else {
-  //   return <UserAuthComponent handleFn={route.params.handler} />;
-  // }
-  
-}
 
 
 const MainScreen = ({ userData, handler, route, navigation }) => {
@@ -925,27 +856,11 @@ const MainScreen = ({ userData, handler, route, navigation }) => {
 
         <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
 
-        {/* <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} /> */}
         <Tab.Screen options={{headerShown: false}} name="Create Event">
           {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
         </Tab.Screen>
 
         <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />
-
-
-        {/* <Tab.Screen name="User Auth" options={{headerShown: false}}>
-          {props => <UserAuthCheck {...props} userData={userData} handler={handler}/>}
-        </Tab.Screen>
-
-        <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthCheck} initialParams={route.params} />
-        
-        <Tab.Screen options={{headerShown: false}} name="User Auth" component={UserAuthComponent} />
-
-        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
-
-        <Tab.Screen options={{headerShown: false}} name="Create Event" component={CreateEventPage} />
-      
-        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />         */}
         
       </Tab.Navigator> 
 
@@ -985,7 +900,7 @@ export default class App extends React.Component{
       // TODO: 
         // get any other information from backend-DB if needed
 
-      // this.setState({ userInfo: userInfo })
+      this.setState({ userInfo: userInfo })
 
     } catch (error) {
       
