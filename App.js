@@ -46,6 +46,8 @@ const MainHeading = () => {
 
   let [service, setService] = React.useState("");
 
+  var tmp_navigation = useNavigation()
+
   return (
 
     <HStack style={{ backgroundColor: 'white', fontSize: 26, paddingTop: 20, paddingLeft: 10}}>
@@ -55,6 +57,13 @@ const MainHeading = () => {
       </Heading>
       <Spacer />
 
+      <Pressable onPress={() => tmp_navigation.navigate('Settings')}>
+        {/* <Icon name="user-shape" group="font-awesome" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
+        <Icon name="settings" group="ui-interface" style={{ marginTop: 2, marginRight: 12}} height="28" width="28"/>
+      </Pressable>
+      
+      
+      {/* <Icon name="user-1" group="ui-interface" /> */}
       {/* <Icon name="filter-results-button" group="material-design" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
       {/* <Icon name="plus" group="ui-interface" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
       {/* <Button backgroundColor="#0284c7">
@@ -68,10 +77,13 @@ const MainHeading = () => {
 }
 
 
-const EventListNew = ({internetConnected, navigation}) => {
+const EventListNew = ({ mainState, navigation}) => {
+
+  var userLoggedIn = mainState.userLoggedIn
+  var userData = mainState.userInfo
+  var internetConnected = mainState.internetConnected
 
   const [showModal, setShowModal] = useState(false);
-
   
   const data = [
     {
@@ -109,19 +121,19 @@ const EventListNew = ({internetConnected, navigation}) => {
     return (
 
       <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
-  
+
         <MainHeading />
-  
+
         <FlatList data={data} renderItem={({ 
           item 
         }) => <Box>
-  
-          <Pressable onPress={() => navigation.navigate('Event Detail')}>
-  
+
+          <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
+
             <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
-  
+
               <HStack alignItems="center">
-  
+
                 {item.icon_name == 'basketball'? <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />: <Icon height="26" width="26" name="football" group="miscellaneous" color="black"/> }
                 <Spacer />
                 
@@ -131,12 +143,12 @@ const EventListNew = ({internetConnected, navigation}) => {
                   {item.park_name}
                 </Badge>
               
-                <Text ml="1"></Text>
+                {/* <Text ml="1"></Text>
                 <Icon name="location" group="logistics-delivery" height="24" width="24"/>
                 <Text fontSize="13" fontWeight="medium">
                   {item.location_distance}
-                </Text>
-  
+                </Text> */}
+
               </HStack>
               
               <Text mt="3" fontWeight="medium" fontSize="xl">
@@ -154,35 +166,35 @@ const EventListNew = ({internetConnected, navigation}) => {
               {/* <Text mt="2" fontSize="sm" color="coolGray.700">
                 Lorem ipsum dolor sit amet, consectetur asd...
               </Text> */}
-  
+
               <HStack mt="0.5">
-  
+
                 <Text ml="0.5"></Text>
                 <Icon name="calendar" group="ui-interface" color="gray" />
                 <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
                   01/01/2022
                 </Text>
-  
+
                 <Text ml="4"></Text>
                 <Icon ml="2" name="time" group="essential" color="gray"/>
                 {/* <Text ml="1" color="gray.500"> */}
                 <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
                   6:00PM
                 </Text>
-  
+
               </HStack>
               
               <HStack pt="5">
                 
                 <Pressable onPress={() => setShowModal(true)}>
-  
+
                   <Avatar.Group size="12" max={2}>
-  
+
                     <Avatar bg="green.500" source={{
                         uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
                       }}>
                     </Avatar>
-  
+
                     <Avatar bg="cyan.500" source={{
                     uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
                   }}>
@@ -220,17 +232,17 @@ const EventListNew = ({internetConnected, navigation}) => {
                       TS
                     </Avatar>
                   </Avatar.Group>
-  
+
                 </Pressable>
-  
+
                 <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                   <Modal.Content maxWidth="400px">
-  
+
                   <Modal.Header>People who are Going:</Modal.Header>
                     <Modal.Body>
-  
+
                       <ScrollView>
-  
+
                         <Pressable>
                           <HStack>
                             <Avatar bg="green.500" source={{
@@ -242,7 +254,7 @@ const EventListNew = ({internetConnected, navigation}) => {
                           </HStack>
                         </Pressable>
                         <Divider my="1" />
-  
+
                         <Pressable>
                           <HStack>
                             <Avatar bg="green.500" source={{
@@ -254,7 +266,7 @@ const EventListNew = ({internetConnected, navigation}) => {
                           </HStack>
                         </Pressable>
                         <Divider my="1" />
-  
+
                         <Pressable >
                           <HStack>
                             <Avatar bg="green.500" source={{
@@ -266,41 +278,47 @@ const EventListNew = ({internetConnected, navigation}) => {
                           </HStack>
                         </Pressable>
                         <Divider my="1" />
-  
+
                       </ScrollView>
-  
+
                     </Modal.Body>
-  
+
                   </Modal.Content>
-  
+
                 </Modal>
                 
                 <Spacer />
                 {/* <Button variant="outline">Going?</Button> */}
-                <Button backgroundColor="#0ea5e9">Going?</Button>
-  
+                <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
+                  Details
+                </Button>
+
               </HStack>
-  
+
             </Box>
-  
+
           </Pressable>
-  
+
         </Box>
         
         }>
-  
+
         </FlatList>
-  
+
       </View>
-  
+
     )
 
-  } else{
+  } else {
 
     return (
+
       <View>
-        <Text>Internet Not Connected! Please reload app after connecting to the internet.</Text>
+        <Text>
+          No Internet Connection! Please connect to Wifi and re-open app!
+        </Text>
       </View>
+
     )
 
   }
@@ -309,7 +327,11 @@ const EventListNew = ({internetConnected, navigation}) => {
 
 
 
-const ExampleEventPage = () => {
+const ExampleEventPage = ({ route }) => {
+  console.log('example-event-page:', route)
+
+  var mainState = route.params.mainState
+  var userLoggedIn = mainState.userLoggedIn
 
   const [selected, setSelected] = React.useState(1);
   
@@ -333,11 +355,11 @@ const ExampleEventPage = () => {
             Smithfield Park
           </Badge>
 
-          <Text ml="1"></Text>
+          {/* <Text ml="1"></Text>
           <Icon name="location" group="logistics-delivery" height="24" width="24"/>
           <Text fontSize="13" fontWeight="medium">
             9KM
-          </Text>
+          </Text> */}
 
         </HStack>
 
@@ -428,138 +450,137 @@ const ExampleEventPage = () => {
 
         <VStack pl="4" pr="4"  backgroundColor="white">
 
-        <Box borderBottomWidth="1" backgroundColor="white" _dark={{
-          borderColor: "gray.600" 
-          }} borderColor="coolGray.200" pl="0" pr="4" py="2">
+          <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+            borderColor: "gray.600" 
+            }} borderColor="coolGray.200" pl="0" pr="4" py="2">
 
-            <HStack space={3} justifyContent="space-between">
+              <HStack space={3} justifyContent="space-between">
 
-              <Avatar size="48px" source={{
-                uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
-              }} />
+                <Avatar size="48px" source={{
+                  uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
+                }} />
 
-              <VStack>
+                <VStack>
 
-                <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
-                  John Doe
+                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                    John Doe
+                  </Text>
+
+                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                    Hello There! Hello There!
+                  </Text>
+
+                </VStack>
+
+                <Spacer />
+                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                  11:15 PM
                 </Text>
 
-                <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
-                  Hello There! Hello There!
+              </HStack>
+
+          </Box>
+
+          <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+            borderColor: "gray.600" 
+            }} borderColor="coolGray.200" pl="0" pr="4" py="2">
+
+              <HStack space={3} justifyContent="space-between">
+
+                <Avatar size="48px" source={{
+                  uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
+                }} />
+
+                <VStack>
+
+                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                    John Doe
+                  </Text>
+
+                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                    Hello There! Hello There!
+                  </Text>
+
+                </VStack>
+
+                <Spacer />
+                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                  11:15 PM
                 </Text>
 
-              </VStack>
+              </HStack>
 
-              <Spacer />
-              <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
-                11:15 PM
-              </Text>
+          </Box>
 
-            </HStack>
+          <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+            borderColor: "gray.600" 
+            }} borderColor="coolGray.200" pl="0" pr="4" py="2">
 
-        </Box>
+              <HStack space={3} justifyContent="space-between">
 
-        <Box borderBottomWidth="1" backgroundColor="white" _dark={{
-          borderColor: "gray.600" 
-          }} borderColor="coolGray.200" pl="0" pr="4" py="2">
+                <Avatar size="48px" source={{
+                  uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
+                }} />
 
-            <HStack space={3} justifyContent="space-between">
+                <VStack>
 
-              <Avatar size="48px" source={{
-                uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
-              }} />
+                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                    John Doe
+                  </Text>
 
-              <VStack>
+                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                    Hello There! Hello There!
+                  </Text>
 
-                <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
-                  John Doe
+                </VStack>
+
+                <Spacer />
+                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                  11:15 PM
                 </Text>
 
-                <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
-                  Hello There! Hello There!
+              </HStack>
+
+          </Box>
+
+          <Box borderBottomWidth="0" backgroundColor="white" _dark={{
+            borderColor: "gray.600" 
+            }} borderColor="coolGray.200" pl="0" pr="4" py="2">
+
+              <HStack space={3} justifyContent="space-between">
+
+                <Avatar size="48px" source={{
+                  uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
+                }} />
+
+                <VStack>
+
+                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                    John Doe
+                  </Text>
+
+                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                    Hello There! Hello There!
+                  </Text>
+
+                </VStack>
+
+                <Spacer />
+                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                  11:15 PM
                 </Text>
 
-              </VStack>
+              </HStack>
 
-              <Spacer />
-              <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
-                11:15 PM
-              </Text>
-
-            </HStack>
-
-        </Box>
-
-        <Box borderBottomWidth="1" backgroundColor="white" _dark={{
-          borderColor: "gray.600" 
-          }} borderColor="coolGray.200" pl="0" pr="4" py="2">
-
-            <HStack space={3} justifyContent="space-between">
-
-              <Avatar size="48px" source={{
-                uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
-              }} />
-
-              <VStack>
-
-                <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
-                  John Doe
-                </Text>
-
-                <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
-                  Hello There! Hello There!
-                </Text>
-
-              </VStack>
-
-              <Spacer />
-              <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
-                11:15 PM
-              </Text>
-
-            </HStack>
-
-        </Box>
-
-        <Box borderBottomWidth="0" backgroundColor="white" _dark={{
-          borderColor: "gray.600" 
-          }} borderColor="coolGray.200" pl="0" pr="4" py="2">
-
-            <HStack space={3} justifyContent="space-between">
-
-              <Avatar size="48px" source={{
-                uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
-              }} />
-
-              <VStack>
-
-                <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
-                  John Doe
-                </Text>
-
-                <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
-                  Hello There! Hello There!
-                </Text>
-
-              </VStack>
-
-              <Spacer />
-              <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
-                11:15 PM
-              </Text>
-
-            </HStack>
-
-        </Box>
+          </Box>
 
         </VStack>
 
-         <Box backgroundColor="white"pb="5" pt="1" pl="4">
+        <Box backgroundColor="white"pb="5" pt="1" pl="4">
           <HStack>
-            <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" placeholder="got something to say?" />
-            {/* <Button>Send</Button> */}
+            <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" placeholder="got something to say?" isDisabled={!userLoggedIn}/>
             <Text pl="1"></Text>
-            <Button height="12" width="12">
+            <Button height="12" width="12" isDisabled={!userLoggedIn}>
               <Icon name="send-button" group="material-design" height="25" width="25" color="white" />
             </Button>
           </HStack>
@@ -800,13 +821,25 @@ const CreateEventPage = ({ userData, handler }) => {
 }
 
 
-const ExampleSettings = () => {
-  return (
+const ExampleSettings = ({ mainState, handler }) => {
+  var userLoggedIn = mainState.userLoggedIn
 
-    <Text>
-      Settings
-    </Text>
-  )
+  if (userLoggedIn) {
+
+    return (
+      <Text>
+        Settings
+      </Text>
+    )
+
+  } else {
+
+    return (
+      <UserLoginComponent handler={handler} />
+    )
+
+  }
+  
 
 }
 
@@ -814,18 +847,17 @@ const ExampleSettings = () => {
 
 
 
-const MainScreen = ({ internetConnected, userData, handler, route, navigation }) => {
+const MainScreen = ({ mainState, handler, navigation }) => {
 
-  // console.log('navigation-state', navigation.getState())
-  // console.log('ms-params:', route.params)
-  // console.log('ms-navigation:', navigation)  
-
-  console.log('main-props:', userData, handler)
-
-  // console.log('rp:', route.params)
-  // var first_name = route.params.userState.first_name
-  // var cb = route.params.handler
+  // {props => <MainScreen {...props} mainState={this.state} userLoggedIn={this.state.userLoggedIn}  userData={this.state.userInfo} internetConnected={this.state.internetConnected} handler={this.handler}/>}
   
+  var userLoggedIn = mainState.userLoggedIn
+  var userData = mainState.userInfo
+  var internetConnected = mainState.internetConnected
+  
+  console.log('main-state-info:', userLoggedIn, userData, internetConnected)
+
+
   return (
 
       <Tab.Navigator screenOptions={{
@@ -839,7 +871,14 @@ const MainScreen = ({ internetConnected, userData, handler, route, navigation })
         {/* TODO: do check for internetConnected in MainEventList and if false, display middle screen with no internet, sorry */}
           {/* add eventlistener and this should be change dynamically */}
 
-        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation} internetConnected={internetConnected}/>} />
+        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (
+        <Ionicons name="home" color={color} size={size} />
+      ),}} name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} /> */}
+        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
+        name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} />
+
+        <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
+        name="Settings" children={()=><ExampleSettings mainState={mainState} navigation={navigation} handler={handler}/>} />
 
         {/* <Tab.Screen options={{headerShown: false}} name="Create Event">
           {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
@@ -862,8 +901,9 @@ export default class App extends React.Component{
     super(props);
     
     this.state = {
+      internetConnected: false,
+      userLoggedIn: false,
       userInfo: undefined,
-      internetConnected: false
     };
 
     this.handler = this.handler.bind(this)
@@ -873,7 +913,8 @@ export default class App extends React.Component{
   handler = (update_val) => {
     console.log('handle-update:', update_val)
     this.setState({
-      userInfo: update_val
+      userInfo: update_val, 
+      userLoggedIn: true
     })
 
   }
@@ -883,18 +924,17 @@ export default class App extends React.Component{
     try {
       const userInfo = await GoogleSignin.signInSilently();
       console.log('current-user-info:', userInfo)
-      this.setState({ userInfo: userInfo })
+      this.setState({ 
+        userInfo: userInfo,
+        userLoggedIn: true
+      })
     } catch (error) {
-      this.setState({ userInfo: undefined })
+      this.setState({ 
+        userInfo: undefined, 
+        userLoggedIn: false
+      })
     }
   }
-
-  // Thanks: https://stackoverflow.com/questions/57296756/how-to-check-internet-connection-in-react-native-application-for-both-ios-and-an
-  network_unsubscribe = NetInfo.addEventListener(state => {
-    console.log("UPDATED Connection type", state.type);
-    console.log("UPDATED Is connected?", state.isConnected);
-    this.setState({ internetConnected: state.isConnected })
-  });
 
 
   async componentDidMount() {
@@ -909,20 +949,10 @@ export default class App extends React.Component{
 
     await this.getCurrentUser();
 
-    // TODO: need to addListener here (https://stackoverflow.com/questions/57296756/how-to-check-internet-connection-in-react-native-application-for-both-ios-and-an)
     NetInfo.fetch().then(state => {
       console.log("Connection type", state.type);
       console.log("Is connected?", state.isConnected);
       this.setState({ internetConnected: state.isConnected })
-
-    this.network_unsubscribe();
-
-      // if (state.isConnected) {
-        
-      // } else {
-      //   Alert.alert("You are offline!");
-      // }
-
     });
 
   }
@@ -950,7 +980,8 @@ export default class App extends React.Component{
               /> */}
 
               <Stack.Screen name="Home" options={{ headerShown: false}}>
-                {props => <MainScreen {...props} internetConnected={this.state.internetConnected} userData={this.state.userInfo} handler={this.handler}/>}
+                {/* {props => <MainScreen {...props} userLoggedIn={this.state.userLoggedIn}  userData={this.state.userInfo} internetConnected={this.state.internetConnected} handler={this.handler}/>} */}
+                {props => <MainScreen {...props} mainState={this.state} handler={this.handler}/>}
               </Stack.Screen>
 
               <Stack.Screen name="Event Detail" component={ExampleEventPage}/>
