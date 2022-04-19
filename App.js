@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from "react";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, Alert } from "react-native";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
   FormControl, Select, CheckIcon, TextArea, Modal } from "native-base";
@@ -17,6 +17,11 @@ import {
   NativeModuleError,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
+
+// import GetLocation from 'react-native-get-location'
+import RNLocation from 'react-native-location';
+import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
+import NetInfo from "@react-native-community/netinfo";
 
 
 
@@ -39,6 +44,11 @@ import {
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+
+RNLocation.configure({
+  distanceFilter: 0.0
+ })
 
 
 
@@ -102,6 +112,8 @@ const EventListNew = ({navigation}) => {
       icon_name: "basketball"
     },
   ]
+
+  
 
   return (
 
@@ -567,11 +579,12 @@ async function google_sign_in(cb) {
       const tokenData = await GoogleSignin.getTokens()
       console.log('google-user-info:', userInfo)
       console.log('google-token-data:', tokenData)
-      // // cb(userInfo)
+      cb(userInfo)
 
     } 
-    catch(error) {
+    catch(error) {  // TODO: need to display error message
       console.log(error)
+
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow
       } else if (error.code === statusCodes.IN_PROGRESS) {
@@ -582,41 +595,6 @@ async function google_sign_in(cb) {
         // some other error happened
       }
     }
-
-
-  // // console.log('function-tmp-navigation', tmp_navigation)
-  // // tmp_navigation.navigate('Home')
-  // // console.log(tmp_navigation)
-
-  // try {
-  //   // await GoogleSignin.hasPlayServices()
-  //   // const userInfo = await GoogleSignin.signIn()
-  //   // const tokenData = await GoogleSignin.getTokens()
-  //   // console.log('google-user-info:', userInfo)
-  //   // console.log('google-token-data:', tokenData)
-    
-  //   // // update parent-state
-  //   cb('this is update val')
-  //   // tmp_navigation.navigate('Home')
-  //   // var tmp_routes = tmp_navigation.getState()?.routes
-  //   // console.log('tmp-routes:', tmp_routes, tmp_routes[tmp_routes.length - 2])
-
-  //   // console.log('navg:', navigation)
-  //   // console.log('ua-navig:', useNavigation())
-
-  // //   // response_to_google_auth({'user_info': userInfo, 'token_data': tokenData})
-
-  // } catch(error) {
-  //   if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-  //     // user cancelled the login flow
-  //   } else if (error.code === statusCodes.IN_PROGRESS) {
-  //     // operation (e.g. sign in) is in progress already
-  //   } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-  //     // play services not available or outdated
-  //   } else {
-  //     // some other error happened
-  //   }
-  // }
   
 }
 
@@ -830,9 +808,67 @@ const ExampleSettings = () => {
 
 }
 
+const permissionHandle = async () => {
+
+  let permission = await RNLocation.checkPermission({
+    ios: 'whenInUse', // or 'always'
+    android: {
+      detail: 'coarse' // or 'fine'
+    }
+  });
+
+  console.log('current-permission:', permission)
+
+  if (permission === false) {
+
+    permission = await RNLocation.requestPermission({
+      ios: "whenInUse",
+      android: {
+        detail: "coarse",
+        rationale: {
+          title: "Are you sure?",
+          message: "We only use your location to show nearby runs!",
+          buttonPositive: "OK",
+          buttonNegative: "Cancel"
+        }
+      }
+    })
+    console.log('new-permission', permission)
+    location = await RNLocation.getLatestLocation({timeout: 100})
+    console.log('location-details:', location, location.longitude, location.latitude, location.timestamp)
+
+  } else {
+    // console.log('location-details:', location)
+    try{
+      location = await RNLocation.getLatestLocation({timeout: 100})
+      // console.log('location-details:', location)
+      // if (location !== null){ //send back to django before returning events; this should be first thing done in componentDidMount()
+      //   console.log('location-details-new:', location, location.longitude, location.latitude, location.timestamp)
+      // }
+      
+    } catch(err){
+      console.log('error', err)
+    }
 
 
-const MainScreen = ({ userData, handler, route, navigation }) => {
+  }
+
+}
+
+
+
+const ExampleLocation = () => {
+  return (
+    
+    <Button onPress={() => permissionHandle()}>
+      Testing Location
+    </Button>
+
+  )
+}
+
+
+const MainScreen = ({ internetConnected, userData, handler, route, navigation }) => {
 
   // console.log('navigation-state', navigation.getState())
   // console.log('ms-params:', route.params)
@@ -854,13 +890,18 @@ const MainScreen = ({ userData, handler, route, navigation }) => {
           }
         }}>
 
-        <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
+        <Tab.Screen options={{headerShown: false}} name="MainEventList" component={ExampleLocation} />
+
+        {/* TODO: do check for internetConnected in MainEventList and if false, display middle screen with no internet, sorry */}
+          {/* add eventlistener and this should be change dynamically */}
+
+        {/* <Tab.Screen options={{headerShown: false}} name="MainEventList" children={()=><EventListNew navigation={navigation}/>} />
 
         <Tab.Screen options={{headerShown: false}} name="Create Event">
           {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
         </Tab.Screen>
 
-        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} />
+        <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} /> */}
         
       </Tab.Navigator> 
 
@@ -877,7 +918,8 @@ export default class App extends React.Component{
     super(props);
     
     this.state = {
-      userInfo: undefined
+      userInfo: undefined,
+      internetConnected: false
     };
 
     this.handler = this.handler.bind(this)
@@ -903,7 +945,8 @@ export default class App extends React.Component{
       this.setState({ userInfo: userInfo })
 
     } catch (error) {
-      
+      // TODO: display error message on fail signin
+
       // // user is not signed in; 
       // console.log('current-error:', error)
       // this.setState({ userInfo: undefined })
@@ -932,7 +975,45 @@ export default class App extends React.Component{
     });
 
     await this.getCurrentUser();
-    
+
+
+    // add this in componentDidMount()
+    RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+      interval: 10000,
+      fastInterval: 5000,
+    }).then((data) => {
+      console.log('data', data)
+      // location = await RNLocation.getLatestLocation({timeout: 100})
+      // console.log('location-now:', location)
+      // The user has accepted to enable the location services
+      // data can be :
+      //  - "already-enabled" if the location services has been already enabled
+      //  - "enabled" if user has clicked on OK button in the popup
+    }).catch((err) => {
+      console.log('errer', err)
+      // The user has not accepted to enable the location services or something went wrong during the process
+      // "err" : { "code" : "ERR00|ERR01|ERR02|ERR03", "message" : "message"}
+      // codes :
+      //  - ERR00 : The user has clicked on Cancel button in the popup
+      //  - ERR01 : If the Settings change are unavailable
+      //  - ERR02 : If the popup has failed to open
+      //  - ERR03 : Internal error
+    });
+
+
+    NetInfo.fetch().then(state => {
+      console.log("Connection type", state.type);
+      console.log("Is connected?", state.isConnected);
+      this.setState({ internetConnected: state.isConnected })
+
+      // if (state.isConnected) {
+        
+      // } else {
+      //   Alert.alert("You are offline!");
+      // }
+
+    });
+
   }
 
 
@@ -958,7 +1039,7 @@ export default class App extends React.Component{
               /> */}
 
               <Stack.Screen name="Home" options={{ headerShown: false}}>
-                {props => <MainScreen {...props} userData={this.state.userInfo} handler={this.handler}/>}
+                {props => <MainScreen {...props} internetConnected={this.state.internetConnected} userData={this.state.userInfo} handler={this.handler}/>}
               </Stack.Screen>
 
               <Stack.Screen name="Event Detail" component={ExampleEventPage}/>
@@ -974,7 +1055,6 @@ export default class App extends React.Component{
   }
 
 }
-
 
 
 
