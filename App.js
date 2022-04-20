@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { useState } from "react";
-import { TouchableOpacity, Alert } from "react-native";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
   FormControl, Select, CheckIcon, TextArea, Modal } from "native-base";
@@ -597,17 +596,16 @@ const ExampleEventPage = ({ route }) => {
 
 
 
-function saveUserProfileDetails(){
+function saveUserProfileDetails(userData){
   
-  fetch("https://abdc-2607-fea8-4360-f100-8905-6fd6-70f5-587d.ngrok.io/auth_signup", {
+  return fetch("https://abdc-2607-fea8-4360-f100-8905-6fd6-70f5-587d.ngrok.io/auth_signup", {
     method: 'POST',
-    body: JSON.stringify({
-      'name': 'testing_one', 'email': 'testing_two'
-    }),
+    body: JSON.stringify(userData),
     headers: {
       'Content-Type': 'application/json'
     }
-  }).then(response => console.log(response.json()))
+  })
+  // .then((response) => response.json()).then((responseJson) => console.log(responseJson))
 
 }
   
@@ -615,23 +613,36 @@ function saveUserProfileDetails(){
 async function google_sign_in(user_state_cb) {
 
     try {      
-      // await GoogleSignin.hasPlayServices()
-      // const userInfo = await GoogleSignin.signIn()
-      var authRes = await saveUserProfileDetails()
+      await GoogleSignin.hasPlayServices()
+      const userInfo = await GoogleSignin.signIn()
+      console.log('user-info:', userInfo)
+      
       // TODO: on authRes success, then get the user-token-data, set the 3 states and have user see event-form/settings
+        // important: 
+          // if error on django's side for saving user-profile, signout user in this app as user is not an 'official-user' in our app
 
-      // saveUserProfileDetails().then(function(res){
-      //   console.log('res', res.json())
-      // })
+      saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
+        console.log('JSON-response:', responseJson)
+        
+        if (responseJson['success'] === true ) { // user has been created in backend
+          const tokenData = GoogleSignin.getTokens().then((tokRes) => tokRes.json()).then((tokRes) => {
+            console.log('google-token-data:', tokenData)
+            var idTok = tokenData['idToken']
+            var accessTok = tokenData['accessToken']
+            var di = {'access_token': accessTok, 'id_token': idTok}
+            user_state_cb(di)
+          })
+          
+        } else {  // user does not exist in our app so 'successful-login' should be removed
+          GoogleSignin.revokeAccess(),then(() => {
+            GoogleSignin.signOut()
+          })
+        }
 
-
-      // const tokenData = await GoogleSignin.getTokens()
-      // console.log('google-user-info:', userInfo)
-      // console.log('google-token-data:', tokenData)
-      // user_state_cb(userInfo)
+      })
 
     } 
-    catch(error) {  // TODO: need to display error message
+    catch(error) {  // TODO: what to do with error? <-- post error saying login unsuccessful
       console.log(error)
 
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
