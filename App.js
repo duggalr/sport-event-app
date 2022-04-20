@@ -27,6 +27,8 @@ import NetInfo from "@react-native-community/netinfo";
   // start backend/frontend-functionality**
     // location/login/create-event-form logic
 
+  // **ENSURE THE GOOGLE CLIENT-ID ON THIS PAGE IS SET AS ENV VARIABLE BEFORE OS**
+
   // backdrop-shadows/colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
     // re-add all the icons (deal with icon/modal issue)
   // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
@@ -594,15 +596,39 @@ const ExampleEventPage = ({ route }) => {
 }
 
 
-async function google_sign_in(cb) {
 
-    try {
-      await GoogleSignin.hasPlayServices()
-      const userInfo = await GoogleSignin.signIn()
-      const tokenData = await GoogleSignin.getTokens()
-      console.log('google-user-info:', userInfo)
-      console.log('google-token-data:', tokenData)
-      cb(userInfo)
+function saveUserProfileDetails(){
+  
+  fetch("https://abdc-2607-fea8-4360-f100-8905-6fd6-70f5-587d.ngrok.io/auth_signup", {
+    method: 'POST',
+    body: JSON.stringify({
+      'name': 'testing_one', 'email': 'testing_two'
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response => console.log(response.json()))
+
+}
+  
+
+async function google_sign_in(user_state_cb) {
+
+    try {      
+      // await GoogleSignin.hasPlayServices()
+      // const userInfo = await GoogleSignin.signIn()
+      var authRes = await saveUserProfileDetails()
+      // TODO: on authRes success, then get the user-token-data, set the 3 states and have user see event-form/settings
+
+      // saveUserProfileDetails().then(function(res){
+      //   console.log('res', res.json())
+      // })
+
+
+      // const tokenData = await GoogleSignin.getTokens()
+      // console.log('google-user-info:', userInfo)
+      // console.log('google-token-data:', tokenData)
+      // user_state_cb(userInfo)
 
     } 
     catch(error) {  // TODO: need to display error message
@@ -670,7 +696,7 @@ const EventFormComponent = ({ userData }) => {
           <FormControl>
             <FormControl.Label>
               <Text fontSize="16" fontWeight="medium">
-                Project Title
+                Title
               </Text>
             </FormControl.Label>
             <Input placeholder="ie. Ball Run this Friday at 6PM at Smithfield Park" w="80"/>
@@ -762,7 +788,7 @@ const EventFormComponent = ({ userData }) => {
         <FormControl pt="4">
           <FormControl.Label>
             <Text fontSize="16" fontWeight="medium">
-              Event Description
+              Description
             </Text>
           </FormControl.Label>
           <TextArea h={20} placeholder="ie. looking to play a 5v5 friday. Any skill-level is fine... I'll bring some water for everyone" />
@@ -825,6 +851,8 @@ const UserLoginComponent = ({handler}) => {
 
 const CreateEventPage = ({ userData, handler }) => {
 
+  // return <EventFormComponent userData={userData} />
+
   // if user is logged-in, render-form, else, render login-screen
   if (typeof userData !== "undefined"){
     return <EventFormComponent userData={userData} />
@@ -883,14 +911,14 @@ const MainScreen = ({ mainState, handler, navigation }) => {
         }}>
 
         
-        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
-        name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} />
+        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
+        name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} /> */}
 
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
         name="Create Event" children={()=><CreateEventPage mainState={mainState} navigation={navigation}/>} />
         
-        <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
-        name="Settings" children={()=><ExampleSettings mainState={mainState} navigation={navigation} handler={handler}/>} />
+        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
+        name="Settings" children={()=><ExampleSettings mainState={mainState} navigation={navigation} handler={handler}/>} /> */}
 
 
         {/* <Tab.Screen options={{headerShown: false}} name="Create Event">
@@ -923,7 +951,8 @@ export default class App extends React.Component{
 
   }
 
-  handler = (update_val) => {
+
+  handler = (update_val) => { // to-update user state after signup/login
     console.log('handle-update:', update_val)
     this.setState({
       userInfo: update_val, 
@@ -936,7 +965,8 @@ export default class App extends React.Component{
   async getCurrentUser() {
     try {
       const userInfo = await GoogleSignin.signInSilently();
-      console.log('current-user-info:', userInfo)
+      console.log('silent-current-user-info:', userInfo)
+
       this.setState({ 
         userInfo: userInfo,
         userLoggedIn: true
