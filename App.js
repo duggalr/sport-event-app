@@ -27,10 +27,10 @@ import NetInfo from "@react-native-community/netinfo";
     // Event-List:
       // test to ensure everything works; 
       // experiment with some shadows and possibly different colurs for buttons/icons, etc. 
-        // then, event-detail + comments
+        // then, event-detail + comments + going-button
  
 
-        
+
   // **ENSURE THE GOOGLE CLIENT-ID ON THIS PAGE IS SET AS ENV VARIABLE BEFORE OS**
   // **For splash-screen, include toronto** (also in appstore description)
 
@@ -185,6 +185,7 @@ const EventListNew = ({ mainState, navigation }) => {
                 <HStack pt="5">
                   
                   <Pressable onPress={() => setShowModal(true)}>
+                  {/* <Pressable> */}
 
                     <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
                       <Avatar bg="green.500" source={{
@@ -201,7 +202,55 @@ const EventListNew = ({ mainState, navigation }) => {
                       <Modal.Header>People who are Going:</Modal.Header>
                         <Modal.Body>
 
-                          <ScrollView>{item.user_going_list.map((avatar_item, index) => 
+                          <ScrollView>{item.user_going_list.map((avatar_item, index) => {
+                            
+                              return (
+                                <View>
+
+                                  <HStack>
+
+                                    <Text fontSize="16" fontWeight="medium" pl="2" pt="3">
+                                      {avatar_item.profile_picture}
+                                    </Text>
+
+                                  </HStack>
+                                  <Divider my="1" />
+
+                                </View>
+                              )
+
+                            })}
+           
+                          </ScrollView>
+
+
+                          {/* <ScrollView data={item.user_going_list} renderItem={({avatar_item, index }) => {
+                            
+                            return (
+                              <View>
+                              
+                                <HStack>
+
+                                  <Avatar bg="green.500" source={{
+                                      uri: avatar_item.profile_picture
+                                    }}></Avatar>
+                                  <Text fontSize="16" fontWeight="medium" pl="2" pt="3">
+                                    {avatar_item.name}
+                                  </Text>
+
+                                </HStack>
+                                <Divider my="1" />
+
+                              </View>
+                            )
+
+                          }} /> */}
+
+
+                          {/* </ScrollView> */}
+
+
+                          {/* <ScrollView>{item.user_going_list.map((avatar_item, index) => 
 
                             <View>
                               
@@ -221,13 +270,14 @@ const EventListNew = ({ mainState, navigation }) => {
                             
                           )}
                 
-                          </ScrollView>
+                          </ScrollView> */}
+
 
                         </Modal.Body>
 
-                      </Modal.Content>
+                    </Modal.Content>
 
-                    </Modal>
+                  </Modal>
                 
                                   
                   <Spacer />
@@ -941,7 +991,7 @@ const EventFormComponent = ({ mainState }) => {
               <Select.Item label="Waterfront Neighbourhood Centre" value="Waterfront Neighbourhood Centre" />
               <Select.Item label="Smithfield Park" value="Smithfield Park" />
               <Select.Item label="Kipling Parkette" value="Kipling Parkette" />
-              <Select.Item label="David Crombie Park Basketball Court" value="David Crombie Park Basketball Court" />
+              <Select.Item label="David Crombie Park" value="David Crombie Park Basketball Court" />
               <Select.Item label="Christie Pits Park" value="Christie Pits Park" />
               <Select.Item label="Underpass Park" value="Underpass Park" />
               <Select.Item label="Flagstaff Park" value="Flagstaff Park" />
