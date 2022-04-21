@@ -27,6 +27,7 @@ import NetInfo from "@react-native-community/netinfo";
     // location/login/create-event-form logic
 
   // **ENSURE THE GOOGLE CLIENT-ID ON THIS PAGE IS SET AS ENV VARIABLE BEFORE OS**
+  // **For splash-screen, include toronto** (also in appstore description)
 
   // backdrop-shadows/colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
     // re-add all the icons (deal with icon/modal issue)
@@ -85,7 +86,18 @@ const EventListNew = ({ mainState, navigation}) => {
   var internetConnected = mainState.internetConnected
 
   const [showModal, setShowModal] = useState(false);
-  
+ 
+ 
+  fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/get_events", {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => response.json()).then((responseJson) => {
+    console.log('events-list:', responseJson)
+
+  })
+
   const data = [
     {
       id: "bd7acbea-c1b1-46c2-aed5-3a123d53abb28ba",
@@ -685,7 +697,8 @@ const EventFormComponent = ({ mainState }) => {
 
   let [service, setService] = React.useState("");
 
-  const [date, setDate] = useState(new Date(1649967016478));
+  // const [date, setDate] = useState(new Date(1649967016478));
+  const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
   const [formData, setData] = React.useState({
@@ -765,16 +778,28 @@ const EventFormComponent = ({ mainState }) => {
 
     }
     
-    fetch("https://655c-2607-fea8-4360-f100-857c-c27f-4671-ec8.ngrok.io/create_event", {
+    fetch("https://323b-2607-fea8-4360-f100-bd22-95d9-3c6b-d354.ngrok.io/create_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
         'Content-Type': 'application/json'
       }
+    }).then((response) => response.json()).then((responseJson) => {
+      console.log('create-evnet-form:', responseJson)
+      if (responseJson['success'] === true ) {
+        // redirect to homepage showing event
+        var tmp_navigation = useNavigation()
+        tmp_navigation.navigate('Home')
+
+      } else{
+        setErrors({ ...errors,
+          error_msg: 'Form did not submit successfully!'
+        });
+      }
+
     })
 
   }
-
   
   return (
 
@@ -925,7 +950,7 @@ const EventFormComponent = ({ mainState }) => {
         
       {/* </Stack> */}
       
-      {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>Please fill all fields before submitting!</Text> : null}
+      {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>Form did not submit successfully. Ensure all fields are filled!</Text> : null}
       {/* <FormControl.ErrorMessage>Error</FormControl.ErrorMessage> */}
 
       <Box alignItems="center">
@@ -1038,8 +1063,8 @@ const MainScreen = ({ mainState, handler, navigation }) => {
         }}>
 
         
-        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
-        name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} /> */}
+        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
+        name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} />
 
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
         name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} />
@@ -1115,13 +1140,11 @@ export default class App extends React.Component{
     console.log('state-info:', this.state)
 
     SplashScreen.hide();
-
+    
     GoogleSignin.configure({
       webClientId:"770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
       forceCodeForRefreshToken: true,
     });
-
-    await this.getCurrentUser();
 
     NetInfo.fetch().then(state => {
       console.log("Connection type", state.type);
@@ -1129,7 +1152,8 @@ export default class App extends React.Component{
       this.setState({ internetConnected: state.isConnected })
     });
 
-
+    await this.getCurrentUser();
+    
   }
 
 
