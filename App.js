@@ -115,7 +115,7 @@ const EventListNew = ({ mainState, navigation }) => {
           item
         }) => <Box>
             
-            <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
+            <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id})}>
 
               <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="1" padding="5" mt="6" rounded="25" backgroundColor="white">
 
@@ -163,7 +163,7 @@ const EventListNew = ({ mainState, navigation }) => {
 
                   </Pressable>
 
-                  <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                  {/* <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                     <Modal.Content maxWidth="400px">
 
                       <Modal.Header>People who are Going:</Modal.Header>
@@ -190,65 +190,14 @@ const EventListNew = ({ mainState, navigation }) => {
            
                           </ScrollView>
 
-
-                          {/* <ScrollView data={item.user_going_list} renderItem={({avatar_item, index }) => {
-                            
-                            return (
-                              <View>
-                              
-                                <HStack>
-
-                                  <Avatar bg="green.500" source={{
-                                      uri: avatar_item.profile_picture
-                                    }}></Avatar>
-                                  <Text fontSize="16" fontWeight="medium" pl="2" pt="3">
-                                    {avatar_item.name}
-                                  </Text>
-
-                                </HStack>
-                                <Divider my="1" />
-
-                              </View>
-                            )
-
-                          }} /> */}
-
-
-                          {/* </ScrollView> */}
-
-
-                          {/* <ScrollView>{item.user_going_list.map((avatar_item, index) => 
-
-                            <View>
-                              
-                              <HStack>
-                                
-                                <Avatar bg="green.500" source={{
-                                  uri: avatar_item.profile_picture
-                                }}></Avatar>
-                                <Text fontSize="16" fontWeight="medium" pl="2" pt="3">
-                                  {avatar_item.name}
-                                </Text>
-
-                              </HStack>
-                              <Divider my="1" />
-
-                            </View>
-                            
-                          )}
-                
-                          </ScrollView> */}
-
-
                         </Modal.Body>
 
                     </Modal.Content>
 
-                  </Modal>
-                
+                  </Modal> */}
                                   
                   <Spacer />
-                  <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
+                  <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id})}>
                     Details
                   </Button>
 
@@ -259,174 +208,9 @@ const EventListNew = ({ mainState, navigation }) => {
 
             </Pressable>
 
-
-        </Box>
-        }>
+         </Box>}>
 
         </FlatList>
-
-
-
-        {/* <FlatList data={data} renderItem={({ 
-          item 
-        }) => <Box>
-
-          <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
-
-            <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
-
-              <HStack alignItems="center">
-
-                {item.icon_name == 'basketball'? <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />: <Icon height="26" width="26" name="football" group="miscellaneous" color="black"/> }
-                <Spacer />
-                
-                <Badge backgroundColor="#0284c7" _text={{
-                  color: "white", fontSize: "13"
-                }} variant="solid" rounded="10" >
-                  {item.park_name}
-                </Badge>
-
-              </HStack>
-              
-              <Text mt="3" fontWeight="medium" fontSize="xl">
-                {item.title}
-              </Text>
-
-              <HStack mt="0.5">
-
-                <Text ml="0.5"></Text>
-                <Icon name="calendar" group="ui-interface" color="gray" />
-                <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
-                  01/01/2022
-                </Text>
-
-                <Text ml="4"></Text>
-                <Icon ml="2" name="time" group="essential" color="gray"/>
-                <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
-                  6:00PM
-                </Text>
-
-              </HStack>
-              
-              <HStack pt="5">
-                
-                <Pressable onPress={() => setShowModal(true)}>
-
-                  <Avatar.Group size="12" max={2}>
-
-                    <Avatar bg="green.500" source={{
-                        uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                      }}>
-                    </Avatar>
-
-                    <Avatar bg="cyan.500" source={{
-                    uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-                  }}>
-                      TE
-                    </Avatar>
-                    
-                    <Avatar bg="indigo.500" source={{
-                    uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                  }}>
-                      JB
-                    </Avatar>
-                    <Avatar bg="amber.500" source={{
-                    uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-                  }}>
-                      TS
-                    </Avatar>
-                    <Avatar bg="green.500" source={{
-                    uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                  }}>
-                      AJ
-                    </Avatar>
-                    <Avatar bg="cyan.500" source={{
-                    uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-                  }}>
-                      TE
-                    </Avatar>
-                    <Avatar bg="indigo.500" source={{
-                    uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                  }}>
-                      JB
-                    </Avatar>
-                    <Avatar bg="amber.500" source={{
-                    uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-                  }}>
-                      TS
-                    </Avatar>
-                  </Avatar.Group>
-
-                </Pressable>
-
-                <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-                  <Modal.Content maxWidth="400px">
-
-                  <Modal.Header>People who are Going:</Modal.Header>
-                    <Modal.Body>
-
-                      <ScrollView>
-
-                        <Pressable>
-                          <HStack>
-                            <Avatar bg="green.500" source={{
-                              uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                            }}>
-                              AJ
-                            </Avatar>
-                            <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                          </HStack>
-                        </Pressable>
-                        <Divider my="1" />
-
-                        <Pressable>
-                          <HStack>
-                            <Avatar bg="green.500" source={{
-                              uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                            }}>
-                              AJ
-                            </Avatar>
-                            <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                          </HStack>
-                        </Pressable>
-                        <Divider my="1" />
-
-                        <Pressable >
-                          <HStack>
-                            <Avatar bg="green.500" source={{
-                              uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-                            }}>
-                              AJ
-                            </Avatar>
-                            <Text fontSize="16" fontWeight="medium" pl="2" pt="3">John Doe</Text>
-                          </HStack>
-                        </Pressable>
-                        <Divider my="1" />
-
-                      </ScrollView>
-
-                    </Modal.Body>
-
-                  </Modal.Content>
-
-                </Modal>
-                
-                <Spacer />
-                <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
-                  Details
-                </Button>
-
-              </HStack>
-
-            </Box>
-
-          </Pressable>
-
-        </Box>
-        
-        }>
-
-        </FlatList> */}
 
       </View>
 
@@ -450,11 +234,18 @@ const EventListNew = ({ mainState, navigation }) => {
 
 
 
-const ExampleEventPage = ({ route }) => {
-  console.log('example-event-page:', route)
+const EventDetailPage = ({ route }) => {
+
+  // console.log('example-event-page:', route)
+
+  const [showModal, setShowModal] = useState(false);
 
   var mainState = route.params.mainState
+  var eventID = route.params.event_id
   var userLoggedIn = mainState.userLoggedIn
+  var eventIdDict = mainState.event_id_dict[eventID]
+
+  console.log('event-id-dict:', eventIdDict)
 
   const [selected, setSelected] = React.useState(1);
   
@@ -464,98 +255,100 @@ const ExampleEventPage = ({ route }) => {
   
       <View p="8" pt="5" pb="4" backgroundColor="white">
 
-      {/* <Image shadow={2} source={{uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80" }} alt="asd Text" size="2xl" />  */}
-
         <HStack alignItems="center">
 
           <Icon name="basketball" group="miscellaneous" height="30" width="30" color="orange" />
-          {/* <Icon name="soccer-ball-outline" group="lodgicons"/> */}
           <Spacer />
 
           <Badge colorScheme="lightBlue" _text={{
             color: "white", fontSize: "13"
           }} variant="solid" rounded="10" >
-            Smithfield Park
+            {/* Smithfield Park */}
+            {eventIdDict.park_name}
           </Badge>
-
-          {/* <Text ml="1"></Text>
-          <Icon name="location" group="logistics-delivery" height="24" width="24"/>
-          <Text fontSize="13" fontWeight="medium">
-            9KM
-          </Text> */}
 
         </HStack>
 
         <Text mt="3" fontWeight="medium" fontSize="23"> 
-          Basketball Run this Friday at Smithfield
+          {/* Basketball Run this Friday at Smithfield */}
+          {eventIdDict.event_name}
         </Text>
 
         <HStack mt="2">
           <Icon name="calendar" group="ui-interface" color="gray" />
           <Text color="gray" ml="2" fontSize="15" fontWeight="medium">
-            01/01/2022
+            {/* 01/01/2022 */}
+            {eventIdDict.event_date}
           </Text>
 
           <Text ml="6"></Text>
           <Icon ml="2" name="time" group="essential" color="gray"/>
           <Text ml="1" color="gray" fontSize="15" fontWeight="medium">
-            6:00PM
+            {/* 6:00PM */}
+            {eventIdDict.event_time}
           </Text>
 
         </HStack>
 
         <Text mt="6" fontSize="16" color="black">
-          I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach. 
+          {/* I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach.  */}
+          {eventIdDict.event_description}
         </Text>
 
         <HStack pt="5">
-          
-          <Avatar.Group size="12" max={2}>
-            <Avatar bg="green.500" source={{
-            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-          }}>
-              AJ
-            </Avatar>
-            <Avatar bg="cyan.500" source={{
-            uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-          }}>
-              TE
-            </Avatar>
-            <Avatar bg="indigo.500" source={{
-            uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-          }}>
-              JB
-            </Avatar>
-            <Avatar bg="amber.500" source={{
-            uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-          }}>
-              TS
-            </Avatar>
-            <Avatar bg="green.500" source={{
-            uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-          }}>
-              AJ
-            </Avatar>
-            <Avatar bg="cyan.500" source={{
-            uri: "https://images.unsplash.com/photo-1603415526960-f7e0328c63b1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-          }}>
-              TE
-            </Avatar>
-            <Avatar bg="indigo.500" source={{
-            uri: "https://images.unsplash.com/photo-1614289371518-722f2615943d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-          }}>
-              JB
-            </Avatar>
-            <Avatar bg="amber.500" source={{
-            uri: "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
-          }}>
-              TS
-            </Avatar>
-          </Avatar.Group>
+
+          <Pressable onPress={() => setShowModal(true)}>
+
+            <Avatar.Group  max={2}>{eventIdDict.user_going_list.map((avatar_item, index) => 
+              <Avatar bg="green.500" source={{
+                  uri: avatar_item.profile_picture
+                }}></Avatar>
+              )}
+            </Avatar.Group>
+
+          </Pressable>
+
+
+          <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+            <Modal.Content maxWidth="400px">
+
+              <Modal.Header>People who are Going:</Modal.Header>
+                <Modal.Body>
+
+                  <ScrollView>{eventIdDict.user_going_list.map((avatar_item, index) => {
+                    
+                      return (
+                        <View>
+
+                          <HStack>
+
+                            <Avatar bg="green.500" source={{
+                                uri: avatar_item.profile_picture
+                              }}></Avatar>
+
+                            <Text fontSize="16" fontWeight="medium" pl="2" pt="3">
+                              {avatar_item.name}
+                            </Text>
+
+                          </HStack>
+                          <Divider my="1" />
+
+                        </View>
+                      )
+
+                    })}
+    
+                  </ScrollView>
+
+                </Modal.Body>
+
+            </Modal.Content>
+
+          </Modal>
+
 
           <Spacer />
-
-          <Button colorScheme="info">Attend</Button>
+          <Button colorScheme="info" isDisabled={!userLoggedIn}>Attend</Button>
 
         </HStack>
 
@@ -1271,7 +1064,7 @@ export default class App extends React.Component{
         'Content-Type': 'application/json'
       }
     }).then((response) => response.json()).then((responseJson) => {
-      this.setState({ all_events_list: responseJson['data'] })
+      this.setState({ all_events_list: responseJson['data'], event_id_dict: responseJson['event_id_dict'][0] })
       // console.log('events-list:', responseJson)
       // eventData = responseJson['data']
       // console.log('events-list-data:', eventData, eventData[0])
@@ -1308,8 +1101,13 @@ export default class App extends React.Component{
                 {/* {props => <MainScreen {...props} userLoggedIn={this.state.userLoggedIn}  userData={this.state.userInfo} internetConnected={this.state.internetConnected} handler={this.handler}/>} */}
                 {props => <MainScreen {...props} mainState={this.state} handler={this.handler}/>}
               </Stack.Screen>
+              
+              <Stack.Screen name="Event Detail">
+                {props => <EventDetailPage {...props} />}
+              </Stack.Screen>
 
               {/* <Stack.Screen name="Event Detail" component={ExampleEventPage}/> */}
+
 
             </Stack.Navigator>
 
