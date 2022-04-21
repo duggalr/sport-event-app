@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from "react";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
-  FormControl, Select, CheckIcon, TextArea, Modal } from "native-base";
+  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem } from "native-base";
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -23,9 +23,14 @@ import NetInfo from "@react-native-community/netinfo";
 
 
 // TODO:   
-  // start backend/frontend-functionality**
-    // location/login/create-event-form logic
+  // backend/frontend-functionality
+    // Event-List:
+      // test to ensure everything works; 
+      // experiment with some shadows and possibly different colurs for buttons/icons, etc. 
+        // then, event-detail + comments
+ 
 
+        
   // **ENSURE THE GOOGLE CLIENT-ID ON THIS PAGE IS SET AS ENV VARIABLE BEFORE OS**
   // **For splash-screen, include toronto** (also in appstore description)
 
@@ -79,56 +84,58 @@ const MainHeading = () => {
 }
 
 
-const EventListNew = ({ mainState, navigation}) => {
+const EventListNew = ({ mainState, navigation }) => {
 
   var userLoggedIn = mainState.userLoggedIn
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
 
   const [showModal, setShowModal] = useState(false);
- 
- 
-  fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/get_events", {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then((response) => response.json()).then((responseJson) => {
-    console.log('events-list:', responseJson)
 
-  })
+  // const data = [
+  //   {
+  //     id: "bd7acbea-c1b1-46c2-aed5-3a123d53abb28ba",
+  //     title: "Ball Run this Friday at Smithfield Park",
+  //     date_of_event: "01/01/2020",
+  //     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
+  //     location_distance: "9KM",
+  //     park_name: "Smithfield Park",
+  //     icon_name: "basketball"
+  //   },
+  //   {
+  //     id: "bd7acbea-c1b1-46c2-aed5-3ad222253abb28334ba",
+  //     title: "Soccer Run this Friday at Harbourfront Center, 2PM",
+  //     date_of_event: "01/01/2020",
+  //     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
+  //     location_distance: "9KM",
+  //     park_name: "Harbbourfront Center",
+  //     icon_name: "soccer"
+  //   },
+  //   {
+  //     id: "bd7acbea-c1b1-46c2-aed5-3ad53adadadaabb28334ba",
+  //     title: "Ball Run, Wednesday evening at Christie Pits Park",
+  //     date_of_event: "01/01/2020",
+  //     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
+  //     location_distance: "9KM",
+  //     park_name: "Christie Pits Park",
+  //     icon_name: "basketball"
+  //   },
+  // ]
 
-  const data = [
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3a123d53abb28ba",
-      title: "Ball Run this Friday at Smithfield Park",
-      date_of_event: "01/01/2020",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
-      location_distance: "9KM",
-      park_name: "Smithfield Park",
-      icon_name: "basketball"
-    },
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3ad222253abb28334ba",
-      title: "Soccer Run this Friday at Harbourfront Center, 2PM",
-      date_of_event: "01/01/2020",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
-      location_distance: "9KM",
-      park_name: "Harbbourfront Center",
-      icon_name: "soccer"
-    },
-    {
-      id: "bd7acbea-c1b1-46c2-aed5-3ad53adadadaabb28334ba",
-      title: "Ball Run, Wednesday evening at Christie Pits Park",
-      date_of_event: "01/01/2020",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
-      location_distance: "9KM",
-      park_name: "Christie Pits Park",
-      icon_name: "basketball"
-    },
-  ]
 
-  
+
+  // var eventData = [{"event_date": "2022-04-29", "event_id": 1, "event_name": "Jshshsu", "event_time": "5:00PM", "park_address": "42 Mercury Rd, Etobicoke, ON", "park_name": "Flagstaff Park", "user_going_list": [{"name": "Rahul Duggal", "profile_picture": "https://lh3.googleusercontent.com/a/AATXAJwFjGR2J-5lAvvx633F9BwuA4W7kX1u0sbm-T65=s96-c", "ug_id": 1}]}]
+
+  // {"data": [{
+  //   "event_date": "2022-04-29", 
+  //   "event_name": "Jshshsu", 
+  //   "event_time": "17:00:00",
+  //   "park_address": "42 Mercury Rd, Etobicoke, ON", 
+  //   "park_name": "Flagstaff Park", 
+  //   "user_going_list": [Array]}]}
+
+  var eventData = mainState.all_events_list
+
   if (internetConnected){
 
     return (
@@ -137,7 +144,113 @@ const EventListNew = ({ mainState, navigation}) => {
 
         <MainHeading />
 
-        <FlatList data={data} renderItem={({ 
+        <FlatList data={eventData} renderItem={({
+          item
+        }) => <Box>
+            
+            <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
+
+              <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
+
+                <HStack alignItems="center">
+
+                  <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />
+                  <Spacer />
+                  <Badge backgroundColor="#0284c7" _text={{color: "white", fontSize: "13"}} variant="solid" rounded="10">
+                    {item.park_name}
+                  </Badge>
+
+                </HStack>                
+
+                <Text mt="3" fontWeight="medium" fontSize="xl">
+                  {item.event_name}
+                </Text>
+
+                <HStack mt="0.5">
+
+                  <Text ml="0.5"></Text>
+                  <Icon name="calendar" group="ui-interface" color="gray" />
+                  <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
+                    {item.event_date}
+                  </Text>
+
+                  <Text ml="4"></Text>
+                  <Icon ml="2" name="time" group="essential" color="gray"/>
+                  <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
+                    {item.event_time}
+                  </Text>
+
+                </HStack>
+
+                <HStack pt="5">
+                  
+                  <Pressable onPress={() => setShowModal(true)}>
+
+                    <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
+                      <Avatar bg="green.500" source={{
+                          uri: avatar_item.profile_picture
+                        }}></Avatar>
+                      )}
+                    </Avatar.Group>
+
+                  </Pressable>
+
+                  <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                    <Modal.Content maxWidth="400px">
+
+                      <Modal.Header>People who are Going:</Modal.Header>
+                        <Modal.Body>
+
+                          <ScrollView>{item.user_going_list.map((avatar_item, index) => 
+
+                            <View>
+                              
+                              <HStack>
+                                
+                                <Avatar bg="green.500" source={{
+                                  uri: avatar_item.profile_picture
+                                }}></Avatar>
+                                <Text fontSize="16" fontWeight="medium" pl="2" pt="3">
+                                  {avatar_item.name}
+                                </Text>
+
+                              </HStack>
+                              <Divider my="1" />
+
+                            </View>
+                            
+                          )}
+                
+                          </ScrollView>
+
+                        </Modal.Body>
+
+                      </Modal.Content>
+
+                    </Modal>
+                
+                                  
+                  <Spacer />
+                  <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
+                    Details
+                  </Button>
+
+                </HStack>
+
+                
+              </Box>
+
+            </Pressable>
+
+
+        </Box>
+        }>
+
+        </FlatList>
+
+
+
+        {/* <FlatList data={data} renderItem={({ 
           item 
         }) => <Box>
 
@@ -155,30 +268,12 @@ const EventListNew = ({ mainState, navigation}) => {
                 }} variant="solid" rounded="10" >
                   {item.park_name}
                 </Badge>
-              
-                {/* <Text ml="1"></Text>
-                <Icon name="location" group="logistics-delivery" height="24" width="24"/>
-                <Text fontSize="13" fontWeight="medium">
-                  {item.location_distance}
-                </Text> */}
 
               </HStack>
               
               <Text mt="3" fontWeight="medium" fontSize="xl">
                 {item.title}
               </Text>
-              
-              {/* <HStack>
-                <Icon name="basketball" group="miscellaneous" />
-                <Text color="coolGray.800" mt="0" fontWeight="medium" fontSize="xl">
-                  {item.title}            
-                </Text>
-                <Image shadow={2} source={{uri: "http://clipart-library.com/newimages/basketball-clip-art-1.jpg" }} alt="asd Text" size="sm" /> 
-              </HStack> */}
-              
-              {/* <Text mt="2" fontSize="sm" color="coolGray.700">
-                Lorem ipsum dolor sit amet, consectetur asd...
-              </Text> */}
 
               <HStack mt="0.5">
 
@@ -190,7 +285,6 @@ const EventListNew = ({ mainState, navigation}) => {
 
                 <Text ml="4"></Text>
                 <Icon ml="2" name="time" group="essential" color="gray"/>
-                {/* <Text ml="1" color="gray.500"> */}
                 <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
                   6:00PM
                 </Text>
@@ -301,7 +395,6 @@ const EventListNew = ({ mainState, navigation}) => {
                 </Modal>
                 
                 <Spacer />
-                {/* <Button variant="outline">Going?</Button> */}
                 <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
                   Details
                 </Button>
@@ -316,7 +409,7 @@ const EventListNew = ({ mainState, navigation}) => {
         
         }>
 
-        </FlatList>
+        </FlatList> */}
 
       </View>
 
@@ -1097,6 +1190,7 @@ export default class App extends React.Component{
       internetConnected: false,
       userLoggedIn: false,
       userInfo: undefined,
+      all_events_list: []
     };
 
     this.handler = this.handler.bind(this)
@@ -1153,6 +1247,20 @@ export default class App extends React.Component{
     });
 
     await this.getCurrentUser();
+
+    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/get_events", {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => response.json()).then((responseJson) => {
+      this.setState({ all_events_list: responseJson['data'] })
+      // console.log('events-list:', responseJson)
+      // eventData = responseJson['data']
+      // console.log('events-list-data:', eventData, eventData[0])
+      // this.setState({ all_events_list: eventData })
+
+    })
     
   }
 
