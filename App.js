@@ -92,40 +92,7 @@ const EventListNew = ({ mainState, navigation }) => {
 
   const [showModal, setShowModal] = useState(false);
 
-  // const data = [
-  //   {
-  //     id: "bd7acbea-c1b1-46c2-aed5-3a123d53abb28ba",
-  //     title: "Ball Run this Friday at Smithfield Park",
-  //     date_of_event: "01/01/2020",
-  //     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
-  //     location_distance: "9KM",
-  //     park_name: "Smithfield Park",
-  //     icon_name: "basketball"
-  //   },
-  //   {
-  //     id: "bd7acbea-c1b1-46c2-aed5-3ad222253abb28334ba",
-  //     title: "Soccer Run this Friday at Harbourfront Center, 2PM",
-  //     date_of_event: "01/01/2020",
-  //     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
-  //     location_distance: "9KM",
-  //     park_name: "Harbbourfront Center",
-  //     icon_name: "soccer"
-  //   },
-  //   {
-  //     id: "bd7acbea-c1b1-46c2-aed5-3ad53adadadaabb28334ba",
-  //     title: "Ball Run, Wednesday evening at Christie Pits Park",
-  //     date_of_event: "01/01/2020",
-  //     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi facilisis pharetra ligula et tincidunt. Nam egestas, arcu eu euismod mollis, nisl dui pretium enim, porttitor congue erat tortor nec massa. Nulla facilisi.",
-  //     location_distance: "9KM",
-  //     park_name: "Christie Pits Park",
-  //     icon_name: "basketball"
-  //   },
-  // ]
-
-
-
   // var eventData = [{"event_date": "2022-04-29", "event_id": 1, "event_name": "Jshshsu", "event_time": "5:00PM", "park_address": "42 Mercury Rd, Etobicoke, ON", "park_name": "Flagstaff Park", "user_going_list": [{"name": "Rahul Duggal", "profile_picture": "https://lh3.googleusercontent.com/a/AATXAJwFjGR2J-5lAvvx633F9BwuA4W7kX1u0sbm-T65=s96-c", "ug_id": 1}]}]
-
   // {"data": [{
   //   "event_date": "2022-04-29", 
   //   "event_name": "Jshshsu", 
@@ -150,7 +117,7 @@ const EventListNew = ({ mainState, navigation }) => {
             
             <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState})}>
 
-              <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="0" padding="5" mt="6" rounded="25" backgroundColor="white">
+              <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="1" padding="5" mt="6" rounded="25" backgroundColor="white">
 
                 <HStack alignItems="center">
 
@@ -184,8 +151,8 @@ const EventListNew = ({ mainState, navigation }) => {
 
                 <HStack pt="5">
                   
-                  <Pressable onPress={() => setShowModal(true)}>
-                  {/* <Pressable> */}
+                  {/* <Pressable onPress={() => setShowModal(true)}> */}
+                  <Pressable>
 
                     <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
                       <Avatar bg="green.500" source={{
