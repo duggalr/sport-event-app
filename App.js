@@ -597,8 +597,9 @@ const ExampleEventPage = ({ route }) => {
 
 
 function saveUserProfileDetails(userData){
-  
-  return fetch("https://abdc-2607-fea8-4360-f100-8905-6fd6-70f5-587d.ngrok.io/auth_signup", {
+
+  // TODO: run this and ensure it works <-- on error, display alert
+  return fetch("https://f9b9-2607-fea8-4360-f100-a4de-5088-8823-ec9a.ngrok.io/auth_signup", {
     method: 'POST',
     body: JSON.stringify(userData),
     headers: {
@@ -611,35 +612,54 @@ function saveUserProfileDetails(userData){
   
 
 async function google_sign_in(user_state_cb) {
+  console.log('cb-function:', user_state_cb)
+
 
     try {      
-      await GoogleSignin.hasPlayServices()
-      const userInfo = await GoogleSignin.signIn()
-      console.log('user-info:', userInfo)
-      
-      // TODO: on authRes success, then get the user-token-data, set the 3 states and have user see event-form/settings
-        // important: 
-          // if error on django's side for saving user-profile, signout user in this app as user is not an 'official-user' in our app
 
-      saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
-        console.log('JSON-response:', responseJson)
-        
-        if (responseJson['success'] === true ) { // user has been created in backend
-          const tokenData = GoogleSignin.getTokens().then((tokRes) => tokRes.json()).then((tokRes) => {
-            console.log('google-token-data:', tokenData)
-            var idTok = tokenData['idToken']
-            var accessTok = tokenData['accessToken']
-            var di = {'access_token': accessTok, 'id_token': idTok}
-            user_state_cb(di)
-          })
-          
-        } else {  // user does not exist in our app so 'successful-login' should be removed
-          GoogleSignin.revokeAccess(),then(() => {
-            GoogleSignin.signOut()
-          })
-        }
-
+      GoogleSignin.getTokens().then((tokRes) => {
+        console.log('GOOGLE TOKEN-DATA:', tokRes)
+        var idTok = tokRes['idToken']
+        var accessTok = tokRes['accessToken']
+        var di = {'access_token': accessTok, 'id_token': idTok}
+        user_state_cb(di)
       })
+
+      // // TODO: on authRes success, then get the user-token-data, set the 3 states and have user see event-form/settings
+      // //   important: 
+      // //     if error on django's side for saving user-profile, signout user in this app as user is not an 'official-user' in our app
+
+      // await GoogleSignin.hasPlayServices()
+      // const userInfo = await GoogleSignin.signIn()
+      // console.log('user-info:', userInfo)
+
+      // saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
+      //   console.log('JSON-response:', responseJson)
+        
+      //   if (responseJson['success'] === true ) { // user has been created in backend
+      //     // const tokenData = GoogleSignin.getTokens().then((tokRes) => tokRes.json()).then((tokRes) => {
+      //     //   console.log('google-token-data:', tokenData)
+      //     //   var idTok = tokenData['idToken']
+      //     //   var accessTok = tokenData['accessToken']
+      //     //   var di = {'access_token': accessTok, 'id_token': idTok}
+      //     //   user_state_cb(di)
+      //     // })
+      //     GoogleSignin.getTokens().then((tokRes) => {
+      //       console.log('GOOGLE TOKEN-DATA:', tokRes)
+      //       var idTok = tokRes['idToken']
+      //       var accessTok = tokRes['accessToken']
+      //       var di = {'access_token': accessTok, 'id_token': idTok}
+      //       user_state_cb(di)
+      //     })
+
+          
+      //   } else {  // user does not exist in our app so 'successful-login' should be removed
+      //     GoogleSignin.revokeAccess(),then(() => {
+      //       GoogleSignin.signOut()
+      //     })
+      //   }
+
+      // })
 
     } 
     catch(error) {  // TODO: what to do with error? <-- post error saying login unsuccessful
@@ -661,18 +681,30 @@ async function google_sign_in(user_state_cb) {
 
 
 // TODO: ensure user-id and other user-based information is passed to validate form (ie. double-check on postman/mitmproxy)
-const EventFormComponent = ({ userData }) => {
+const EventFormComponent = ({ mainState }) => {
 
   let [service, setService] = React.useState("");
 
   const [date, setDate] = useState(new Date(1649967016478));
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
+  const [formData, setData] = React.useState({
+    event_title: '', 
+    event_description: '',
+    park_name: '',
+    event_date: '',
+    event_time: ''
+  });
+  const [errors, setErrors] = React.useState({});
 
-  const onChange = (event, selectedDate) => {
+  const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate;
     setShow(false);
     setDate(currentDate);
+    setData({ ...formData,
+      event_date: currentDate
+    })
+
   };
 
   const showMode = (currentMode) => {
@@ -684,7 +716,66 @@ const EventFormComponent = ({ userData }) => {
     showMode('date');
   };
 
+  const parkValueChange = (value) => {
+    console.log('select-val:', value)
+    setData({ ...formData,
+      park_name: value
+    })
+    setService(value)
+  }
 
+  const timeValueChange = (value) => {
+    console.log('select-val:', value)
+    setData({ ...formData,
+      event_time: value
+    })
+    setService(value)
+  }
+
+  const validate = () => {
+    if (formData.name === undefined) {
+      setErrors({ ...errors,
+        name: 'Name is required'
+      });
+      return false;
+    } else if (formData.name.length < 3) {
+      setErrors({ ...errors,
+        name: 'Name is too short'
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+
+  const onEventFormSubmit = () => {
+    setErrors({});
+
+    var userData = mainState.userInfo
+    var user_access_token = userData['access_token']
+    formData['access_token'] = user_access_token
+    console.log('new-form-data', formData)
+
+    if (formData['event_title'] === "" || formData['event_description'] === "" || formData['park_name'] === "" | formData['event_date'] === "" | formData['event_time'] === ""){
+      setErrors({ ...errors,
+        error_msg: 'Please fill all fields before submitting!'
+      });
+      return false;
+
+    }
+    
+    fetch("https://655c-2607-fea8-4360-f100-857c-c27f-4671-ec8.ngrok.io/create_event", {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+  }
+
+  
   return (
 
     <ScrollView w="100%" backgroundColor="white">
@@ -704,33 +795,58 @@ const EventFormComponent = ({ userData }) => {
       <VStack p="5">
 
         <Box pt="2" >
-          <FormControl>
+          <FormControl isRequired>
             <FormControl.Label>
-              <Text fontSize="16" fontWeight="medium">
+              <Text fontSize="16" fontWeight="medium" >
                 Title
               </Text>
             </FormControl.Label>
-            <Input placeholder="ie. Ball Run this Friday at 6PM at Smithfield Park" w="80"/>
+            <Input placeholder="ie. Ball Run this Friday at 6PM at Smithfield Park" w="80" onChangeText={value => setData({ ...formData,
+        event_title: value
+      })}/>
           </FormControl>
         </Box>
 
-        {/* <Box w="3/4" maxW="300"> */}
         <Box pt="4">
-          <FormControl>
+          <FormControl isRequired>
             <FormControl.Label>
               <Text fontSize="16" fontWeight="medium">
-                Activity Type 
+                Choose a Park
               </Text>
             </FormControl.Label>
-            <Select selectedValue={service} minWidth="200" accessibilityLabel="Type of Activity" placeholder="Type of Activity" _selectedItem={{
-            bg: "teal.600",
-            endIcon: <CheckIcon size="5" />
-          }} mt={1} onValueChange={itemValue => setService(itemValue)}>
-              <Select.Item label="Basketball" value="basketball" />
-              <Select.Item label="Soccer" value="soccer" />
+
+            <Select selectedValue={service} minWidth="200" accessibilityLabel="Park Name" placeholder="Park Name" _selectedItem={{
+                bg: "teal.600",
+                endIcon: <CheckIcon size="5"/>
+              }} mt={1} onValueChange={itemValue => parkValueChange(itemValue)}>
+              
+              <Select.Item label="Waterfront Neighbourhood Centre" value="Waterfront Neighbourhood Centre" />
+              <Select.Item label="Smithfield Park" value="Smithfield Park" />
+              <Select.Item label="Kipling Parkette" value="Kipling Parkette" />
+              <Select.Item label="David Crombie Park Basketball Court" value="David Crombie Park Basketball Court" />
+              <Select.Item label="Christie Pits Park" value="Christie Pits Park" />
+              <Select.Item label="Underpass Park" value="Underpass Park" />
+              <Select.Item label="Flagstaff Park" value="Flagstaff Park" />
+              <Select.Item label="Indian Line Park" value="Indian Line Park" />
+              <Select.Item label="Summerlea Park" value="Summerlea Park" />
+              <Select.Item label="Firgrove Park" value="Firgrove Park" />
+              <Select.Item label="Irving W. Chapley Park" value="Irving W. Chapley Park" />
+              <Select.Item label="McNicoll Park" value="McNicoll Park" />
+              <Select.Item label="Sanwood Park" value="Sanwood Park" />
+              <Select.Item label="Confederation Park" value="Confederation Park" />
+              <Select.Item label="MacGregor Playground" value="MacGregor Playground" />
+              <Select.Item label="Jack Goodlad Park" value="Jack Goodlad Park" />
+              <Select.Item label="Ramsden Park" value="Ramsden Park" />
+              <Select.Item label="Earlscourt Park" value="Earlscourt Park" />
+              <Select.Item label="Ourland Park" value="Ourland Park" />
+              <Select.Item label="Paul Coffey Park" value="Paul Coffey Park" />
+              <Select.Item label="Regent Park Athletic Grounds" value="Regent Park Athletic Grounds" />
+
             </Select>
+
           </FormControl>
         </Box>
+
 
         <View pt="4">
           <HStack>
@@ -754,15 +870,16 @@ const EventFormComponent = ({ userData }) => {
               value={date}
               mode={mode}
               is24Hour={true}
-              onChange={onChange}
+              onChange={onDateChange}
             />
           )}
 
         </View>
+
    
         <Box pt="4">
 
-          <FormControl>
+          <FormControl isRequired>
 
             <FormControl.Label>
               <Text fontSize="16" fontWeight="medium">
@@ -773,7 +890,7 @@ const EventFormComponent = ({ userData }) => {
             <Select selectedValue={service}  accessibilityLabel="Choose Time" placeholder="Choose Time" _selectedItem={{
               bg: "teal.600",
               endIcon: <CheckIcon size="5" />
-            }} mt={1} onValueChange={itemValue => setService(itemValue)}>
+            }} mt={1} onValueChange={itemValue => timeValueChange(itemValue)}>
               <Select.Item label="12:00PM" value="12:00" />
               <Select.Item label="1:00PM" value="1:00" />
               <Select.Item label="2:00PM" value="2:00" />
@@ -785,10 +902,6 @@ const EventFormComponent = ({ userData }) => {
               <Select.Item label="8:00PM" value="8:00" />
               <Select.Item label="9:00PM" value="9:00" />
             </Select>
-
-            {/* <FormControl.HelperText>
-              this is an approximate time on when you plan on coming.
-            </FormControl.HelperText> */}
             
           </FormControl>
     
@@ -802,7 +915,8 @@ const EventFormComponent = ({ userData }) => {
               Description
             </Text>
           </FormControl.Label>
-          <TextArea h={20} placeholder="ie. looking to play a 5v5 friday. Any skill-level is fine... I'll bring some water for everyone" />
+          <TextArea h={20} placeholder="ie. looking to play a 5v5 friday. Any skill-level is fine... I'll bring some water for everyone"
+           onChangeText={value => setData({ ...formData, event_description: value})}/>
         </FormControl>
         
         {/* </Box>; */}
@@ -811,8 +925,11 @@ const EventFormComponent = ({ userData }) => {
         
       {/* </Stack> */}
       
+      {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>Please fill all fields before submitting!</Text> : null}
+      {/* <FormControl.ErrorMessage>Error</FormControl.ErrorMessage> */}
+
       <Box alignItems="center">
-        <Button w="1/2">Create Event</Button>
+        <Button w="1/2" onPress={onEventFormSubmit}>Create Event</Button>
       </Box>
       
 
@@ -851,8 +968,6 @@ const UserLoginComponent = ({handler}) => {
 
       </HStack>
 
-      
-
     </View>
 
   )
@@ -860,13 +975,14 @@ const UserLoginComponent = ({handler}) => {
 }
 
 
-const CreateEventPage = ({ userData, handler }) => {
+const CreateEventPage = ({ mainState, handler }) => {
 
-  // return <EventFormComponent userData={userData} />
+  // return <EventFormComponent mainState={mainState} />
 
-  // if user is logged-in, render-form, else, render login-screen
-  if (typeof userData !== "undefined"){
-    return <EventFormComponent userData={userData} />
+  var userLoggedIn = mainState.userLoggedIn
+
+  if (userLoggedIn){
+    return <EventFormComponent mainState={mainState} />
   } else { 
     return <UserLoginComponent handler={handler} />
   }
@@ -926,7 +1042,7 @@ const MainScreen = ({ mainState, handler, navigation }) => {
         name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} /> */}
 
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
-        name="Create Event" children={()=><CreateEventPage mainState={mainState} navigation={navigation}/>} />
+        name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} />
         
         {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
         name="Settings" children={()=><ExampleSettings mainState={mainState} navigation={navigation} handler={handler}/>} /> */}
@@ -976,17 +1092,21 @@ export default class App extends React.Component{
   async getCurrentUser() {
     try {
       const userInfo = await GoogleSignin.signInSilently();
-      console.log('silent-current-user-info:', userInfo)
+      const userAccessTokens = await GoogleSignin.getTokens()
+      var di = {'access_token': userAccessTokens['accessToken'], 'id_token': userAccessTokens['idToken']}
 
       this.setState({ 
-        userInfo: userInfo,
-        userLoggedIn: true
+        userLoggedIn: true,
+        userInfo: di
       })
+
     } catch (error) {
+
       this.setState({ 
         userInfo: undefined, 
         userLoggedIn: false
       })
+
     }
   }
 
@@ -1009,11 +1129,13 @@ export default class App extends React.Component{
       this.setState({ internetConnected: state.isConnected })
     });
 
+
   }
 
 
   componentDidUpdate(){
-    console.log('STATE HAS UPDATED:', this.state)
+    // console.log('STATE HAS UPDATED:', this.state)
+    
   }
  
   render() {
@@ -1038,7 +1160,7 @@ export default class App extends React.Component{
                 {props => <MainScreen {...props} mainState={this.state} handler={this.handler}/>}
               </Stack.Screen>
 
-              <Stack.Screen name="Event Detail" component={ExampleEventPage}/>
+              {/* <Stack.Screen name="Event Detail" component={ExampleEventPage}/> */}
 
             </Stack.Navigator>
 
