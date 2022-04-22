@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
   FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem } from "native-base";
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, useNavigation, useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-ico';
@@ -65,9 +65,9 @@ const MainHeading = () => {
       <Spacer />
 
       <Pressable onPress={() => tmp_navigation.navigate('Settings')}>
-        {/* <Icon name="user-shape" group="font-awesome" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
         <Icon name="settings" group="ui-interface" style={{ marginTop: 2, marginRight: 12}} height="28" width="28"/>
       </Pressable>
+        {/* <Icon name="user-shape" group="font-awesome" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
       
       
       {/* <Icon name="user-1" group="ui-interface" /> */}
@@ -84,11 +84,20 @@ const MainHeading = () => {
 }
 
 
-const EventListNew = ({ mainState, navigation }) => {
+const EventListNew = ({ mainState, handler, navigation }) => {
+
+  // const isFocused = useIsFocused();
+  // useEffect(() => {
+  //   console.log('is-focused')
+  //   handler({'event_list_refresh': true})
+  // }, [isFocused]);
 
   var userLoggedIn = mainState.userLoggedIn
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
+
+  var userEventGoingList = mainState.user_event_going_list
+  var userCreatedEventList = mainState.user_created_event_list
 
   const [showModal, setShowModal] = useState(false);
 
@@ -113,9 +122,9 @@ const EventListNew = ({ mainState, navigation }) => {
 
         <FlatList data={eventData} renderItem={({
           item
-        }) => <Box>
+        }) => <Box key={item.event_id}>
             
-            <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id})}>
+            <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id, state_handler: handler})}>
 
               <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="1" padding="5" mt="6" rounded="25" backgroundColor="white">
 
@@ -197,9 +206,13 @@ const EventListNew = ({ mainState, navigation }) => {
                   </Modal> */}
                                   
                   <Spacer />
-                  <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id})}>
+                  { userEventGoingList.includes(item.event_id) ?  
+                    <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
+                      Your Going
+                    </Badge> : <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id})}>
                     Details
                   </Button>
+                  }                                  
 
                 </HStack>
 
@@ -237,17 +250,63 @@ const EventListNew = ({ mainState, navigation }) => {
 const EventDetailPage = ({ route }) => {
 
   // console.log('example-event-page:', route)
+  var tmp_navigation = useNavigation();
 
   const [showModal, setShowModal] = useState(false);
 
   var mainState = route.params.mainState
   var eventID = route.params.event_id
+  var userInfo = mainState.userInfo
   var userLoggedIn = mainState.userLoggedIn
   var eventIdDict = mainState.event_id_dict[eventID]
+  var cb_handler = route.params.state_handler
 
-  console.log('event-id-dict:', eventIdDict)
+  var userEventGoingList = mainState.user_event_going_list
+  var userCreatedEventList = mainState.user_created_event_list
+
+  console.log('event-id-dict:', userEventGoingList)
 
   const [selected, setSelected] = React.useState(1);
+  
+
+  function saveUserAttend() {
+    var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
+    
+    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/user_attending_event", {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => response.json()).then((responseJson) => {
+      console.log('save-user-attend:', responseJson)
+      // TODO: 
+        // need to mark-state for this event that user is not going or user is going
+          // show not-going-button and going-button
+
+    })
+
+  }
+
+  function deleteEvent(){
+    var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
+
+    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/delete_event", {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => response.json()).then((responseJson) => {
+      console.log('delete-event:', responseJson)
+      cb_handler({'event_list_refresh': true})
+      tmp_navigation.navigate('MainEventList')
+
+    })
+
+
+  }
+
   
   return (
 
@@ -300,7 +359,7 @@ const EventDetailPage = ({ route }) => {
           <Pressable onPress={() => setShowModal(true)}>
 
             <Avatar.Group  max={2}>{eventIdDict.user_going_list.map((avatar_item, index) => 
-              <Avatar bg="green.500" source={{
+              <Avatar key={avatar_item.ug_id} bg="green.500" source={{
                   uri: avatar_item.profile_picture
                 }}></Avatar>
               )}
@@ -318,7 +377,7 @@ const EventDetailPage = ({ route }) => {
                   <ScrollView>{eventIdDict.user_going_list.map((avatar_item, index) => {
                     
                       return (
-                        <View>
+                        <View key={avatar_item.ug_id}>
 
                           <HStack>
 
@@ -348,7 +407,15 @@ const EventDetailPage = ({ route }) => {
 
 
           <Spacer />
-          <Button colorScheme="info" isDisabled={!userLoggedIn}>Attend</Button>
+          { userEventGoingList.includes(eventID) ?  
+            <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
+              Your Going
+            </Badge> : <Button colorScheme="info" isDisabled={!userLoggedIn} onPress={() => saveUserAttend()}>Attend</Button>
+          }
+
+          <Spacer />
+          { userCreatedEventList.includes(eventID) ?  <Button onPress={() => deleteEvent()}>Delete</Button> : null}
+            
 
         </HStack>
 
@@ -494,7 +561,7 @@ const EventDetailPage = ({ route }) => {
 
         <Box backgroundColor="white"pb="5" pt="1" pl="4">
           <HStack>
-            <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" placeholder="got something to say?" isDisabled={!userLoggedIn}/>
+            <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" placeholder="say what's on your mind..." isDisabled={!userLoggedIn}/>
             <Text pl="1"></Text>
             <Button height="12" width="12" isDisabled={!userLoggedIn}>
               <Icon name="send-button" group="material-design" height="25" width="25" color="white" />
@@ -514,7 +581,7 @@ const EventDetailPage = ({ route }) => {
 function saveUserProfileDetails(userData){
 
   // TODO: run this and ensure it works <-- on error, display alert
-  return fetch("https://f9b9-2607-fea8-4360-f100-a4de-5088-8823-ec9a.ngrok.io/auth_signup", {
+  return fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/auth_signup", {
     method: 'POST',
     body: JSON.stringify(userData),
     headers: {
@@ -529,52 +596,55 @@ function saveUserProfileDetails(userData){
 async function google_sign_in(user_state_cb) {
   console.log('cb-function:', user_state_cb)
 
+  // var final_di = {'userInfo': 'testing_one', 'userLoggedIn': false}
+  // user_state_cb(final_di)
 
     try {      
 
-      GoogleSignin.getTokens().then((tokRes) => {
-        console.log('GOOGLE TOKEN-DATA:', tokRes)
-        var idTok = tokRes['idToken']
-        var accessTok = tokRes['accessToken']
-        var di = {'access_token': accessTok, 'id_token': idTok}
-        user_state_cb(di)
-      })
+      // // GoogleSignin.getTokens().then((tokRes) => {
+      // //   console.log('GOOGLE TOKEN-DATA:', tokRes)
+      // //   var idTok = tokRes['idToken']
+      // //   var accessTok = tokRes['accessToken']
+      // //   var user_info_di = {'access_token': accessTok, 'id_token': idTok}
+      // //   var user_logged_in = true
+      // //   var final_di = {'userInfo': user_info_di, 'userLoggedIn': user_logged_in}
+      // //   user_state_cb(final_di)
+      // // })
 
-      // // TODO: on authRes success, then get the user-token-data, set the 3 states and have user see event-form/settings
-      // //   important: 
-      // //     if error on django's side for saving user-profile, signout user in this app as user is not an 'official-user' in our app
+      // // // TODO: on authRes success, then get the user-token-data, set the 3 states and have user see event-form/settings
+      // // //   important: 
+      // // //     if error on django's side for saving user-profile, signout user in this app as user is not an 'official-user' in our app
 
-      // await GoogleSignin.hasPlayServices()
-      // const userInfo = await GoogleSignin.signIn()
-      // console.log('user-info:', userInfo)
+      await GoogleSignin.hasPlayServices()
+      const userInfo = await GoogleSignin.signIn()
+      console.log('user-info:', userInfo)
 
-      // saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
-      //   console.log('JSON-response:', responseJson)
+      saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
+        console.log('JSON-response:', responseJson)
         
-      //   if (responseJson['success'] === true ) { // user has been created in backend
-      //     // const tokenData = GoogleSignin.getTokens().then((tokRes) => tokRes.json()).then((tokRes) => {
-      //     //   console.log('google-token-data:', tokenData)
-      //     //   var idTok = tokenData['idToken']
-      //     //   var accessTok = tokenData['accessToken']
-      //     //   var di = {'access_token': accessTok, 'id_token': idTok}
-      //     //   user_state_cb(di)
-      //     // })
-      //     GoogleSignin.getTokens().then((tokRes) => {
-      //       console.log('GOOGLE TOKEN-DATA:', tokRes)
-      //       var idTok = tokRes['idToken']
-      //       var accessTok = tokRes['accessToken']
-      //       var di = {'access_token': accessTok, 'id_token': idTok}
-      //       user_state_cb(di)
-      //     })
+        if (responseJson['success'] === true ) { // user has been created in backend
+          // const tokenData = GoogleSignin.getTokens().then((tokRes) => tokRes.json()).then((tokRes) => {
+          //   console.log('google-token-data:', tokenData)
+          //   var idTok = tokenData['idToken']
+          //   var accessTok = tokenData['accessToken']
+          //   var di = {'access_token': accessTok, 'id_token': idTok}
+          //   user_state_cb(di)
+          // })
+          GoogleSignin.getTokens().then((tokRes) => {
+            console.log('GOOGLE TOKEN-DATA:', tokRes)
+            var idTok = tokRes['idToken']
+            var accessTok = tokRes['accessToken']
+            var di = {'userInfo': {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
+            user_state_cb(di)
+          })
 
-          
-      //   } else {  // user does not exist in our app so 'successful-login' should be removed
-      //     GoogleSignin.revokeAccess(),then(() => {
-      //       GoogleSignin.signOut()
-      //     })
-      //   }
+        } else {  // user does not exist in our app so 'successful-login' should be removed
+          GoogleSignin.revokeAccess(),then(() => {
+            GoogleSignin.signOut()
+          })
+        }
 
-      // })
+      })
 
     } 
     catch(error) {  // TODO: what to do with error? <-- post error saying login unsuccessful
@@ -590,15 +660,19 @@ async function google_sign_in(user_state_cb) {
         // some other error happened
       }
     }
+
   
 }
 
 
 
 // TODO: ensure user-id and other user-based information is passed to validate form (ie. double-check on postman/mitmproxy)
-const EventFormComponent = ({ mainState }) => {
+const EventFormComponent = ({ mainState, handler }) => {
 
-  let [service, setService] = React.useState("");
+  var tmp_navigation = useNavigation();
+
+  let [parkVal, setParkVal] = React.useState("");
+  let [timeVal, setTimeVal] = React.useState("");
 
   // const [date, setDate] = useState(new Date(1649967016478));
   const [date, setDate] = useState(new Date());
@@ -608,7 +682,7 @@ const EventFormComponent = ({ mainState }) => {
     event_title: '', 
     event_description: '',
     park_name: '',
-    event_date: '',
+    event_date: new Date(),
     event_time: ''
   });
   const [errors, setErrors] = React.useState({});
@@ -637,7 +711,7 @@ const EventFormComponent = ({ mainState }) => {
     setData({ ...formData,
       park_name: value
     })
-    setService(value)
+    setParkVal(value)
   }
 
   const timeValueChange = (value) => {
@@ -645,26 +719,10 @@ const EventFormComponent = ({ mainState }) => {
     setData({ ...formData,
       event_time: value
     })
-    setService(value)
+    setTimeVal(value)
   }
 
-  const validate = () => {
-    if (formData.name === undefined) {
-      setErrors({ ...errors,
-        name: 'Name is required'
-      });
-      return false;
-    } else if (formData.name.length < 3) {
-      setErrors({ ...errors,
-        name: 'Name is too short'
-      });
-      return false;
-    }
-
-    return true;
-  };
-
-
+ 
   const onEventFormSubmit = () => {
     setErrors({});
 
@@ -681,7 +739,7 @@ const EventFormComponent = ({ mainState }) => {
 
     }
     
-    fetch("https://323b-2607-fea8-4360-f100-bd22-95d9-3c6b-d354.ngrok.io/create_event", {
+    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/create_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
@@ -690,9 +748,12 @@ const EventFormComponent = ({ mainState }) => {
     }).then((response) => response.json()).then((responseJson) => {
       console.log('create-evnet-form:', responseJson)
       if (responseJson['success'] === true ) {
+        
         // redirect to homepage showing event
-        var tmp_navigation = useNavigation()
-        tmp_navigation.navigate('Home')
+        // handler({'event_submitted': true})
+        handler({'event_list_refresh': true})
+        tmp_navigation.navigate('MainEventList')
+        
 
       } else{
         setErrors({ ...errors,
@@ -743,7 +804,7 @@ const EventFormComponent = ({ mainState }) => {
               </Text>
             </FormControl.Label>
 
-            <Select selectedValue={service} minWidth="200" accessibilityLabel="Park Name" placeholder="Park Name" _selectedItem={{
+            <Select selectedValue={parkVal} minWidth="200" accessibilityLabel="Park Name" placeholder="Park Name" _selectedItem={{
                 bg: "teal.600",
                 endIcon: <CheckIcon size="5"/>
               }} mt={1} onValueChange={itemValue => parkValueChange(itemValue)}>
@@ -815,7 +876,7 @@ const EventFormComponent = ({ mainState }) => {
               </Text>
             </FormControl.Label>
 
-            <Select selectedValue={service}  accessibilityLabel="Choose Time" placeholder="Choose Time" _selectedItem={{
+            <Select selectedValue={timeVal}  accessibilityLabel="Choose Time" placeholder="Choose Time" _selectedItem={{
               bg: "teal.600",
               endIcon: <CheckIcon size="5" />
             }} mt={1} onValueChange={itemValue => timeValueChange(itemValue)}>
@@ -910,7 +971,7 @@ const CreateEventPage = ({ mainState, handler }) => {
   var userLoggedIn = mainState.userLoggedIn
 
   if (userLoggedIn){
-    return <EventFormComponent mainState={mainState} />
+    return <EventFormComponent mainState={mainState} handler={handler} />
   } else { 
     return <UserLoginComponent handler={handler} />
   }
@@ -951,8 +1012,7 @@ const MainScreen = ({ mainState, handler, navigation }) => {
   var userLoggedIn = mainState.userLoggedIn
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
-  
-  console.log('main-state-info:', userLoggedIn, userData, internetConnected)
+  // console.log('main-state-info:', userLoggedIn, userData, internetConnected)
 
 
   return (
@@ -967,7 +1027,7 @@ const MainScreen = ({ mainState, handler, navigation }) => {
 
         
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
-        name="MainEventList" children={()=><EventListNew mainState={mainState} navigation={navigation}/>} />
+        name="MainEventList" children={()=><EventListNew mainState={mainState} handler={handler} navigation={navigation}/>} />
 
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
         name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} />
@@ -1000,20 +1060,30 @@ export default class App extends React.Component{
       internetConnected: false,
       userLoggedIn: false,
       userInfo: undefined,
-      all_events_list: []
+      all_events_list: [],
+      event_list_refresh: false
     };
 
     this.handler = this.handler.bind(this)
 
   }
 
-
+ 
   handler = (update_val) => { // to-update user state after signup/login
     console.log('handle-update:', update_val)
-    this.setState({
-      userInfo: update_val, 
-      userLoggedIn: true
-    })
+    this.setState(update_val)
+    
+    // for (const [key, value] of Object.entries(update_val)) {
+    //   console.log("K/V:", key, value)
+    //   this.setState({ key: value })
+    // }
+
+    console.log('new-state:', this.state)
+      
+    // this.setState({
+    //   userInfo: update_val, 
+    //   userLoggedIn: true
+    // })
 
   }
   
@@ -1040,6 +1110,34 @@ export default class App extends React.Component{
   }
 
 
+
+  async getAllEvents() {
+
+    var getEventFormData = this.state.userInfo
+    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/get_events", {
+      method: 'POST',
+      body: JSON.stringify(getEventFormData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => response.json()).then((responseJson) => {      
+      this.setState({ 
+        all_events_list: responseJson['data'], 
+        event_id_dict: responseJson['event_id_dict'][0],
+        user_event_going_list: responseJson['user_event_going_list'][0],
+        user_created_event_list: responseJson['user_created_event_list'][0],
+        event_list_refresh: false
+      })
+
+      // console.log('events-list:', responseJson)
+      // eventData = responseJson['data']
+      // console.log('events-list-data:', eventData, eventData[0])
+      // this.setState({ all_events_list: eventData })
+    })
+
+  }
+
+
   async componentDidMount() {
     console.log('state-info:', this.state)
 
@@ -1057,29 +1155,22 @@ export default class App extends React.Component{
     });
 
     await this.getCurrentUser();
-
-    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/get_events", {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then((response) => response.json()).then((responseJson) => {
-      this.setState({ all_events_list: responseJson['data'], event_id_dict: responseJson['event_id_dict'][0] })
-      // console.log('events-list:', responseJson)
-      // eventData = responseJson['data']
-      // console.log('events-list-data:', eventData, eventData[0])
-      // this.setState({ all_events_list: eventData })
-
-    })
+    await this.getAllEvents();
     
   }
 
 
-  componentDidUpdate(){
+  async componentDidUpdate(previousProps, previousState){
+    if (this.state.event_list_refresh === true){
+      console.log('event-list-refresh')
+      await this.getAllEvents();
+    }
     // console.log('STATE HAS UPDATED:', this.state)
+    // console.log('updating-component...', this.state.userInfo)
     
   }
- 
+
+  
   render() {
 
     return (
@@ -1121,6 +1212,10 @@ export default class App extends React.Component{
 
 }
 
+
+// TODO: 
+  // handler doesn't seem to be working 
+    // get event_refresh==true on handler call and main-event-list-api-call, set event_refresh=False <-- this is condition
 
 
 
