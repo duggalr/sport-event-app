@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "770095547736",
+    "project_id": "proximity-personal",
+    "storage_bucket": "proximity-personal.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:770095547736:android:28091df2a3ae7f3794d12d",
+        "android_client_info": {
+          "package_name": "com.event_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAR8j4JsjCf4YlxDuS1eXDkrwlm58ojoSk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

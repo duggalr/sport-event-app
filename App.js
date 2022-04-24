@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from "react";
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
-  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem } from "native-base";
+  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem, Checkbox } from "native-base";
 import { NavigationContainer, useNavigation, useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -19,6 +19,30 @@ import {
 
 import NetInfo from "@react-native-community/netinfo";
 
+import { initializeApp } from 'firebase/app';
+import messaging from '@react-native-firebase/messaging';
+import notifee from '@notifee/react-native';
+
+
+// // Node.js
+// var admin = require('firebase-admin');
+// //
+// const { initializeApp } = require("firebase-admin/app");
+// initializeApp();
+
+// const firebaseConfig = {
+//   "client_id": "770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
+// }
+// const firebaseConfig = {
+//   apiKey: "",
+//   authDomain: "",
+//   projectId: "",
+//   storageBucket: "",
+//   messagingSenderId: "",
+//   appId: "",
+//   measurementId: ""
+// };
+// const firebaseApp = initializeApp(firebaseConfig);
 
 
 
@@ -29,8 +53,6 @@ import NetInfo from "@react-native-community/netinfo";
       // experiment with some shadows and possibly different colurs for buttons/icons, etc. 
         // then, event-detail + comments + going-button
  
-
-
   // **ENSURE THE GOOGLE CLIENT-ID ON THIS PAGE IS SET AS ENV VARIABLE BEFORE OS**
   // **For splash-screen, include toronto** (also in appstore description)
 
@@ -64,9 +86,9 @@ const MainHeading = () => {
       </Heading>
       <Spacer />
 
-      <Pressable onPress={() => tmp_navigation.navigate('Settings')}>
+      {/* <Pressable onPress={() => tmp_navigation.navigate('Settings')}>
         <Icon name="settings" group="ui-interface" style={{ marginTop: 2, marginRight: 12}} height="28" width="28"/>
-      </Pressable>
+      </Pressable> */}
         {/* <Icon name="user-shape" group="font-awesome" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
       
       
@@ -84,7 +106,7 @@ const MainHeading = () => {
 }
 
 
-const EventListNew = ({ mainState, handler, navigation }) => {
+const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
   // const isFocused = useIsFocused();
   // useEffect(() => {
@@ -124,7 +146,8 @@ const EventListNew = ({ mainState, handler, navigation }) => {
           item
         }) => <Box key={item.event_id}>
             
-            <Pressable onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id, state_handler: handler})}>
+            <Pressable onPress={() => navigation.navigate('Event Detail', 
+            {mainState: mainState, event_id: item.event_id, state_handler: handler})}>
 
               <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="1" padding="5" mt="6" rounded="25" backgroundColor="white">
 
@@ -254,12 +277,22 @@ const EventDetailPage = ({ route }) => {
 
   const [showModal, setShowModal] = useState(false);
 
+  var cb_handler = route.params.state_handler
   var mainState = route.params.mainState
   var eventID = route.params.event_id
   var userInfo = mainState.userInfo
+  var userProfileInfo = mainState.userProfileInfo
+
+  console.log('event-detail-user-info', userInfo, userProfileInfo)
+
   var userLoggedIn = mainState.userLoggedIn
   var eventIdDict = mainState.event_id_dict[eventID]
-  var cb_handler = route.params.state_handler
+  var user_comment_list = eventIdDict.user_event_comments
+  // var user_comment_list = ['asdlakjd', 'asdaksdja', 'asdlkjad']
+
+  const [commentStateList, setCommentState] = useState(user_comment_list)
+
+  console.log('comment-state-list:', commentStateList)
 
   var userEventGoingList = mainState.user_event_going_list
   var userCreatedEventList = mainState.user_created_event_list
@@ -267,7 +300,12 @@ const EventDetailPage = ({ route }) => {
   console.log('event-id-dict:', userEventGoingList)
 
   const [selected, setSelected] = React.useState(1);
-  
+
+
+  const [commentFormData, setCommentData] = React.useState({
+    comment_input: ''
+  });
+
 
   function saveUserAttend() {
     var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
@@ -298,14 +336,41 @@ const EventDetailPage = ({ route }) => {
         'Content-Type': 'application/json'
       }
     }).then((response) => response.json()).then((responseJson) => {
-      console.log('delete-event:', responseJson)
+      console.log('delete-event:', responseJson)      
       cb_handler({'event_list_refresh': true})
       tmp_navigation.navigate('MainEventList')
 
     })
 
+  }
+
+
+  function saveComment(){
+    var user_comment = commentFormData['comment_input']
+    console.log('saving-comment:', user_comment)
+    // {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
+    var saveCommentFormData = {'event_id': eventID, 'comment': user_comment, 'access_token': userInfo['access_token']}
+
+    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/create_comment", {
+      method: 'POST',
+      body: JSON.stringify(saveCommentFormData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => response.json()).then((responseJson) => {
+      console.log('save-comment:', responseJson)
+      var di = {'comment': user_comment, 'user_full_name': userProfileInfo.user.name, 'user_profile_pic': userProfileInfo.user.photo}
+      setCommentState(prevState => [...prevState, di])
+      setCommentData({comment_input: ''})
+
+      // {"comment": "Shsudushs ", "user_full_name": "Rahul Duggal", "user_profile_pic": "https://lh3.googleusercontent.com/a/AATXAJwFjGR2J-5lAvvx633F9BwuA4W7kX1u0sbm-T65=s96-c"}
+      // console.log('delete-event:', responseJson)
+      // cb_handler({'event_list_refresh': true})
+      // tmp_navigation.navigate('MainEventList')
+    })
 
   }
+
 
   
   return (
@@ -426,14 +491,69 @@ const EventDetailPage = ({ route }) => {
           {/* <Icon name="comment-white-oval-bubble" group="font-awesome" height="30" width="30" />
           <Text fontSize="18" pl="2">(13)</Text> */}
 
-          <Text pl="5" fontWeight="medium" fontSize="20">Comments (1)</Text>
+          <Text pl="5" fontWeight="medium" fontSize="20">Comments ({commentStateList.length})</Text>
 
         </HStack>
 
+        
 
-        <VStack pl="4" pr="4"  backgroundColor="white">
+        {/* <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
+                      <Avatar bg="green.500" source={{
+                          uri: avatar_item.profile_picture
+                        }}></Avatar>
+                      )}
+                    </Avatar.Group> */}
 
-          <Box borderBottomWidth="1" backgroundColor="white" _dark={{
+
+        {/* <ScrollView>{commentStateList.map((comment_item, index) => {
+
+          <Text>asdkjadlskj</Text>
+
+          })}
+
+        </ScrollView> */}
+        
+
+        <VStack pl="4" pr="4"  backgroundColor="white">{commentStateList.map((comment_item, index) => {
+
+          return <Box borderBottomWidth="1" backgroundColor="white" _dark={{borderColor: "gray.600" }}
+           borderColor="coolGray.200" pl="0" pr="4" py="2">
+
+             <HStack space={3} justifyContent="space-between">
+
+               <Avatar size="48px" source={{
+                  uri: comment_item.user_profile_pic
+                }} />
+
+                <VStack>
+
+                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
+                    {comment_item.user_full_name}
+                  </Text>
+
+                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
+                    {comment_item.comment}
+                  </Text>
+                
+                </VStack>
+
+                <Spacer />
+                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
+                  11:15 PM
+                </Text>
+
+             </HStack>
+
+          </Box>
+
+          })}
+        
+        </VStack>
+
+                        
+
+        {/* <VStack pl="4" pr="4"  backgroundColor="white"> */}
+          {/* <Box borderBottomWidth="1" backgroundColor="white" _dark={{
             borderColor: "gray.600" 
             }} borderColor="coolGray.200" pl="0" pr="4" py="2">
 
@@ -555,15 +675,21 @@ const EventDetailPage = ({ route }) => {
 
               </HStack>
 
-          </Box>
+          </Box> */}
 
-        </VStack>
+        {/* </VStack> */}
 
         <Box backgroundColor="white"pb="5" pt="1" pl="4">
           <HStack>
-            <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" placeholder="say what's on your mind..." isDisabled={!userLoggedIn}/>
+            <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" 
+            placeholder="say what's on your mind..." isDisabled={!userLoggedIn}
+            value={commentFormData.comment_input}
+            onChangeText={value => setCommentData({ ...commentFormData,
+              comment_input: value
+            })} />
+
             <Text pl="1"></Text>
-            <Button height="12" width="12" isDisabled={!userLoggedIn}>
+            <Button height="12" width="12" isDisabled={!userLoggedIn} onPress={() => saveComment()}>
               <Icon name="send-button" group="material-design" height="25" width="25" color="white" />
             </Button>
           </HStack>
@@ -979,29 +1105,131 @@ const CreateEventPage = ({ mainState, handler }) => {
 }
 
 
-const ExampleSettings = ({ mainState, handler }) => {
-  var userLoggedIn = mainState.userLoggedIn
 
-  if (userLoggedIn) {
+const SettingsComponent = ({ mainState }) => {
+ 
+  var userProfile = mainState.userProfileInfo 
+  // 'user_full_name': userProfileInfo.user.name, 'user_profile_pic': userProfileInfo.user.photo}
+  const [groupValues, setGroupValues] = React.useState([]);
 
-    return (
-      <Text>
-        Settings
-      </Text>
-    )
+  return (
+    
+    <View backgroundColor={"white"} >
 
-  } else {
+      <Center p="8">
 
-    return (
-      <UserLoginComponent handler={handler} />
-    )
+        <Image size={120} resizeMode={"contain"} borderRadius={100} source={{
+          uri: userProfile.user.photo
+        }} alt="your google profile picture" />
 
-  }
-  
+        <Heading size="lg" mt="2">{userProfile.user.name}</Heading>
+
+      </Center>
+
+      
+      <View pl="6">
+
+        <Text fontSize={18} fontWeight="medium">Notifications</Text>
+
+        <Checkbox.Group onChange={setGroupValues} value={groupValues} accessibilityLabel="choose numbers">
+          <Checkbox value="one" my={4}>
+            UX Research
+          </Checkbox>
+          <Checkbox value="two">Software Development</Checkbox>
+        </Checkbox.Group>
+
+      </View>
+        
+
+    </View>
+   
+    
+  )
 
 }
 
 
+const SettingsPage = ({ mainState, handler }) => {
+
+  var userLoggedIn = mainState.userLoggedIn
+
+  if (userLoggedIn){
+    return <SettingsComponent mainState={mainState} handler={handler} />
+  } else { 
+    return <UserLoginComponent handler={handler} />
+  }
+
+}
+
+
+
+const NotificationExample = ({ mainState }) => {
+
+  // async function onDisplayNotification() {
+  //   // Create a channel
+  //   const channelId = await notifee.createChannel({
+  //     id: 'default',
+  //     name: 'Default Channel',
+  //   });
+
+  //   // Display a notification
+  //   await notifee.displayNotification({
+  //     title: 'Notification Title',
+  //     body: 'Main body content of the notification',
+  //     android: {
+  //       channelId,
+  //       smallIcon: 'ic_launcher', // optional, defaults to 'ic_launcher'.
+  //     },
+  //   });
+  // }
+
+
+
+  async function fbMessage(){
+
+    // TODO: get the firebase/push-notif to work
+
+    // // Initialize Firebase
+    // admin.initializeApp({
+    //   credential: admin.credential.applicationDefault()
+    // });
+
+    // // Register the device with FCM
+    // await messaging().registerDeviceForRemoteMessages();
+    // // Get the token
+    // const token = await messaging().getToken();
+    // console.log('device-token:', token)
+    
+    // console.log('firebase-app:', mainState.firebase_app)
+    // var deviceToken = 'dGziePteRsKH2GWGWp6yeM:APA91bES_afjuthXSIzI1E4KhjrWDt8NFy61dUeNZ8JocEmdkqH2Wgjo8GyGvwaG6AcOOAHHmkg_q5r-JAtgsoa4d46tvl1-cvzhjICvFpf5rQ7ntd0tbu6atQdQiADd19Ccq94rtHRJ'
+    // var tokens = [deviceToken]
+
+    // console.log('messaging:', messaging())    
+
+    // // Send a message to devices with the registered tokens
+    // await messaging().sendMulticast({
+    //   tokens, 
+    //   data: { hello: 'world!' },
+    // });
+
+    // notifee.displayNotification(JSON.parse({hello: 'world!'}))
+
+  }
+
+  // fbMessage();
+  
+
+  return (
+
+    <View>
+      {/* <Button onPress={() => onDisplayNotification()}>Test Notifications</Button> */}
+      <Text>Notifications</Text>
+    </View>
+
+  )
+
+
+}
 
 
 
@@ -1025,16 +1253,20 @@ const MainScreen = ({ mainState, handler, navigation }) => {
           }
         }}>
 
+        {/* <Tab.Screen name="NotificationExample" component={NotificationExample} />  */}
         
-        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
+        <Tab.Screen options={{headerShown: false}} 
+        name="NotificationExample" children={()=><NotificationExample mainState={mainState}/>} />
+
+        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
         name="MainEventList" children={()=><EventListNew mainState={mainState} handler={handler} navigation={navigation}/>} />
 
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
-        name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} />
+        name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} /> */}
         
-        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
-        name="Settings" children={()=><ExampleSettings mainState={mainState} navigation={navigation} handler={handler}/>} /> */}
 
+        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
+        name="Settings" children={()=><SettingsPage mainState={mainState} navigation={navigation} handler={handler}/>} /> */}
 
         {/* <Tab.Screen options={{headerShown: false}} name="Create Event">
           {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
@@ -1061,7 +1293,8 @@ export default class App extends React.Component{
       userLoggedIn: false,
       userInfo: undefined,
       all_events_list: [],
-      event_list_refresh: false
+      event_list_refresh: false,
+      user_device_token: undefined
     };
 
     this.handler = this.handler.bind(this)
@@ -1086,17 +1319,25 @@ export default class App extends React.Component{
     // })
 
   }
-  
+
+  comment_handler = (update_val) => {
+    console.log('comment-upate-handle:', update_val)
+    // 'event_id': eventID, 'comment': user_comment}
+    var event_dict = this.state.event_id_dict[eventID]
+  }
+
+
 
   async getCurrentUser() {
     try {
-      const userInfo = await GoogleSignin.signInSilently();
+      const google_userInfo = await GoogleSignin.signInSilently();
       const userAccessTokens = await GoogleSignin.getTokens()
       var di = {'access_token': userAccessTokens['accessToken'], 'id_token': userAccessTokens['idToken']}
 
       this.setState({ 
         userLoggedIn: true,
-        userInfo: di
+        userInfo: di,
+        userProfileInfo: google_userInfo
       })
 
     } catch (error) {
@@ -1108,8 +1349,6 @@ export default class App extends React.Component{
 
     }
   }
-
-
 
   async getAllEvents() {
 
@@ -1138,24 +1377,92 @@ export default class App extends React.Component{
   }
 
 
+  async getDeviceToken() {
+    await messaging().registerDeviceForRemoteMessages();
+    const token = await messaging().getToken();
+    console.log('device-token:', token)
+    
+    this.setState({ user_device_token: token})
+
+  }
+
+
+  onMessageReceived(message) {
+    console.log('message-received:', message, message['data']['notifee'])
+    notifee.displayNotification(JSON.parse(message['data']['notifee']));
+    // TODO: 
+      // display notification with image and correct app-name on create-event for select users (sent from django)
+        // go from there...
+  }
+  
   async componentDidMount() {
     console.log('state-info:', this.state)
 
     SplashScreen.hide();
-    
-    GoogleSignin.configure({
-      webClientId:"770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
-      forceCodeForRefreshToken: true,
-    });
 
-    NetInfo.fetch().then(state => {
-      console.log("Connection type", state.type);
-      console.log("Is connected?", state.isConnected);
-      this.setState({ internetConnected: state.isConnected })
-    });
+    // user_logged_in=false, don't save device-token 
+      // else, update device-token on compDidMount only (ie. when app loads)
 
     await this.getCurrentUser();
     await this.getAllEvents();
+    await this.getDeviceToken();
+
+    if (this.state.userLoggedIn === true){
+      
+      var formData = {"userDeviceToken": this.state.user_device_token}
+
+      fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/user_attending_event", {
+        method: 'POST',
+        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then((response) => response.json()).then((responseJson) => {
+        console.log('save-user-attend:', responseJson)
+        // TODO: 
+          // need to mark-state for this event that user is not going or user is going
+            // show not-going-button and going-button
+
+      })
+
+
+    }
+
+
+
+    messaging().onMessage(this.onMessageReceived);
+    messaging().setBackgroundMessageHandler(this.onMessageReceived);
+
+    // const firebaseConfig = {
+    //   apiKey: "AIzaSyAR8j4JsjCf4YlxDuS1eXDkrwlm58ojoSk",
+    //   authDomain: "",
+    //   projectId:  "proximity-personal",
+    //   storageBucket: "proximity-personal.appspot.com",
+    //   messagingSenderId: "",
+    //   appId: "1:770095547736:android:28091df2a3ae7f3794d12d",
+    //   measurementId: ""
+    // };
+    
+    // // TODO: get the firebase app to initialize and send multicast message to all device-tokens
+    // const firebaseApp = initializeApp(firebaseConfig);
+    // console.log('component-did-mount-firebase-app:', firebaseApp)
+    // console.log('component-apps:', firebaseApp.name)
+    // // console.log('component-fb-messaging:', messaging())
+    // this.setState({'firebase_app': firebaseApp})
+
+     
+    // GoogleSignin.configure({
+    //   webClientId:"770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
+    //   forceCodeForRefreshToken: true,
+    // });
+
+    // NetInfo.fetch().then(state => {
+    //   console.log("Connection type", state.type);
+    //   console.log("Is connected?", state.isConnected);
+    //   this.setState({ internetConnected: state.isConnected })
+    // });
+
+    
     
   }
 
@@ -1199,7 +1506,6 @@ export default class App extends React.Component{
 
               {/* <Stack.Screen name="Event Detail" component={ExampleEventPage}/> */}
 
-
             </Stack.Navigator>
 
           </NavigationContainer>
@@ -1213,9 +1519,7 @@ export default class App extends React.Component{
 }
 
 
-// TODO: 
-  // handler doesn't seem to be working 
-    // get event_refresh==true on handler call and main-event-list-api-call, set event_refresh=False <-- this is condition
+
 
 
 
