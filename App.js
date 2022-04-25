@@ -1,8 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect } from "react";
+import { RefreshControl } from 'react-native';
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
-  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem, Checkbox } from "native-base";
+  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem, Checkbox, Alert } from "native-base";
 import { NavigationContainer, useNavigation, useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -108,12 +109,6 @@ const MainHeading = () => {
 
 const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
-  // const isFocused = useIsFocused();
-  // useEffect(() => {
-  //   console.log('is-focused')
-  //   handler({'event_list_refresh': true})
-  // }, [isFocused]);
-
   var userLoggedIn = mainState.userLoggedIn
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
@@ -123,151 +118,91 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
   const [showModal, setShowModal] = useState(false);
 
-  // var eventData = [{"event_date": "2022-04-29", "event_id": 1, "event_name": "Jshshsu", "event_time": "5:00PM", "park_address": "42 Mercury Rd, Etobicoke, ON", "park_name": "Flagstaff Park", "user_going_list": [{"name": "Rahul Duggal", "profile_picture": "https://lh3.googleusercontent.com/a/AATXAJwFjGR2J-5lAvvx633F9BwuA4W7kX1u0sbm-T65=s96-c", "ug_id": 1}]}]
-  // {"data": [{
-  //   "event_date": "2022-04-29", 
-  //   "event_name": "Jshshsu", 
-  //   "event_time": "17:00:00",
-  //   "park_address": "42 Mercury Rd, Etobicoke, ON", 
-  //   "park_name": "Flagstaff Park", 
-  //   "user_going_list": [Array]}]}
-
   var eventData = mainState.all_events_list
 
-  if (internetConnected){
+  return (
 
-    return (
+    <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
 
-      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
+      <MainHeading />
 
-        <MainHeading />
+      <FlatList data={eventData} renderItem={({
+        item
+      }) => <Box key={item.event_id}>
+          
+          <Pressable onPress={() => navigation.navigate('Event Detail', 
+          {mainState: mainState, event_id: item.event_id, state_handler: handler})}>
 
-        <FlatList data={eventData} renderItem={({
-          item
-        }) => <Box key={item.event_id}>
-            
-            <Pressable onPress={() => navigation.navigate('Event Detail', 
-            {mainState: mainState, event_id: item.event_id, state_handler: handler})}>
+            <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="1" padding="5" mt="6" rounded="25" backgroundColor="white">
 
-              <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="1" padding="5" mt="6" rounded="25" backgroundColor="white">
+              <HStack alignItems="center">
 
-                <HStack alignItems="center">
+                <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />
+                <Spacer />
+                <Badge backgroundColor="#0284c7" _text={{color: "white", fontSize: "13"}} variant="solid" rounded="10">
+                  {item.park_name}
+                </Badge>
 
-                  <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />
-                  <Spacer />
-                  <Badge backgroundColor="#0284c7" _text={{color: "white", fontSize: "13"}} variant="solid" rounded="10">
-                    {item.park_name}
-                  </Badge>
+              </HStack>                
 
-                </HStack>                
+              <Text mt="3" fontWeight="medium" fontSize="xl">
+                {item.event_name}
+              </Text>
 
-                <Text mt="3" fontWeight="medium" fontSize="xl">
-                  {item.event_name}
+              <HStack mt="0.5">
+
+                <Text ml="0.5"></Text>
+                <Icon name="calendar" group="ui-interface" color="gray" />
+                <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
+                  {item.event_date}
                 </Text>
 
-                <HStack mt="0.5">
+                <Text ml="4"></Text>
+                <Icon ml="2" name="time" group="essential" color="gray"/>
+                <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
+                  {item.event_time}
+                </Text>
 
-                  <Text ml="0.5"></Text>
-                  <Icon name="calendar" group="ui-interface" color="gray" />
-                  <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
-                    {item.event_date}
-                  </Text>
+              </HStack>
 
-                  <Text ml="4"></Text>
-                  <Icon ml="2" name="time" group="essential" color="gray"/>
-                  <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
-                    {item.event_time}
-                  </Text>
-
-                </HStack>
-
-                <HStack pt="5">
-                  
-                  {/* <Pressable onPress={() => setShowModal(true)}> */}
-                  <Pressable>
-
-                    <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
-                      <Avatar bg="green.500" source={{
-                          uri: avatar_item.profile_picture
-                        }}></Avatar>
-                      )}
-                    </Avatar.Group>
-
-                  </Pressable>
-
-                  {/* <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-                    <Modal.Content maxWidth="400px">
-
-                      <Modal.Header>People who are Going:</Modal.Header>
-                        <Modal.Body>
-
-                          <ScrollView>{item.user_going_list.map((avatar_item, index) => {
-                            
-                              return (
-                                <View>
-
-                                  <HStack>
-
-                                    <Text fontSize="16" fontWeight="medium" pl="2" pt="3">
-                                      {avatar_item.profile_picture}
-                                    </Text>
-
-                                  </HStack>
-                                  <Divider my="1" />
-
-                                </View>
-                              )
-
-                            })}
-           
-                          </ScrollView>
-
-                        </Modal.Body>
-
-                    </Modal.Content>
-
-                  </Modal> */}
-                                  
-                  <Spacer />
-                  { userEventGoingList.includes(item.event_id) ?  
-                    <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
-                      Your Going
-                    </Badge> : <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id})}>
-                    Details
-                  </Button>
-                  }                                  
-
-                </HStack>
-
+              <HStack pt="5">
                 
-              </Box>
+                <Pressable>
 
-            </Pressable>
+                  <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
+                    <Avatar bg="green.500" source={{
+                        uri: avatar_item.profile_picture
+                      }}></Avatar>
+                    )}
+                  </Avatar.Group>
 
-         </Box>}>
+                </Pressable>
 
-        </FlatList>
+                <Spacer />
+                { userEventGoingList.includes(item.event_id) ?  
+                  <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
+                    Your Going
+                  </Badge> : <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id})}>
+                  Details
+                </Button>
+                }                                  
 
-      </View>
+              </HStack>
 
-    )
+            </Box>
 
-  } else {
+          </Pressable>
 
-    return (
+        </Box>}>
 
-      <View>
-        <Text>
-          No Internet Connection! Please connect to Wifi and re-open app!
-        </Text>
-      </View>
+      </FlatList>
 
-    )
+    </View>
 
-  }
+  )
+
 
 }
-
 
 
 const EventDetailPage = ({ route }) => {
@@ -310,7 +245,7 @@ const EventDetailPage = ({ route }) => {
   function saveUserAttend() {
     var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
     
-    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/user_attending_event", {
+    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/user_attending_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
@@ -329,7 +264,7 @@ const EventDetailPage = ({ route }) => {
   function deleteEvent(){
     var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
 
-    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/delete_event", {
+    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/delete_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
@@ -351,7 +286,7 @@ const EventDetailPage = ({ route }) => {
     // {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
     var saveCommentFormData = {'event_id': eventID, 'comment': user_comment, 'access_token': userInfo['access_token']}
 
-    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/create_comment", {
+    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_comment", {
       method: 'POST',
       body: JSON.stringify(saveCommentFormData),
       headers: {
@@ -706,87 +641,61 @@ const EventDetailPage = ({ route }) => {
 
 function saveUserProfileDetails(userData){
 
-  // TODO: run this and ensure it works <-- on error, display alert
-  return fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/auth_signup", {
+  return fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/auth_signup", {
     method: 'POST',
     body: JSON.stringify(userData),
     headers: {
       'Content-Type': 'application/json'
     }
   })
-  // .then((response) => response.json()).then((responseJson) => console.log(responseJson))
 
 }
   
 
-async function google_sign_in(user_state_cb) {
+async function google_sign_in(user_device_token, user_state_cb) {
   console.log('cb-function:', user_state_cb)
 
-  // var final_di = {'userInfo': 'testing_one', 'userLoggedIn': false}
-  // user_state_cb(final_di)
+  try {      
+    await GoogleSignin.hasPlayServices()
+    const userInfo = await GoogleSignin.signIn()
+    userInfo['user_device_token'] = user_device_token
+    console.log('user-info:', userInfo)
 
-    try {      
+    saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
+      console.log('JSON-response:', responseJson)
+      
+      if (responseJson['success'] === true ) { // user has been created in backend
 
-      // // GoogleSignin.getTokens().then((tokRes) => {
-      // //   console.log('GOOGLE TOKEN-DATA:', tokRes)
-      // //   var idTok = tokRes['idToken']
-      // //   var accessTok = tokRes['accessToken']
-      // //   var user_info_di = {'access_token': accessTok, 'id_token': idTok}
-      // //   var user_logged_in = true
-      // //   var final_di = {'userInfo': user_info_di, 'userLoggedIn': user_logged_in}
-      // //   user_state_cb(final_di)
-      // // })
+        GoogleSignin.getTokens().then((tokRes) => {
+          console.log('GOOGLE TOKEN-DATA:', tokRes)
+          var idTok = tokRes['idToken']
+          var accessTok = tokRes['accessToken']
+          var di = {'userInfo': {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
+          user_state_cb(di)
+        })
 
-      // // // TODO: on authRes success, then get the user-token-data, set the 3 states and have user see event-form/settings
-      // // //   important: 
-      // // //     if error on django's side for saving user-profile, signout user in this app as user is not an 'official-user' in our app
-
-      await GoogleSignin.hasPlayServices()
-      const userInfo = await GoogleSignin.signIn()
-      console.log('user-info:', userInfo)
-
-      saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
-        console.log('JSON-response:', responseJson)
-        
-        if (responseJson['success'] === true ) { // user has been created in backend
-          // const tokenData = GoogleSignin.getTokens().then((tokRes) => tokRes.json()).then((tokRes) => {
-          //   console.log('google-token-data:', tokenData)
-          //   var idTok = tokenData['idToken']
-          //   var accessTok = tokenData['accessToken']
-          //   var di = {'access_token': accessTok, 'id_token': idTok}
-          //   user_state_cb(di)
-          // })
-          GoogleSignin.getTokens().then((tokRes) => {
-            console.log('GOOGLE TOKEN-DATA:', tokRes)
-            var idTok = tokRes['idToken']
-            var accessTok = tokRes['accessToken']
-            var di = {'userInfo': {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
-            user_state_cb(di)
-          })
-
-        } else {  // user does not exist in our app so 'successful-login' should be removed
-          GoogleSignin.revokeAccess(),then(() => {
-            GoogleSignin.signOut()
-          })
-        }
-
-      })
-
-    } 
-    catch(error) {  // TODO: what to do with error? <-- post error saying login unsuccessful
-      console.log(error)
-
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-      } else {
-        // some other error happened
+      } else {  // user does not exist in our app so 'successful-login' should be removed
+        GoogleSignin.revokeAccess(),then(() => {
+          GoogleSignin.signOut()
+        })
       }
-    }
 
+    })
+
+  } 
+  catch(error) {  // TODO: do nothing with error?
+    console.log(error)
+
+    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      // user cancelled the login flow
+    } else if (error.code === statusCodes.IN_PROGRESS) {
+      // operation (e.g. sign in) is in progress already
+    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      // play services not available or outdated
+    } else {
+      // some other error happened
+    }
+  }
   
 }
 
@@ -865,7 +774,7 @@ const EventFormComponent = ({ mainState, handler }) => {
 
     }
     
-    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/create_event", {
+    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
@@ -1055,7 +964,7 @@ const EventFormComponent = ({ mainState, handler }) => {
 }
 
 
-const UserLoginComponent = ({handler}) => {
+const UserLoginComponent = ({ mainState, handler }) => {
 
   // var tmp_navigation = useNavigation()
   // console.log('ua-ndavig:', tmp_navigation, handler)
@@ -1078,7 +987,7 @@ const UserLoginComponent = ({handler}) => {
           style={{ width: 195, height: 50 }}
           size={GoogleSigninButton.Size.Wide}
           color={GoogleSigninButton.Color.Dark}
-          onPress={() => google_sign_in(handler)}
+          onPress={() => google_sign_in(mainState.user_device_token, handler)}
         />
 
       </HStack>
@@ -1099,7 +1008,7 @@ const CreateEventPage = ({ mainState, handler }) => {
   if (userLoggedIn){
     return <EventFormComponent mainState={mainState} handler={handler} />
   } else { 
-    return <UserLoginComponent handler={handler} />
+    return <UserLoginComponent mainState={mainState} handler={handler} />
   }
 
 }
@@ -1156,7 +1065,7 @@ const SettingsPage = ({ mainState, handler }) => {
   if (userLoggedIn){
     return <SettingsComponent mainState={mainState} handler={handler} />
   } else { 
-    return <UserLoginComponent handler={handler} />
+    return <UserLoginComponent mainState={mainState} handler={handler} />
   }
 
 }
@@ -1233,17 +1142,30 @@ const NotificationExample = ({ mainState }) => {
 
 
 
-const MainScreen = ({ mainState, handler, navigation }) => {
 
-  // {props => <MainScreen {...props} mainState={this.state} userLoggedIn={this.state.userLoggedIn}  userData={this.state.userInfo} internetConnected={this.state.internetConnected} handler={this.handler}/>}
+
+
+const MainScreen = ({ mainState, handler, navigation }) => {
   
   var userLoggedIn = mainState.userLoggedIn
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
-  // console.log('main-state-info:', userLoggedIn, userData, internetConnected)
 
+  const [refreshing, setRefreshing] = React.useState(false);
 
-  return (
+  const refreshWait = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout));
+  }
+  
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    refreshWait(2000).then(() => setRefreshing(false));
+  }, []);
+
+  
+  if (internetConnected) {
+
+    return (
 
       <Tab.Navigator screenOptions={{
           tabBarOptions: {
@@ -1253,30 +1175,49 @@ const MainScreen = ({ mainState, handler, navigation }) => {
           }
         }}>
 
-        {/* <Tab.Screen name="NotificationExample" component={NotificationExample} />  */}
-        
-        <Tab.Screen options={{headerShown: false}} 
-        name="NotificationExample" children={()=><NotificationExample mainState={mainState}/>} />
-
-        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
+        <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="list" group="miscellaneous" />)}} 
         name="MainEventList" children={()=><EventListNew mainState={mainState} handler={handler} navigation={navigation}/>} />
 
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
-        name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} /> */}
-        
+        name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} />
 
-        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
-        name="Settings" children={()=><SettingsPage mainState={mainState} navigation={navigation} handler={handler}/>} /> */}
+        <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
+        name="Settings" children={()=><SettingsPage mainState={mainState} navigation={navigation} handler={handler}/>} />
+
+        {/* <Tab.Screen options={{headerShown: false}} 
+        name="NotificationExample" children={()=><NotificationExample mainState={mainState}/>} /> */}
 
         {/* <Tab.Screen options={{headerShown: false}} name="Create Event">
           {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
         </Tab.Screen> */}
-      
-        {/* <Tab.Screen options={{headerShown: false}} name="Settings" component={ExampleSettings} /> */}
         
       </Tab.Navigator> 
 
-  )
+    )
+
+  } else {
+
+    return (
+
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
+          }
+        >
+          <Text fontSize={16} >
+            No Internet Connection! Please connect to Wifi and reload the app!
+          </Text>
+
+      </ScrollView>
+
+    )
+
+  }
+
+
 
 }
 
@@ -1353,7 +1294,7 @@ export default class App extends React.Component{
   async getAllEvents() {
 
     var getEventFormData = this.state.userInfo
-    fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/get_events", {
+    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/get_events", {
       method: 'POST',
       body: JSON.stringify(getEventFormData),
       headers: {
@@ -1400,34 +1341,39 @@ export default class App extends React.Component{
 
     SplashScreen.hide();
 
-    // user_logged_in=false, don't save device-token 
-      // else, update device-token on compDidMount only (ie. when app loads)
+    NetInfo.fetch().then(state => {
+      console.log("Connection type", state.type);
+      console.log("Is connected?", state.isConnected);
+      this.setState({ internetConnected: state.isConnected })
+    });
 
-    await this.getCurrentUser();
-    await this.getAllEvents();
-    await this.getDeviceToken();
+    if (this.state.internetConnected === true){
 
-    if (this.state.userLoggedIn === true){
-      
-      var formData = {"userDeviceToken": this.state.user_device_token}
-
-      fetch("https://0f34-2607-fea8-4360-f100-ec01-4052-22fd-a7a5.ngrok.io/user_attending_event", {
-        method: 'POST',
-        body: JSON.stringify(formData),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }).then((response) => response.json()).then((responseJson) => {
-        console.log('save-user-attend:', responseJson)
-        // TODO: 
-          // need to mark-state for this event that user is not going or user is going
-            // show not-going-button and going-button
-
-      })
-
+      await this.getCurrentUser();
+      await this.getAllEvents();
+      await this.getDeviceToken();
+  
+      if (this.state.userLoggedIn === true){
+        
+        var formData = {"userDeviceToken": this.state.user_device_token}
+  
+        fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
+          method: 'POST',
+          body: JSON.stringify(formData),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then((response) => response.json()).then((responseJson) => {
+          console.log('save-user-attend:', responseJson)
+          // TODO: 
+            // need to mark-state for this event that user is not going or user is going
+              // show not-going-button and going-button
+  
+        })
+  
+      }
 
     }
-
 
 
     messaging().onMessage(this.onMessageReceived);
@@ -1455,13 +1401,6 @@ export default class App extends React.Component{
     //   webClientId:"770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
     //   forceCodeForRefreshToken: true,
     // });
-
-    // NetInfo.fetch().then(state => {
-    //   console.log("Connection type", state.type);
-    //   console.log("Is connected?", state.isConnected);
-    //   this.setState({ internetConnected: state.isConnected })
-    // });
-
     
     
   }
@@ -1488,23 +1427,13 @@ export default class App extends React.Component{
 
             <Stack.Navigator>
 
-              {/* <Stack.Screen
-                name="Home"
-                component={MainScreen}
-                initialParams={{ 'userState': this.state, 'handler': this.handler }}
-                options={{ headerShown: false}}
-              /> */}
-
               <Stack.Screen name="Home" options={{ headerShown: false}}>
-                {/* {props => <MainScreen {...props} userLoggedIn={this.state.userLoggedIn}  userData={this.state.userInfo} internetConnected={this.state.internetConnected} handler={this.handler}/>} */}
                 {props => <MainScreen {...props} mainState={this.state} handler={this.handler}/>}
               </Stack.Screen>
               
               <Stack.Screen name="Event Detail">
                 {props => <EventDetailPage {...props} />}
               </Stack.Screen>
-
-              {/* <Stack.Screen name="Event Detail" component={ExampleEventPage}/> */}
 
             </Stack.Navigator>
 
