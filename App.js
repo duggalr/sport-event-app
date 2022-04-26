@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect } from "react";
-import { RefreshControl } from 'react-native';
+import { RefreshControl, Alert } from 'react-native';
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
-  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem, Checkbox, Alert } from "native-base";
+  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem, Checkbox } from "native-base";
 import { NavigationContainer, useNavigation, useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -23,6 +23,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { initializeApp } from 'firebase/app';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
+import { resolve } from 'url';
 
 
 // // Node.js
@@ -65,11 +66,32 @@ import notifee from '@notifee/react-native';
   // Start implementation (will be interfaced with UI/backend <-- but basic core UI is laid out)
   
 
+// TODO: 
+    // figure out why I signed out (handle this exception) and ensure comment with profile-pic works properly
+    // test the signup/login extensively before continuning
+    // notifications (add and ensure functionality works)
+    // test app once more for functionality (actually use it to post first event) <-- test production version
+      // -(speed/smoothness/functionality)
+    // then, see test how UI looks on all devices (iOS and android)
+      // ^fix any errors here 
+    // productionize django-api and RN app <-- final test and then release... 
 
 
+// TODO: 
+  // un-attend? (would rather not have in V1)  
+  // add notification on event-create (test on my device) 
+  // **user-device-token/authentication returns invalid-credentials at times <-- why is this? (sometimes it takes long too)**
+  // redownload app and test signup/login extensively
+  // **delete all the stuff in DB, fix all the API, test everything again to ensure it works (with production-logic)
+  // fix all (majority of key ones) the React-Native warnings
+  // test in production without any console.logs... 
+  // UI-testing on many different devices
+  // Productionize backend and final-testing; everything good, release...
+
+
+  
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-
 
 
 const MainHeading = () => {
@@ -87,9 +109,10 @@ const MainHeading = () => {
       </Heading>
       <Spacer />
 
-      {/* <Pressable onPress={() => tmp_navigation.navigate('Settings')}>
-        <Icon name="settings" group="ui-interface" style={{ marginTop: 2, marginRight: 12}} height="28" width="28"/>
-      </Pressable> */}
+      <Pressable onPress={() => tmp_navigation.navigate('Create Event')}>
+        {/* <Icon name="settings" group="ui-interface" style={{ marginTop: 2, marginRight: 12}} height="28" width="28"/> */}
+        <Icon name="plus" group="ui-interface" style={{ marginTop: 1, marginRight: 12}} height="28" width="28"/>
+      </Pressable>
         {/* <Icon name="user-shape" group="font-awesome" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
       
       
@@ -119,6 +142,11 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
   const [showModal, setShowModal] = useState(false);
 
   var eventData = mainState.all_events_list
+
+  // if (mainState.event_comment_refresh === false){
+  //   handler({'event_comment_refresh': true}) // so when user clicks on eventDetail, they will see an updated comments-state
+  // }
+  
 
   return (
 
@@ -166,23 +194,41 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
               </HStack>
 
               <HStack pt="5">
-                
-                <Pressable>
 
-                  <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
-                    <Avatar bg="green.500" source={{
-                        uri: avatar_item.profile_picture
-                      }}></Avatar>
-                    )}
-                  </Avatar.Group>
+                {item.user_going_list.length > 0 ?  
+                <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
+                  <Avatar bg="green.500" source={{
+                      uri: avatar_item.profile_picture
+                    }} key={index}></Avatar>
+                  )}
+                </Avatar.Group> 
+                : 
+                null
+                }
 
-                </Pressable>
+                {/* <Text>({item.user_event_comments.length})</Text> */}      
 
                 <Spacer />
+
+                {/* <HStack pt="4" alignSelf="center" > */}
+                <HStack pt="3" pr="3">
+                  <Icon name="comment-white-oval-bubble" group="font-awesome" height="24" width="24"/> 
+                  {/* <Icon name="comment-black-oval-bubble-shape" group="font-awesome" height="24" width="24"/>  */}
+                  <Text fontSize={16} fontWeight="medium" pl="1">
+                   ({item.user_event_comments.length})
+                  </Text>
+                </HStack>
+
                 { userEventGoingList.includes(item.event_id) ?  
+                
+                  // <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
+                  //   Your Going
+                  // </Badge> 
                   <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
                     Your Going
-                  </Badge> : <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {mainState: mainState, event_id: item.event_id})}>
+                  </Badge> 
+                  : <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {
+                    mainState: mainState, event_id: item.event_id, state_handler: handler})}>
                   Details
                 </Button>
                 }                                  
@@ -213,6 +259,9 @@ const EventDetailPage = ({ route }) => {
   const [showModal, setShowModal] = useState(false);
 
   var cb_handler = route.params.state_handler
+
+  console.log('cb-handler:', cb_handler)
+
   var mainState = route.params.mainState
   var eventID = route.params.event_id
   var userInfo = mainState.userInfo
@@ -221,14 +270,48 @@ const EventDetailPage = ({ route }) => {
   console.log('event-detail-user-info', userInfo, userProfileInfo)
 
   var userLoggedIn = mainState.userLoggedIn
+  console.log('event-id:', eventID)
   var eventIdDict = mainState.event_id_dict[eventID]
-  var user_comment_list = eventIdDict.user_event_comments
-  // var user_comment_list = ['asdlakjd', 'asdaksdja', 'asdlkjad']
+  // var user_comment_list = eventIdDict.user_event_comments
 
-  const [commentStateList, setCommentState] = useState(user_comment_list)
+  console.log('event-comment-dict:', mainState.event_id_comment_dict)
+  var user_comment_list = mainState.event_id_comment_dict[eventID]
+  
+  // var event_comment_list = mainState.event_comment_list
+  // const [commentStateList, setCommentState] = useState(event_comment_list)
+  // console.log('comment-state-list:', commentStateList)
 
-  console.log('comment-state-list:', commentStateList)
+  // function fetchComments(eventID){
+    
+  //   var formData = {'event_id': eventID}
 
+  //   // fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/fetch_comments", {
+  //   //   method: 'POST',
+  //   //   body: JSON.stringify(formData),
+  //   //   headers: {
+  //   //     'Content-Type': 'application/json'
+  //   //   }
+  //   // }).then((response) => response.json()).then((responseJson) => {
+  //   //   console.log('fetch-comments:', responseJson)
+      
+  //   //   cb_handler({
+  //   //     event_comment_list: responseJson['data'],
+  //   //     event_comment_refresh: false
+  //   //   })
+
+  //   //   // setCommentState(responseJson['data'])
+      
+  //   // })
+
+  // }
+
+  // console.log('event-comment:', mainState.event_comment_refresh)
+
+  // if (mainState.event_comment_refresh === true){
+  //   fetchComments(eventID)
+  //   // cb_handler({event_comment_refresh: false})
+  // }
+  
   var userEventGoingList = mainState.user_event_going_list
   var userCreatedEventList = mainState.user_created_event_list
 
@@ -236,7 +319,10 @@ const EventDetailPage = ({ route }) => {
 
   const [selected, setSelected] = React.useState(1);
 
+  const [errors, setErrors] = React.useState({});
 
+
+  // TODO: set this to blank on submit
   const [commentFormData, setCommentData] = React.useState({
     comment_input: ''
   });
@@ -253,9 +339,13 @@ const EventDetailPage = ({ route }) => {
       }
     }).then((response) => response.json()).then((responseJson) => {
       console.log('save-user-attend:', responseJson)
-      // TODO: 
-        // need to mark-state for this event that user is not going or user is going
-          // show not-going-button and going-button
+      // TODO: change to 'your-going'; look at mainstate update
+        // add the new event-id to user_event_going_list
+        // console.log('userCreatedEventList:', userCreatedEventList)
+      userEventGoingList.push(eventID)
+      // console.log(userEventGoingList, eventID)
+      cb_handler({'user_created_event_list': userEventGoingList})
+      // TODO: for attend, loader with callback?      
 
     })
 
@@ -281,28 +371,50 @@ const EventDetailPage = ({ route }) => {
 
 
   function saveComment(){
+    setErrors({});
+
     var user_comment = commentFormData['comment_input']
-    console.log('saving-comment:', user_comment)
-    // {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
-    var saveCommentFormData = {'event_id': eventID, 'comment': user_comment, 'access_token': userInfo['access_token']}
 
-    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_comment", {
-      method: 'POST',
-      body: JSON.stringify(saveCommentFormData),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then((response) => response.json()).then((responseJson) => {
-      console.log('save-comment:', responseJson)
-      var di = {'comment': user_comment, 'user_full_name': userProfileInfo.user.name, 'user_profile_pic': userProfileInfo.user.photo}
-      setCommentState(prevState => [...prevState, di])
-      setCommentData({comment_input: ''})
+    if (user_comment === "") {
 
-      // {"comment": "Shsudushs ", "user_full_name": "Rahul Duggal", "user_profile_pic": "https://lh3.googleusercontent.com/a/AATXAJwFjGR2J-5lAvvx633F9BwuA4W7kX1u0sbm-T65=s96-c"}
-      // console.log('delete-event:', responseJson)
-      // cb_handler({'event_list_refresh': true})
-      // tmp_navigation.navigate('MainEventList')
-    })
+      console.log('error on comment...')
+      setErrors({ ...errors,
+        error_msg: 'Comment Invalid.'
+      });
+      return false;
+      
+    } else {
+
+      console.log('saving-comment:', user_comment)
+      // {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
+      var saveCommentFormData = {'event_id': eventID, 'comment': user_comment, 'access_token': userInfo['access_token']}
+
+      fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_comment", {
+        method: 'POST',
+        body: JSON.stringify(saveCommentFormData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then((response) => response.json()).then((responseJson) => {
+        console.log('save-comment:', responseJson)
+        console.log('user-profile-info:', userProfileInfo)
+        var di = {'comment': user_comment, 'user_full_name': userProfileInfo.user.name, 'user_profile_pic': userProfileInfo.user.photo}
+        // mainState.event_id_comment_dict[eventID]
+        var prev_comment_dict = mainState.event_id_comment_dict
+        prev_comment_dict[eventID].push(di)
+        // user_comment_list.push(di)
+        cb_handler({'event_id_comment_dict': prev_comment_dict})
+        setCommentData({comment_input: ''})
+
+        // setCommentState(prevState => [...prevState, di])
+
+        // {"comment": "Shsudushs ", "user_full_name": "Rahul Duggal", "user_profile_pic": "https://lh3.googleusercontent.com/a/AATXAJwFjGR2J-5lAvvx633F9BwuA4W7kX1u0sbm-T65=s96-c"}
+        // console.log('delete-event:', responseJson)
+        // cb_handler({'event_list_refresh': true})
+        // tmp_navigation.navigate('MainEventList')
+      })
+
+    }
 
   }
 
@@ -325,6 +437,33 @@ const EventDetailPage = ({ route }) => {
             {/* Smithfield Park */}
             {eventIdDict.park_name}
           </Badge>
+ 
+          {/* <Pressable onPress={() => deleteEvent()}> */}
+
+          { userCreatedEventList.includes(eventID) ? 
+          <Pressable onPress={() => {
+            Alert.alert(
+              "Delete this event?",
+              "This cannot be undone...",
+              [
+                {
+                  text: "Cancel",
+                  onPress: () => console.log("Cancel Pressed"),
+                  style: "cancel"
+                },
+                { text: "Delete", onPress: () => deleteEvent() }
+              ]
+            );
+          }}>
+              <Icon name="trash" group="ui-interface" height="26" width="26"/>
+          </Pressable>
+           : 
+           null}
+
+
+          {/* <Badge alignSelf="center" variant={"solid"} colorScheme="success" _text={{fontSize: 15}}>
+          Your Going
+        </Badge>  */}
 
         </HStack>
 
@@ -332,7 +471,7 @@ const EventDetailPage = ({ route }) => {
           {/* Basketball Run this Friday at Smithfield */}
           {eventIdDict.event_name}
         </Text>
-
+          
         <HStack mt="2">
           <Icon name="calendar" group="ui-interface" color="gray" />
           <Text color="gray" ml="2" fontSize="15" fontWeight="medium">
@@ -358,13 +497,17 @@ const EventDetailPage = ({ route }) => {
 
           <Pressable onPress={() => setShowModal(true)}>
 
+            {eventIdDict.user_going_list.length > 0 ? 
             <Avatar.Group  max={2}>{eventIdDict.user_going_list.map((avatar_item, index) => 
               <Avatar key={avatar_item.ug_id} bg="green.500" source={{
                   uri: avatar_item.profile_picture
                 }}></Avatar>
               )}
             </Avatar.Group>
-
+            :
+            null
+            }
+            
           </Pressable>
 
 
@@ -383,7 +526,7 @@ const EventDetailPage = ({ route }) => {
 
                             <Avatar bg="green.500" source={{
                                 uri: avatar_item.profile_picture
-                              }}></Avatar>
+                              }} key={avatar_item.ug_id}></Avatar>
 
                             <Text fontSize="16" fontWeight="medium" pl="2" pt="3">
                               {avatar_item.name}
@@ -408,13 +551,17 @@ const EventDetailPage = ({ route }) => {
 
           <Spacer />
           { userEventGoingList.includes(eventID) ?  
+            // <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
+            //   Your Going
+            // </Badge> 
             <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
               Your Going
-            </Badge> : <Button colorScheme="info" isDisabled={!userLoggedIn} onPress={() => saveUserAttend()}>Attend</Button>
+            </Badge> 
+            : <Button colorScheme="info" isDisabled={!userLoggedIn} onPress={() => saveUserAttend()}>Attend</Button>
           }
 
-          <Spacer />
-          { userCreatedEventList.includes(eventID) ?  <Button onPress={() => deleteEvent()}>Delete</Button> : null}
+          {/* <Spacer />           */}
+          {/* { userCreatedEventList.includes(eventID) ? <Button onPress={() => deleteEvent()}>Delete</Button> : null} */}
             
 
         </HStack>
@@ -426,10 +573,9 @@ const EventDetailPage = ({ route }) => {
           {/* <Icon name="comment-white-oval-bubble" group="font-awesome" height="30" width="30" />
           <Text fontSize="18" pl="2">(13)</Text> */}
 
-          <Text pl="5" fontWeight="medium" fontSize="20">Comments ({commentStateList.length})</Text>
+          <Text pl="5" fontWeight="medium" fontSize="20">Comments ({user_comment_list.length})</Text>
 
         </HStack>
-
         
 
         {/* <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
@@ -449,7 +595,7 @@ const EventDetailPage = ({ route }) => {
         </ScrollView> */}
         
 
-        <VStack pl="4" pr="4"  backgroundColor="white">{commentStateList.map((comment_item, index) => {
+        <VStack pl="4" pr="4"  backgroundColor="white">{user_comment_list.map((comment_item, index) => {
 
           return <Box borderBottomWidth="1" backgroundColor="white" _dark={{borderColor: "gray.600" }}
            borderColor="coolGray.200" pl="0" pr="4" py="2">
@@ -653,7 +799,6 @@ function saveUserProfileDetails(userData){
   
 
 async function google_sign_in(user_device_token, user_state_cb) {
-  console.log('cb-function:', user_state_cb)
 
   try {      
     await GoogleSignin.hasPlayServices()
@@ -683,8 +828,7 @@ async function google_sign_in(user_device_token, user_state_cb) {
     })
 
   } 
-  catch(error) {  // TODO: do nothing with error?
-    console.log(error)
+  catch(error) {  // TODO: update state to display error message on this screen 
 
     if (error.code === statusCodes.SIGN_IN_CANCELLED) {
       // user cancelled the login flow
@@ -757,6 +901,7 @@ const EventFormComponent = ({ mainState, handler }) => {
     setTimeVal(value)
   }
 
+
  
   const onEventFormSubmit = () => {
     setErrors({});
@@ -771,8 +916,17 @@ const EventFormComponent = ({ mainState, handler }) => {
         error_msg: 'Please fill all fields before submitting!'
       });
       return false;
-
     }
+
+    var todayDate = new Date()
+    if (new Date(formData['event_date']).getTime() < todayDate.getTime()){ // date must be greater or equal to current date
+      console.log('error on date...')
+      setErrors({ ...errors,
+        error_msg: 'Invalid Date!'
+      });
+      return false;
+      
+    } 
     
     fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_event", {
       method: 'POST',
@@ -787,6 +941,13 @@ const EventFormComponent = ({ mainState, handler }) => {
         // redirect to homepage showing event
         // handler({'event_submitted': true})
         handler({'event_list_refresh': true})
+        setData({
+          event_title: '', 
+          event_description: '',
+          park_name: '',
+          event_date: new Date(),
+          event_time: ''
+        })
         tmp_navigation.navigate('MainEventList')
         
 
@@ -799,7 +960,11 @@ const EventFormComponent = ({ mainState, handler }) => {
     })
 
   }
+
+
   
+
+
   return (
 
     <ScrollView w="100%" backgroundColor="white">
@@ -827,7 +992,7 @@ const EventFormComponent = ({ mainState, handler }) => {
             </FormControl.Label>
             <Input placeholder="ie. Ball Run this Friday at 6PM at Smithfield Park" w="80" onChangeText={value => setData({ ...formData,
         event_title: value
-      })}/>
+      })} value={formData.event_title}/>
           </FormControl>
         </Box>
 
@@ -842,7 +1007,7 @@ const EventFormComponent = ({ mainState, handler }) => {
             <Select selectedValue={parkVal} minWidth="200" accessibilityLabel="Park Name" placeholder="Park Name" _selectedItem={{
                 bg: "teal.600",
                 endIcon: <CheckIcon size="5"/>
-              }} mt={1} onValueChange={itemValue => parkValueChange(itemValue)}>
+              }} mt={1} onValueChange={itemValue => parkValueChange(itemValue)} value={formData.park_name}>
               
               <Select.Item label="Waterfront Neighbourhood Centre" value="Waterfront Neighbourhood Centre" />
               <Select.Item label="Smithfield Park" value="Smithfield Park" />
@@ -933,14 +1098,14 @@ const EventFormComponent = ({ mainState, handler }) => {
 
 
         {/* <Box alignItems="center" w="100%"> */}
-        <FormControl pt="4">
+        <FormControl pt="4" isRequired> 
           <FormControl.Label>
             <Text fontSize="16" fontWeight="medium">
               Description
             </Text>
           </FormControl.Label>
           <TextArea h={20} placeholder="ie. looking to play a 5v5 friday. Any skill-level is fine... I'll bring some water for everyone"
-           onChangeText={value => setData({ ...formData, event_description: value})}/>
+           onChangeText={value => setData({ ...formData, event_description: value})} value={formData.event_description}/>
         </FormControl>
         
         {/* </Box>; */}
@@ -949,7 +1114,8 @@ const EventFormComponent = ({ mainState, handler }) => {
         
       {/* </Stack> */}
       
-      {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>Form did not submit successfully. Ensure all fields are filled!</Text> : null}
+      {/* {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>Form did not submit successfully. Ensure all fields are filled!</Text> : null} */}
+      {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>{errors.error_msg}</Text> : null}
       {/* <FormControl.ErrorMessage>Error</FormControl.ErrorMessage> */}
 
       <Box alignItems="center">
@@ -989,7 +1155,6 @@ const UserLoginComponent = ({ mainState, handler }) => {
           color={GoogleSigninButton.Color.Dark}
           onPress={() => google_sign_in(mainState.user_device_token, handler)}
         />
-
       </HStack>
 
     </View>
@@ -1151,16 +1316,21 @@ const MainScreen = ({ mainState, handler, navigation }) => {
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
 
-  const [refreshing, setRefreshing] = React.useState(false);
+  // const [refreshing, setRefreshing] = React.useState(false);
 
-  const refreshWait = (timeout) => {
-    return new Promise(resolve => setTimeout(resolve, timeout));
-  }
+  // const refreshWait = () => {
+  //   // return new Promise(resolve => setTimeout(resolve, timeout));
+  //   internetCB().then(function(res){
+  //     setRefreshing(false)
+  //   })
+  // }
   
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(true);
-    refreshWait(2000).then(() => setRefreshing(false));
-  }, []);
+  // const onRefresh = React.useCallback(() => {
+  //   setRefreshing(true);
+  //   // refreshWait().then(() => setRefreshing(false));
+  //   refreshWait()
+    
+  // }, []);
 
   
   if (internetConnected) {
@@ -1181,8 +1351,9 @@ const MainScreen = ({ mainState, handler, navigation }) => {
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
         name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} />
 
-        <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
-        name="Settings" children={()=><SettingsPage mainState={mainState} navigation={navigation} handler={handler}/>} />
+        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
+        name="Settings" children={()=><SettingsPage mainState={mainState} navigation={navigation} handler={handler}/>} /> */}
+
 
         {/* <Tab.Screen options={{headerShown: false}} 
         name="NotificationExample" children={()=><NotificationExample mainState={mainState}/>} /> */}
@@ -1199,25 +1370,29 @@ const MainScreen = ({ mainState, handler, navigation }) => {
 
     return (
 
-        <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-            />
-          }
-        >
-          <Text fontSize={16} >
-            No Internet Connection! Please connect to Wifi and reload the app!
-          </Text>
+      <View style={{flex: 1, justifyContent: "center"}}>
+        <Text style={{textAlign: "center", fontSize: 17}}>
+          No Internet Connection! Please connect to Wifi and restart app!
+        </Text>
+      </View>
 
-      </ScrollView>
+      //   <ScrollView
+      //     refreshControl={
+      //       <RefreshControl
+      //         refreshing={refreshing}
+      //         onRefresh={onRefresh}
+      //       />
+      //     }
+      //   >
+      //     <Text fontSize={16} >
+      //       No Internet Connection! Please connect to Wifi and reload the app!
+      //     </Text>
+
+      // </ScrollView>
 
     )
 
   }
-
-
 
 }
 
@@ -1235,7 +1410,10 @@ export default class App extends React.Component{
       userInfo: undefined,
       all_events_list: [],
       event_list_refresh: false,
-      user_device_token: undefined
+      user_device_token: undefined,
+      // event_comment_refresh: false,
+      // event_comment_list: []
+      event_id_comment_dict: undefined
     };
 
     this.handler = this.handler.bind(this)
@@ -1261,6 +1439,7 @@ export default class App extends React.Component{
 
   }
 
+
   comment_handler = (update_val) => {
     console.log('comment-upate-handle:', update_val)
     // 'event_id': eventID, 'comment': user_comment}
@@ -1268,18 +1447,49 @@ export default class App extends React.Component{
   }
 
 
+  
 
   async getCurrentUser() {
-    try {
+    try { 
       const google_userInfo = await GoogleSignin.signInSilently();
+      console.log('google-user-info:', google_userInfo)      
       const userAccessTokens = await GoogleSignin.getTokens()
       var di = {'access_token': userAccessTokens['accessToken'], 'id_token': userAccessTokens['idToken']}
-
+ 
       this.setState({ 
         userLoggedIn: true,
         userInfo: di,
         userProfileInfo: google_userInfo
       })
+      
+      // fetch('https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/get_user_profile_info', {
+      //   method: 'POST',
+      //   body: JSON.stringify(di),
+      //   headers: {
+      //     'Content-Type': 'application/json'
+      //   }
+      // }).then((response) => response.json()).then((responseJson) => {
+
+      //   if (responseJson['success'] === true) {
+
+      //     this.setState({ 
+      //       userLoggedIn: true,
+      //       userInfo: di,
+      //       userProfileInfo: responseJson['data']
+      //     })
+
+      //   } else {
+
+      //     this.setState({ 
+      //       userLoggedIn: true,
+      //       userInfo: di,
+      //       userProfileInfo: google_userInfo
+      //     })
+
+      //   }
+
+      // })
+
 
     } catch (error) {
 
@@ -1290,6 +1500,7 @@ export default class App extends React.Component{
 
     }
   }
+
 
   async getAllEvents() {
 
@@ -1306,7 +1517,8 @@ export default class App extends React.Component{
         event_id_dict: responseJson['event_id_dict'][0],
         user_event_going_list: responseJson['user_event_going_list'][0],
         user_created_event_list: responseJson['user_created_event_list'][0],
-        event_list_refresh: false
+        event_list_refresh: false,
+        event_id_comment_dict: responseJson['event_id_comment_dict'][0]
       })
 
       // console.log('events-list:', responseJson)
@@ -1325,7 +1537,64 @@ export default class App extends React.Component{
     
     this.setState({ user_device_token: token})
 
+    if (this.state.userLoggedIn === true){
+
+      var formData = {
+        "userDeviceToken": this.state.user_device_token, 
+        "access_token": this.state.userInfo['access_token']
+      }
+      
+      fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
+        method: 'POST',
+        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then((response) => response.json()).then((responseJson) => {
+        console.log('user-device-token-updated:', responseJson)
+
+      })
+
+    }
+
   }
+
+
+  // async internetCB() {
+
+  //   return new Promise(resolve => {
+
+  //     NetInfo.fetch().then(state => {
+  //       console.log("Connection type", state.type);
+  //       console.log("Is connected?", state.isConnected);
+        
+  //       if (state.isConnected === true){  
+
+  //         // console.log('gcu-mount:', this.getCurrentUser())
+  //         testingFN() // TODO: need to create the all these as separate functions outside
+  //         // resolve(true)
+          
+  //         // getCurrentUser().then( () => {resolve(true)})
+
+  //         // this.getCurrentUser();
+  //         // this.getAllEvents();
+  //         // this.getDeviceToken();
+          
+  //         // this.setState({ 
+  //         //   internetConnected: state.isConnected
+  //         // })
+
+  //         // resolve(true)
+  
+  //       } else {
+  //         resolve(true)
+  //       }
+
+  //     });
+
+  //   })
+    
+  // }
 
 
   onMessageReceived(message) {
@@ -1335,74 +1604,95 @@ export default class App extends React.Component{
       // display notification with image and correct app-name on create-event for select users (sent from django)
         // go from there...
   }
-  
+
+
   async componentDidMount() {
-    console.log('state-info:', this.state)
+    // console.log('state-info:', this.state)
+
+    // GoogleSignin.configure({});
+    GoogleSignin.configure({
+      webClientId: '770095547736-vnejub7rlnb4gsl6pmkl2or9q6qgceeb.apps.googleusercontent.com'
+    });
 
     SplashScreen.hide();
 
     NetInfo.fetch().then(state => {
-      console.log("Connection type", state.type);
-      console.log("Is connected?", state.isConnected);
+      // console.log("Connection type", state.type);
+      // console.log("Is connected?", state.isConnected);
       this.setState({ internetConnected: state.isConnected })
-    });
+    })
 
-    if (this.state.internetConnected === true){
-
-      await this.getCurrentUser();
-      await this.getAllEvents();
-      await this.getDeviceToken();
-  
-      if (this.state.userLoggedIn === true){
-        
-        var formData = {"userDeviceToken": this.state.user_device_token}
-  
-        fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
-          method: 'POST',
-          body: JSON.stringify(formData),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }).then((response) => response.json()).then((responseJson) => {
-          console.log('save-user-attend:', responseJson)
-          // TODO: 
-            // need to mark-state for this event that user is not going or user is going
-              // show not-going-button and going-button
-  
-        })
-  
-      }
-
-    }
-
+    await this.getCurrentUser();
+    await this.getAllEvents();
+    await this.getDeviceToken();
 
     messaging().onMessage(this.onMessageReceived);
     messaging().setBackgroundMessageHandler(this.onMessageReceived);
 
-    // const firebaseConfig = {
-    //   apiKey: "AIzaSyAR8j4JsjCf4YlxDuS1eXDkrwlm58ojoSk",
-    //   authDomain: "",
-    //   projectId:  "proximity-personal",
-    //   storageBucket: "proximity-personal.appspot.com",
-    //   messagingSenderId: "",
-    //   appId: "1:770095547736:android:28091df2a3ae7f3794d12d",
-    //   measurementId: ""
-    // };
-    
-    // // TODO: get the firebase app to initialize and send multicast message to all device-tokens
-    // const firebaseApp = initializeApp(firebaseConfig);
-    // console.log('component-did-mount-firebase-app:', firebaseApp)
-    // console.log('component-apps:', firebaseApp.name)
-    // // console.log('component-fb-messaging:', messaging())
-    // this.setState({'firebase_app': firebaseApp})
+    // NetInfo.fetch().then(state => {
+    //   console.log("Connection type", state.type);
+    //   console.log("Is connected?", state.isConnected);
+    //   this.setState({ internetConnected: state.isConnected })
 
-     
-    // GoogleSignin.configure({
-    //   webClientId:"770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
-    //   forceCodeForRefreshToken: true,
+    //   if (this.state.internetConnected === true){
+
+    //     this.getAllEvents().then(function(){
+    //       console.log(this.state)
+    //     })
+
+    //     // this.getCurrentUser().then(this.getDeviceToken().then(this.getAllEvents().then(function(){
+
+    //     //   if (this.state.userLoggedIn === true){
+        
+    //     //     var formData = {"userDeviceToken": this.state.user_device_token}
+      
+    //     //     fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
+    //     //       method: 'POST',
+    //     //       body: JSON.stringify(formData),
+    //     //       headers: {
+    //     //         'Content-Type': 'application/json'
+    //     //       }
+    //     //     }).then((response) => response.json()).then((responseJson) => {
+    //     //       console.log('user-device-token-updated:', responseJson)
+  
+    //     //     })
+      
+    //     //   }
+
+    //     // })))
+
+    //   }
+
     // });
-    
-    
+
+    // if (this.state.internetConnected === true){
+      
+    //   console.log('gcu-mount:', this.getCurrentUser())
+    //   // await this.getCurrentUser();
+    //   // await this.getAllEvents();
+    //   // await this.getDeviceToken();
+  
+    //   // if (this.state.userLoggedIn === true){
+        
+    //   //   var formData = {"userDeviceToken": this.state.user_device_token}
+  
+    //   //   fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
+    //   //     method: 'POST',
+    //   //     body: JSON.stringify(formData),
+    //   //     headers: {
+    //   //       'Content-Type': 'application/json'
+    //   //     }
+    //   //   }).then((response) => response.json()).then((responseJson) => {
+    //   //     console.log('save-user-attend:', responseJson)
+    //   //     // TODO: 
+    //   //       // need to mark-state for this event that user is not going or user is going
+    //   //         // show not-going-button and going-button
+    //   //   })
+  
+    //   // }
+
+    // }
+
   }
 
 
@@ -1446,6 +1736,9 @@ export default class App extends React.Component{
   }
 
 }
+
+
+
 
 
 
