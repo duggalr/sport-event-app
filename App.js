@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useState, useEffect } from "react";
-import { RefreshControl, Alert } from 'react-native';
+import { RefreshControl, Alert, ActivityIndicator } from 'react-native';
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
-  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem, Checkbox } from "native-base";
+  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem, Checkbox, Spinner } from "native-base";
 import { NavigationContainer, useNavigation, useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -78,15 +78,16 @@ import { resolve } from 'url';
 
 
 // TODO: 
-  // un-attend? (would rather not have in V1)  
-  // add notification on event-create (test on my device) 
+  // **need a loading-screen on create-event (alot of stuff happening and takes a few seconds)
   // **user-device-token/authentication returns invalid-credentials at times <-- why is this? (sometimes it takes long too)**
   // redownload app and test signup/login extensively
   // **delete all the stuff in DB, fix all the API, test everything again to ensure it works (with production-logic)
+    // Productionize backend and final-testing; everything good, release...
+    // go through all TODO's, etc. in both RN/API files (don't waste time refactoring...)
   // fix all (majority of key ones) the React-Native warnings
-  // test in production without any console.logs... 
+  // test in production without any console.logs... (<-- main focus is testing speed here)
   // UI-testing on many different devices
-  // Productionize backend and final-testing; everything good, release...
+  
 
 
   
@@ -221,9 +222,6 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
                 { userEventGoingList.includes(item.event_id) ?  
                 
-                  // <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
-                  //   Your Going
-                  // </Badge> 
                   <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
                     Your Going
                   </Badge> 
@@ -253,7 +251,6 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
 const EventDetailPage = ({ route }) => {
 
-  // console.log('example-event-page:', route)
   var tmp_navigation = useNavigation();
 
   const [showModal, setShowModal] = useState(false);
@@ -343,9 +340,18 @@ const EventDetailPage = ({ route }) => {
         // add the new event-id to user_event_going_list
         // console.log('userCreatedEventList:', userCreatedEventList)
       userEventGoingList.push(eventID)
+      // user_going_list.append({'ug_id': ug_obj.id, 'profile_picture': ug_obj.user_obj.profile_picture_url, 'name': ug_obj.user_obj.full_name})      
+      var prev_user_going_list = eventIdDict.user_going_list
+      prev_user_going_list.push({
+        'ug_id': userProfileInfo['user']['id'],
+        'profile_picture': userProfileInfo['user']['photo'],
+        'name': userProfileInfo['user']['name']
+      })
       // console.log(userEventGoingList, eventID)
-      cb_handler({'user_created_event_list': userEventGoingList})
-      // TODO: for attend, loader with callback?      
+      cb_handler({
+        'user_event_going_list': userEventGoingList, 
+        'event_id_dict': eventIdDict
+      })
 
     })
 
@@ -419,6 +425,30 @@ const EventDetailPage = ({ route }) => {
   }
 
 
+
+  function unAttendEvent(){
+
+    var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
+    
+    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/unattend_event", {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => response.json()).then((responseJson) => {
+      console.log('unattend-user-event:', responseJson)
+      var index = userEventGoingList.indexOf(eventID);
+      if (index > -1) {
+        userEventGoingList.splice(index, 1); // 2nd parameter means remove one item only
+        cb_handler({'user_event_going_list': userEventGoingList})
+
+      }
+          
+    })
+
+  }
+
   
   return (
 
@@ -459,11 +489,6 @@ const EventDetailPage = ({ route }) => {
           </Pressable>
            : 
            null}
-
-
-          {/* <Badge alignSelf="center" variant={"solid"} colorScheme="success" _text={{fontSize: 15}}>
-          Your Going
-        </Badge>  */}
 
         </HStack>
 
@@ -549,16 +574,35 @@ const EventDetailPage = ({ route }) => {
           </Modal>
 
 
-          <Spacer />
+          <Spacer />          
+
           { userEventGoingList.includes(eventID) ?  
-            // <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
-            //   Your Going
-            // </Badge> 
+          <HStack>
             <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
               Your Going
             </Badge> 
+            {/* <Pressable pt="4" pl="3" onPress={() => unAttendEvent()}> */}
+            <Pressable pt="3" pl="3" onPress={() => {
+            Alert.alert(
+              "Unattend Event?",
+              "you sure...",
+              [
+                {
+                  text: "Cancel",
+                  onPress: () => console.log("Cancel Pressed"),
+                  style: "cancel"
+                },
+                { text: "Confirm", onPress: () => unAttendEvent() }
+              ]
+            );
+          }}>
+              <Icon name="cancel" group="ui-interface"/>
+            </Pressable>
+            {/* style={{paddingTop: 2, paddingLeft: 3}} */}
+          </HStack>
             : <Button colorScheme="info" isDisabled={!userLoggedIn} onPress={() => saveUserAttend()}>Attend</Button>
           }
+          
 
           {/* <Spacer />           */}
           {/* { userCreatedEventList.includes(eventID) ? <Button onPress={() => deleteEvent()}>Delete</Button> : null} */}
@@ -904,228 +948,264 @@ const EventFormComponent = ({ mainState, handler }) => {
 
  
   const onEventFormSubmit = () => {
-    setErrors({});
+    handler({'event_submit_loading': true})
 
-    var userData = mainState.userInfo
-    var user_access_token = userData['access_token']
-    formData['access_token'] = user_access_token
-    console.log('new-form-data', formData)
+    // setErrors({});
 
-    if (formData['event_title'] === "" || formData['event_description'] === "" || formData['park_name'] === "" | formData['event_date'] === "" | formData['event_time'] === ""){
-      setErrors({ ...errors,
-        error_msg: 'Please fill all fields before submitting!'
-      });
-      return false;
-    }
+    // var userData = mainState.userInfo
+    // var user_access_token = userData['access_token']
+    // formData['access_token'] = user_access_token
+    // console.log('new-form-data', formData)
 
-    var todayDate = new Date()
-    if (new Date(formData['event_date']).getTime() < todayDate.getTime()){ // date must be greater or equal to current date
-      console.log('error on date...')
-      setErrors({ ...errors,
-        error_msg: 'Invalid Date!'
-      });
-      return false;
+    // if (formData['event_title'] === "" || formData['event_description'] === "" || formData['park_name'] === "" | formData['event_date'] === "" | formData['event_time'] === ""){
+    //   setErrors({ ...errors,
+    //     error_msg: 'Please fill all fields before submitting!'
+    //   });
+    //   return false;
+    // }
+
+    // var todayDate = new Date()
+    // if (new Date(formData['event_date']).getTime() < todayDate.getTime()){ // date must be greater or equal to current date
+    //   console.log('error on date...')
+    //   setErrors({ ...errors,
+    //     error_msg: 'Invalid Date!'
+    //   });
+    //   return false;
       
-    } 
-    
-    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_event", {
-      method: 'POST',
-      body: JSON.stringify(formData),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then((response) => response.json()).then((responseJson) => {
-      console.log('create-evnet-form:', responseJson)
-      if (responseJson['success'] === true ) {
+    // } 
+
+    // handler({'event_submit_loading': true})
+
+    // fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_event", {
+    //   method: 'POST',
+    //   body: JSON.stringify(formData),
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // }).then((response) => response.json()).then((responseJson) => {
+    //   console.log('create-evnet-form:', responseJson)
+    //   if (responseJson['success'] === true ) {
         
-        // redirect to homepage showing event
-        // handler({'event_submitted': true})
-        handler({'event_list_refresh': true})
-        setData({
-          event_title: '', 
-          event_description: '',
-          park_name: '',
-          event_date: new Date(),
-          event_time: ''
-        })
-        tmp_navigation.navigate('MainEventList')
+    //     // redirect to homepage showing event
+    //     // handler({'event_submitted': true})
+    //     handler({'event_list_refresh': true, 'event_submit_loading': false})
+    //     setData({
+    //       event_title: '', 
+    //       event_description: '',
+    //       park_name: '',
+    //       event_date: new Date(),
+    //       event_time: ''
+    //     })
+    //     tmp_navigation.navigate('MainEventList')
         
 
-      } else{
-        setErrors({ ...errors,
-          error_msg: 'Form did not submit successfully!'
-        });
-      }
+    //   } else{
+    //     setErrors({ ...errors,
+    //       error_msg: 'Form did not submit successfully!'
+    //     });
+    //   }
 
-    })
+    // })
 
   }
 
 
   
 
+  if (mainState.event_submit_loading === true) {
 
-  return (
-
-    <ScrollView w="100%" backgroundColor="white">
-      {/* <Stack space={2.5} alignSelf="center" px="4" safeArea mt="4" w={{base: "100%", md: "25%"}}> */}
-      <HStack paddingTop="6" paddingLeft="2">
-
-        <View pl="4" pt="2">
-          <Icon name="pencil" group="ui-interface" />  
-        </View>
-        
-        <Text bold fontSize="24" pl="4">
-          Create A Run        
-        </Text>
-
-      </HStack>
+    return (
       
-      <VStack p="5">
+      // <HStack space={2} justifyContent="center">
+      //   <Spinner accessibilityLabel="Loading posts" />
+      //   <Heading color="primary.500" fontSize="md">
+      //     Loading
+      //   </Heading>
+      // </HStack>
+      <View style={{
+        // flex: 1,
+        // justifyContent: "center", 
+        // flexDirection: "row",
+        // justifyContent: "space-around",
+        // padding: 10
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <ActivityIndicator size="large" />
+      </View>
 
-        <Box pt="2" >
-          <FormControl isRequired>
-            <FormControl.Label>
-              <Text fontSize="16" fontWeight="medium" >
-                Title
-              </Text>
-            </FormControl.Label>
-            <Input placeholder="ie. Ball Run this Friday at 6PM at Smithfield Park" w="80" onChangeText={value => setData({ ...formData,
-        event_title: value
-      })} value={formData.event_title}/>
-          </FormControl>
-        </Box>
+    )
 
-        <Box pt="4">
-          <FormControl isRequired>
-            <FormControl.Label>
-              <Text fontSize="16" fontWeight="medium">
-                Choose a Park
-              </Text>
-            </FormControl.Label>
+  } else {
 
-            <Select selectedValue={parkVal} minWidth="200" accessibilityLabel="Park Name" placeholder="Park Name" _selectedItem={{
-                bg: "teal.600",
-                endIcon: <CheckIcon size="5"/>
-              }} mt={1} onValueChange={itemValue => parkValueChange(itemValue)} value={formData.park_name}>
+    return (
+
+      <ScrollView w="100%" backgroundColor="white">
+        {/* <Stack space={2.5} alignSelf="center" px="4" safeArea mt="4" w={{base: "100%", md: "25%"}}> */}
+        <HStack paddingTop="6" paddingLeft="2">
+
+          <View pl="4" pt="2">
+            <Icon name="pencil" group="ui-interface" />  
+          </View>
+          
+          <Text bold fontSize="24" pl="4">
+            Create A Run        
+          </Text>
+
+        </HStack>
+        
+        <VStack p="5">
+
+          <Box pt="2" >
+            <FormControl isRequired>
+              <FormControl.Label>
+                <Text fontSize="16" fontWeight="medium" >
+                  Title
+                </Text>
+              </FormControl.Label>
+              <Input placeholder="ie. Ball Run this Friday at 6PM at Smithfield Park" w="80" onChangeText={value => setData({ ...formData,
+          event_title: value
+        })} value={formData.event_title}/>
+            </FormControl>
+          </Box>
+
+          <Box pt="4">
+            <FormControl isRequired>
+              <FormControl.Label>
+                <Text fontSize="16" fontWeight="medium">
+                  Choose a Park
+                </Text>
+              </FormControl.Label>
+
+              <Select selectedValue={parkVal} minWidth="200" accessibilityLabel="Park Name" placeholder="Park Name" _selectedItem={{
+                  bg: "teal.600",
+                  endIcon: <CheckIcon size="5"/>
+                }} mt={1} onValueChange={itemValue => parkValueChange(itemValue)} value={formData.park_name}>
+                
+                <Select.Item label="Waterfront Neighbourhood Centre" value="Waterfront Neighbourhood Centre" />
+                <Select.Item label="Smithfield Park" value="Smithfield Park" />
+                <Select.Item label="Kipling Parkette" value="Kipling Parkette" />
+                <Select.Item label="David Crombie Park" value="David Crombie Park Basketball Court" />
+                <Select.Item label="Christie Pits Park" value="Christie Pits Park" />
+                <Select.Item label="Underpass Park" value="Underpass Park" />
+                <Select.Item label="Flagstaff Park" value="Flagstaff Park" />
+                <Select.Item label="Indian Line Park" value="Indian Line Park" />
+                <Select.Item label="Summerlea Park" value="Summerlea Park" />
+                <Select.Item label="Firgrove Park" value="Firgrove Park" />
+                <Select.Item label="Irving W. Chapley Park" value="Irving W. Chapley Park" />
+                <Select.Item label="McNicoll Park" value="McNicoll Park" />
+                <Select.Item label="Sanwood Park" value="Sanwood Park" />
+                <Select.Item label="Confederation Park" value="Confederation Park" />
+                <Select.Item label="MacGregor Playground" value="MacGregor Playground" />
+                <Select.Item label="Jack Goodlad Park" value="Jack Goodlad Park" />
+                <Select.Item label="Ramsden Park" value="Ramsden Park" />
+                <Select.Item label="Earlscourt Park" value="Earlscourt Park" />
+                <Select.Item label="Ourland Park" value="Ourland Park" />
+                <Select.Item label="Paul Coffey Park" value="Paul Coffey Park" />
+                <Select.Item label="Regent Park Athletic Grounds" value="Regent Park Athletic Grounds" />
+
+              </Select>
+
+            </FormControl>
+          </Box>
+
+
+          <View pt="4">
+            <HStack>
+              {/* <Button onPress={showDatepicker} title="Show date picker!" w="1/2">
+                Choose Date
+              </Button> */}
               
-              <Select.Item label="Waterfront Neighbourhood Centre" value="Waterfront Neighbourhood Centre" />
-              <Select.Item label="Smithfield Park" value="Smithfield Park" />
-              <Select.Item label="Kipling Parkette" value="Kipling Parkette" />
-              <Select.Item label="David Crombie Park" value="David Crombie Park Basketball Court" />
-              <Select.Item label="Christie Pits Park" value="Christie Pits Park" />
-              <Select.Item label="Underpass Park" value="Underpass Park" />
-              <Select.Item label="Flagstaff Park" value="Flagstaff Park" />
-              <Select.Item label="Indian Line Park" value="Indian Line Park" />
-              <Select.Item label="Summerlea Park" value="Summerlea Park" />
-              <Select.Item label="Firgrove Park" value="Firgrove Park" />
-              <Select.Item label="Irving W. Chapley Park" value="Irving W. Chapley Park" />
-              <Select.Item label="McNicoll Park" value="McNicoll Park" />
-              <Select.Item label="Sanwood Park" value="Sanwood Park" />
-              <Select.Item label="Confederation Park" value="Confederation Park" />
-              <Select.Item label="MacGregor Playground" value="MacGregor Playground" />
-              <Select.Item label="Jack Goodlad Park" value="Jack Goodlad Park" />
-              <Select.Item label="Ramsden Park" value="Ramsden Park" />
-              <Select.Item label="Earlscourt Park" value="Earlscourt Park" />
-              <Select.Item label="Ourland Park" value="Ourland Park" />
-              <Select.Item label="Paul Coffey Park" value="Paul Coffey Park" />
-              <Select.Item label="Regent Park Athletic Grounds" value="Regent Park Athletic Grounds" />
+              <Button size="sm" variant="outline" onPress={showDatepicker}>
+                Choose Date
+              </Button>
 
-            </Select>
+              <Text pl="4" pt="2" fontWeight="medium">
+                Date Selected: {date.getFullYear() + '/' + parseInt(date.getMonth()+1) + '/' + date.getDate()}
+              </Text>
 
-          </FormControl>
-        </Box>
+            </HStack>
+
+            {show && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date}
+                mode={mode}
+                is24Hour={true}
+                onChange={onDateChange}
+              />
+            )}
+
+          </View>
+
+    
+          <Box pt="4">
+
+            <FormControl isRequired>
+
+              <FormControl.Label>
+                <Text fontSize="16" fontWeight="medium">
+                  Choose Time
+                </Text>
+              </FormControl.Label>
+
+              <Select selectedValue={timeVal}  accessibilityLabel="Choose Time" placeholder="Choose Time" _selectedItem={{
+                bg: "teal.600",
+                endIcon: <CheckIcon size="5" />
+              }} mt={1} onValueChange={itemValue => timeValueChange(itemValue)}>
+                <Select.Item label="12:00PM" value="12:00" />
+                <Select.Item label="1:00PM" value="1:00" />
+                <Select.Item label="2:00PM" value="2:00" />
+                <Select.Item label="3:00PM" value="3:00" />
+                <Select.Item label="4:00PM" value="4:00" />
+                <Select.Item label="5:00PM" value="5:00" />
+                <Select.Item label="6:00PM" value="6:00" />
+                <Select.Item label="7:00PM" value="7:00" />
+                <Select.Item label="8:00PM" value="8:00" />
+                <Select.Item label="9:00PM" value="9:00" />
+              </Select>
+              
+            </FormControl>
+      
+          </Box>
 
 
-        <View pt="4">
-          <HStack>
-            {/* <Button onPress={showDatepicker} title="Show date picker!" w="1/2">
-              Choose Date
-            </Button> */}
-            
-            <Button size="sm" variant="outline" onPress={showDatepicker}>
-              Choose Date
-            </Button>
-
-            <Text pl="4" pt="2" fontWeight="medium">
-              Date Selected: {date.getFullYear() + '/' + parseInt(date.getMonth()+1) + '/' + date.getDate()}
-            </Text>
-
-          </HStack>
-
-          {show && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={date}
-              mode={mode}
-              is24Hour={true}
-              onChange={onDateChange}
-            />
-          )}
-
-        </View>
-
-   
-        <Box pt="4">
-
-          <FormControl isRequired>
-
+          {/* <Box alignItems="center" w="100%"> */}
+          <FormControl pt="4" isRequired> 
             <FormControl.Label>
               <Text fontSize="16" fontWeight="medium">
-                Choose Time
+                Description
               </Text>
             </FormControl.Label>
-
-            <Select selectedValue={timeVal}  accessibilityLabel="Choose Time" placeholder="Choose Time" _selectedItem={{
-              bg: "teal.600",
-              endIcon: <CheckIcon size="5" />
-            }} mt={1} onValueChange={itemValue => timeValueChange(itemValue)}>
-              <Select.Item label="12:00PM" value="12:00" />
-              <Select.Item label="1:00PM" value="1:00" />
-              <Select.Item label="2:00PM" value="2:00" />
-              <Select.Item label="3:00PM" value="3:00" />
-              <Select.Item label="4:00PM" value="4:00" />
-              <Select.Item label="5:00PM" value="5:00" />
-              <Select.Item label="6:00PM" value="6:00" />
-              <Select.Item label="7:00PM" value="7:00" />
-              <Select.Item label="8:00PM" value="8:00" />
-              <Select.Item label="9:00PM" value="9:00" />
-            </Select>
-            
+            <TextArea h={20} placeholder="ie. looking to play a 5v5 friday. Any skill-level is fine... I'll bring some water for everyone"
+            onChangeText={value => setData({ ...formData, event_description: value})} value={formData.event_description}/>
           </FormControl>
-    
+          
+          {/* </Box>; */}
+
+        </VStack>
+          
+        {/* </Stack> */}
+        
+        {/* {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>Form did not submit successfully. Ensure all fields are filled!</Text> : null} */}
+        {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>{errors.error_msg}</Text> : null}
+        {/* <FormControl.ErrorMessage>Error</FormControl.ErrorMessage> */}
+
+        <Box alignItems="center">
+          <Button w="1/2" onPress={onEventFormSubmit}>Create Event</Button>
         </Box>
-
-
-        {/* <Box alignItems="center" w="100%"> */}
-        <FormControl pt="4" isRequired> 
-          <FormControl.Label>
-            <Text fontSize="16" fontWeight="medium">
-              Description
-            </Text>
-          </FormControl.Label>
-          <TextArea h={20} placeholder="ie. looking to play a 5v5 friday. Any skill-level is fine... I'll bring some water for everyone"
-           onChangeText={value => setData({ ...formData, event_description: value})} value={formData.event_description}/>
-        </FormControl>
         
-        {/* </Box>; */}
 
-      </VStack>
-        
-      {/* </Stack> */}
-      
-      {/* {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>Form did not submit successfully. Ensure all fields are filled!</Text> : null} */}
-      {Object.keys(errors).length > 0 ? <Text style={{color: 'red', fontSize: 16, alignSelf: "center"}}>{errors.error_msg}</Text> : null}
-      {/* <FormControl.ErrorMessage>Error</FormControl.ErrorMessage> */}
+      </ScrollView>
 
-      <Box alignItems="center">
-        <Button w="1/2" onPress={onEventFormSubmit}>Create Event</Button>
-      </Box>
-      
+    )
 
-    </ScrollView>
-
-  )
+  }
 
 }
 
