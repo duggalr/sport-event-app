@@ -78,6 +78,9 @@ import { resolve } from 'url';
 
 
 // TODO: 
+  // start with event-list <-- when no events, adjust UI and go from there 
+    // go through each functionality again, etc. (<-- test for speed, ease-of-use, functionality, etc.)
+
   // **need a loading-screen on create-event (alot of stuff happening and takes a few seconds)
   // **user-device-token/authentication returns invalid-credentials at times <-- why is this? (sometimes it takes long too)**
   // redownload app and test signup/login extensively
@@ -95,9 +98,8 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 
-const MainHeading = () => {
 
-  let [service, setService] = React.useState("");
+const MainHeading = () => {
 
   var tmp_navigation = useNavigation()
 
@@ -111,18 +113,8 @@ const MainHeading = () => {
       <Spacer />
 
       <Pressable onPress={() => tmp_navigation.navigate('Create Event')}>
-        {/* <Icon name="settings" group="ui-interface" style={{ marginTop: 2, marginRight: 12}} height="28" width="28"/> */}
         <Icon name="plus" group="ui-interface" style={{ marginTop: 1, marginRight: 12}} height="28" width="28"/>
       </Pressable>
-        {/* <Icon name="user-shape" group="font-awesome" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
-      
-      
-      {/* <Icon name="user-1" group="ui-interface" /> */}
-      {/* <Icon name="filter-results-button" group="material-design" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
-      {/* <Icon name="plus" group="ui-interface" style={{ marginTop: 3, marginRight: 12}} height="24" width="24"/> */}
-      {/* <Button backgroundColor="#0284c7">
-        Create Event
-      </Button> */}
 
     </HStack>
     
@@ -139,6 +131,8 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
   var userEventGoingList = mainState.user_event_going_list
   var userCreatedEventList = mainState.user_created_event_list
+  var event_id_comment_dict = mainState.event_id_comment_dict
+  // mainState.event_id_comment_dict[eventID]
 
   const [showModal, setShowModal] = useState(false);
 
@@ -148,102 +142,124 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
   //   handler({'event_comment_refresh': true}) // so when user clicks on eventDetail, they will see an updated comments-state
   // }
   
+  if (eventData.length > 0) {
 
-  return (
+    return (
 
-    <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
-
-      <MainHeading />
-
-      <FlatList data={eventData} renderItem={({
-        item
-      }) => <Box key={item.event_id}>
-          
-          <Pressable onPress={() => navigation.navigate('Event Detail', 
-          {mainState: mainState, event_id: item.event_id, state_handler: handler})}>
-
-            <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="1" padding="5" mt="6" rounded="25" backgroundColor="white">
-
-              <HStack alignItems="center">
-
-                <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />
-                <Spacer />
-                <Badge backgroundColor="#0284c7" _text={{color: "white", fontSize: "13"}} variant="solid" rounded="10">
-                  {item.park_name}
-                </Badge>
-
-              </HStack>                
-
-              <Text mt="3" fontWeight="medium" fontSize="xl">
-                {item.event_name}
-              </Text>
-
-              <HStack mt="0.5">
-
-                <Text ml="0.5"></Text>
-                <Icon name="calendar" group="ui-interface" color="gray" />
-                <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
-                  {item.event_date}
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
+  
+        <MainHeading />
+  
+        <FlatList data={eventData} renderItem={({
+          item
+        }) => <Box key={item.event_id}>
+            
+            <Pressable onPress={() => navigation.navigate('Event Detail', 
+            {mainState: mainState, event_id: item.event_id, state_handler: handler})}>
+  
+              <Box maxW="96" borderWidth="1" borderColor="coolGray.300" shadow="1" padding="5" mt="6" rounded="25" backgroundColor="white">
+  
+                <HStack alignItems="center">
+  
+                  <Icon name="basketball" group="miscellaneous" height="26" width="26" color="orange" />
+                  <Spacer />
+                  <Badge backgroundColor="#0284c7" _text={{color: "white", fontSize: "13"}} variant="solid" rounded="10">
+                    {item.park_name}
+                  </Badge>
+  
+                </HStack>                
+  
+                <Text mt="3" fontWeight="medium" fontSize="xl">
+                  {item.event_name}
                 </Text>
-
-                <Text ml="4"></Text>
-                <Icon ml="2" name="time" group="essential" color="gray"/>
-                <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
-                  {item.event_time}
-                </Text>
-
-              </HStack>
-
-              <HStack pt="5">
-
-                {item.user_going_list.length > 0 ?  
-                <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
-                  <Avatar bg="green.500" source={{
-                      uri: avatar_item.profile_picture
-                    }} key={index}></Avatar>
-                  )}
-                </Avatar.Group> 
-                : 
-                null
-                }
-
-                {/* <Text>({item.user_event_comments.length})</Text> */}      
-
-                <Spacer />
-
-                {/* <HStack pt="4" alignSelf="center" > */}
-                <HStack pt="3" pr="3">
-                  <Icon name="comment-white-oval-bubble" group="font-awesome" height="24" width="24"/> 
-                  {/* <Icon name="comment-black-oval-bubble-shape" group="font-awesome" height="24" width="24"/>  */}
-                  <Text fontSize={16} fontWeight="medium" pl="1">
-                   ({item.user_event_comments.length})
+  
+                <HStack mt="0.5">
+  
+                  <Text ml="0.5"></Text>
+                  <Icon name="calendar" group="ui-interface" color="gray" />
+                  <Text color="gray.400" ml="2" fontSize="sm" fontWeight="600">
+                    {item.event_date}
                   </Text>
+  
+                  <Text ml="4"></Text>
+                  <Icon ml="2" name="time" group="essential" color="gray"/>
+                  <Text ml="1" color="gray.400" fontSize="sm" fontWeight="600">
+                    {item.event_time}
+                  </Text>
+  
                 </HStack>
+  
+                <HStack pt="5">
+  
+                  {item.user_going_list.length > 0 ?  
+                  <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
+                    <Avatar bg="green.500" source={{
+                        uri: avatar_item.profile_picture
+                      }} key={index}></Avatar>
+                    )}
+                  </Avatar.Group> 
+                  : 
+                  null
+                  }
+  
+                  {/* <Text>({item.user_event_comments.length})</Text> */}      
+  
+                  <Spacer />
+  
+                  {/* <HStack pt="4" alignSelf="center" > */}
+                  <HStack pt="3" pr="3">
+                    <Icon name="comment-white-oval-bubble" group="font-awesome" height="24" width="24"/> 
+                    {/* <Icon name="comment-black-oval-bubble-shape" group="font-awesome" height="24" width="24"/>  */}
+                    <Text fontSize={16} fontWeight="medium" pl="1">
+                     {/* ({item.user_event_comments.length}) */}
+                     {/* ({event_id_comment_dict[item.id].length}) */}
+                    </Text>
+                  </HStack>
 
-                { userEventGoingList.includes(item.event_id) ?  
-                
-                  <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
-                    Your Going
-                  </Badge> 
-                  : <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {
-                    mainState: mainState, event_id: item.event_id, state_handler: handler})}>
-                  Details
-                </Button>
-                }                                  
+                  { userEventGoingList.includes(item.event_id) ?  
+                  
+                    <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
+                      Your Going
+                    </Badge> 
+                    : <Button colorScheme="info" onPress={() => navigation.navigate('Event Detail', {
+                      mainState: mainState, event_id: item.event_id, state_handler: handler})}>
+                    Details
+                  </Button>
+                  }
+  
+                </HStack>
+  
+              </Box>
+  
+            </Pressable>
+  
+          </Box>}>
+  
+        </FlatList>
+  
+      </View>
+  
+    )
 
-              </HStack>
+  } else {
 
-            </Box>
+    return (
 
-          </Pressable>
+      <View style={{ flex: 1, backgroundColor: 'white', padding: 15}}>
 
-        </Box>}>
+        <MainHeading />
+        
+        <Text style={{ justifyContent: 'center', backgroundColor: 'white', padding: 15, fontSize: 15, marginTop: 20}}>
+          No Upcoming Runs Posted. Be the first to post and notify everyone!
+        </Text>
 
-      </FlatList>
+      </View>
 
-    </View>
+    )
 
-  )
+  }
+
+
 
 
 }
@@ -252,74 +268,21 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 const EventDetailPage = ({ route }) => {
 
   var tmp_navigation = useNavigation();
-
-  const [showModal, setShowModal] = useState(false);
-
   var cb_handler = route.params.state_handler
-
-  console.log('cb-handler:', cb_handler)
-
   var mainState = route.params.mainState
   var eventID = route.params.event_id
+
   var userInfo = mainState.userInfo
   var userProfileInfo = mainState.userProfileInfo
-
-  console.log('event-detail-user-info', userInfo, userProfileInfo)
-
   var userLoggedIn = mainState.userLoggedIn
-  console.log('event-id:', eventID)
   var eventIdDict = mainState.event_id_dict[eventID]
-  // var user_comment_list = eventIdDict.user_event_comments
-
-  console.log('event-comment-dict:', mainState.event_id_comment_dict)
   var user_comment_list = mainState.event_id_comment_dict[eventID]
-  
-  // var event_comment_list = mainState.event_comment_list
-  // const [commentStateList, setCommentState] = useState(event_comment_list)
-  // console.log('comment-state-list:', commentStateList)
-
-  // function fetchComments(eventID){
-    
-  //   var formData = {'event_id': eventID}
-
-  //   // fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/fetch_comments", {
-  //   //   method: 'POST',
-  //   //   body: JSON.stringify(formData),
-  //   //   headers: {
-  //   //     'Content-Type': 'application/json'
-  //   //   }
-  //   // }).then((response) => response.json()).then((responseJson) => {
-  //   //   console.log('fetch-comments:', responseJson)
-      
-  //   //   cb_handler({
-  //   //     event_comment_list: responseJson['data'],
-  //   //     event_comment_refresh: false
-  //   //   })
-
-  //   //   // setCommentState(responseJson['data'])
-      
-  //   // })
-
-  // }
-
-  // console.log('event-comment:', mainState.event_comment_refresh)
-
-  // if (mainState.event_comment_refresh === true){
-  //   fetchComments(eventID)
-  //   // cb_handler({event_comment_refresh: false})
-  // }
-  
   var userEventGoingList = mainState.user_event_going_list
   var userCreatedEventList = mainState.user_created_event_list
 
-  console.log('event-id-dict:', userEventGoingList)
-
+  const [showModal, setShowModal] = useState(false);
   const [selected, setSelected] = React.useState(1);
-
   const [errors, setErrors] = React.useState({});
-
-
-  // TODO: set this to blank on submit
   const [commentFormData, setCommentData] = React.useState({
     comment_input: ''
   });
@@ -334,20 +297,15 @@ const EventDetailPage = ({ route }) => {
       headers: {
         'Content-Type': 'application/json'
       }
-    }).then((response) => response.json()).then((responseJson) => {
-      console.log('save-user-attend:', responseJson)
-      // TODO: change to 'your-going'; look at mainstate update
-        // add the new event-id to user_event_going_list
-        // console.log('userCreatedEventList:', userCreatedEventList)
+    }).then((response) => response.json()).then((responseJson) => {      
       userEventGoingList.push(eventID)
-      // user_going_list.append({'ug_id': ug_obj.id, 'profile_picture': ug_obj.user_obj.profile_picture_url, 'name': ug_obj.user_obj.full_name})      
       var prev_user_going_list = eventIdDict.user_going_list
       prev_user_going_list.push({
         'ug_id': userProfileInfo['user']['id'],
         'profile_picture': userProfileInfo['user']['photo'],
         'name': userProfileInfo['user']['name']
       })
-      // console.log(userEventGoingList, eventID)
+
       cb_handler({
         'user_event_going_list': userEventGoingList, 
         'event_id_dict': eventIdDict
@@ -367,14 +325,13 @@ const EventDetailPage = ({ route }) => {
         'Content-Type': 'application/json'
       }
     }).then((response) => response.json()).then((responseJson) => {
-      console.log('delete-event:', responseJson)      
+
       cb_handler({'event_list_refresh': true})
       tmp_navigation.navigate('MainEventList')
 
     })
 
   }
-
 
   function saveComment(){
     setErrors({});
@@ -383,7 +340,6 @@ const EventDetailPage = ({ route }) => {
 
     if (user_comment === "") {
 
-      console.log('error on comment...')
       setErrors({ ...errors,
         error_msg: 'Comment Invalid.'
       });
@@ -391,8 +347,6 @@ const EventDetailPage = ({ route }) => {
       
     } else {
 
-      console.log('saving-comment:', user_comment)
-      // {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
       var saveCommentFormData = {'event_id': eventID, 'comment': user_comment, 'access_token': userInfo['access_token']}
 
       fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_comment", {
@@ -402,29 +356,16 @@ const EventDetailPage = ({ route }) => {
           'Content-Type': 'application/json'
         }
       }).then((response) => response.json()).then((responseJson) => {
-        console.log('save-comment:', responseJson)
-        console.log('user-profile-info:', userProfileInfo)
         var di = {'comment': user_comment, 'user_full_name': userProfileInfo.user.name, 'user_profile_pic': userProfileInfo.user.photo}
-        // mainState.event_id_comment_dict[eventID]
         var prev_comment_dict = mainState.event_id_comment_dict
         prev_comment_dict[eventID].push(di)
-        // user_comment_list.push(di)
         cb_handler({'event_id_comment_dict': prev_comment_dict})
         setCommentData({comment_input: ''})
-
-        // setCommentState(prevState => [...prevState, di])
-
-        // {"comment": "Shsudushs ", "user_full_name": "Rahul Duggal", "user_profile_pic": "https://lh3.googleusercontent.com/a/AATXAJwFjGR2J-5lAvvx633F9BwuA4W7kX1u0sbm-T65=s96-c"}
-        // console.log('delete-event:', responseJson)
-        // cb_handler({'event_list_refresh': true})
-        // tmp_navigation.navigate('MainEventList')
       })
 
     }
 
   }
-
-
 
   function unAttendEvent(){
 
@@ -437,12 +378,10 @@ const EventDetailPage = ({ route }) => {
         'Content-Type': 'application/json'
       }
     }).then((response) => response.json()).then((responseJson) => {
-      console.log('unattend-user-event:', responseJson)
       var index = userEventGoingList.indexOf(eventID);
       if (index > -1) {
         userEventGoingList.splice(index, 1); // 2nd parameter means remove one item only
         cb_handler({'user_event_going_list': userEventGoingList})
-
       }
           
     })
@@ -464,12 +403,9 @@ const EventDetailPage = ({ route }) => {
           <Badge colorScheme="lightBlue" _text={{
             color: "white", fontSize: "13"
           }} variant="solid" rounded="10" >
-            {/* Smithfield Park */}
             {eventIdDict.park_name}
           </Badge>
  
-          {/* <Pressable onPress={() => deleteEvent()}> */}
-
           { userCreatedEventList.includes(eventID) ? 
           <Pressable onPress={() => {
             Alert.alert(
@@ -478,7 +414,7 @@ const EventDetailPage = ({ route }) => {
               [
                 {
                   text: "Cancel",
-                  onPress: () => console.log("Cancel Pressed"),
+                  onPress: () => {},
                   style: "cancel"
                 },
                 { text: "Delete", onPress: () => deleteEvent() }
@@ -493,28 +429,24 @@ const EventDetailPage = ({ route }) => {
         </HStack>
 
         <Text mt="3" fontWeight="medium" fontSize="23"> 
-          {/* Basketball Run this Friday at Smithfield */}
           {eventIdDict.event_name}
         </Text>
           
         <HStack mt="2">
           <Icon name="calendar" group="ui-interface" color="gray" />
           <Text color="gray" ml="2" fontSize="15" fontWeight="medium">
-            {/* 01/01/2022 */}
             {eventIdDict.event_date}
           </Text>
 
           <Text ml="6"></Text>
           <Icon ml="2" name="time" group="essential" color="gray"/>
           <Text ml="1" color="gray" fontSize="15" fontWeight="medium">
-            {/* 6:00PM */}
             {eventIdDict.event_time}
           </Text>
 
         </HStack>
 
         <Text mt="6" fontSize="16" color="black">
-          {/* I got 2 of my friends coming. Want to do a 5v5, full-court run, click join if you want to reach.  */}
           {eventIdDict.event_description}
         </Text>
 
@@ -580,8 +512,15 @@ const EventDetailPage = ({ route }) => {
           <HStack>
             <Badge alignSelf="center" variant={"solid"} bg="cyan.500" _text={{fontSize: 15}}>
               Your Going
-            </Badge> 
-            {/* <Pressable pt="4" pl="3" onPress={() => unAttendEvent()}> */}
+            </Badge>
+          </HStack>
+            : <Button colorScheme="info" isDisabled={!userLoggedIn} onPress={() => saveUserAttend()}>Attend</Button>
+          }
+
+
+        { userCreatedEventList.includes(eventID) ? 
+          null : 
+          <HStack>
             <Pressable pt="3" pl="3" onPress={() => {
             Alert.alert(
               "Unattend Event?",
@@ -589,7 +528,7 @@ const EventDetailPage = ({ route }) => {
               [
                 {
                   text: "Cancel",
-                  onPress: () => console.log("Cancel Pressed"),
+                  onPress: () => {},
                   style: "cancel"
                 },
                 { text: "Confirm", onPress: () => unAttendEvent() }
@@ -598,47 +537,20 @@ const EventDetailPage = ({ route }) => {
           }}>
               <Icon name="cancel" group="ui-interface"/>
             </Pressable>
-            {/* style={{paddingTop: 2, paddingLeft: 3}} */}
           </HStack>
-            : <Button colorScheme="info" isDisabled={!userLoggedIn} onPress={() => saveUserAttend()}>Attend</Button>
-          }
-          
-
-          {/* <Spacer />           */}
-          {/* { userCreatedEventList.includes(eventID) ? <Button onPress={() => deleteEvent()}>Delete</Button> : null} */}
             
+        }
 
+          
         </HStack>
 
       </View>
 
     
         <HStack backgroundColor="white">
-          {/* <Icon name="comment-white-oval-bubble" group="font-awesome" height="30" width="30" />
-          <Text fontSize="18" pl="2">(13)</Text> */}
-
           <Text pl="5" fontWeight="medium" fontSize="20">Comments ({user_comment_list.length})</Text>
-
         </HStack>
         
-
-        {/* <Avatar.Group  max={2}>{item.user_going_list.map((avatar_item, index) => 
-                      <Avatar bg="green.500" source={{
-                          uri: avatar_item.profile_picture
-                        }}></Avatar>
-                      )}
-                    </Avatar.Group> */}
-
-
-        {/* <ScrollView>{commentStateList.map((comment_item, index) => {
-
-          <Text>asdkjadlskj</Text>
-
-          })}
-
-        </ScrollView> */}
-        
-
         <VStack pl="4" pr="4"  backgroundColor="white">{user_comment_list.map((comment_item, index) => {
 
           return <Box borderBottomWidth="1" backgroundColor="white" _dark={{borderColor: "gray.600" }}
@@ -675,135 +587,6 @@ const EventDetailPage = ({ route }) => {
         
         </VStack>
 
-                        
-
-        {/* <VStack pl="4" pr="4"  backgroundColor="white"> */}
-          {/* <Box borderBottomWidth="1" backgroundColor="white" _dark={{
-            borderColor: "gray.600" 
-            }} borderColor="coolGray.200" pl="0" pr="4" py="2">
-
-              <HStack space={3} justifyContent="space-between">
-
-                <Avatar size="48px" source={{
-                  uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
-                }} />
-
-                <VStack>
-
-                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
-                    John Doe
-                  </Text>
-
-                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
-                    Hello There! Hello There!
-                  </Text>
-
-                </VStack>
-
-                <Spacer />
-                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
-                  11:15 PM
-                </Text>
-
-              </HStack>
-
-          </Box>
-
-          <Box borderBottomWidth="1" backgroundColor="white" _dark={{
-            borderColor: "gray.600" 
-            }} borderColor="coolGray.200" pl="0" pr="4" py="2">
-
-              <HStack space={3} justifyContent="space-between">
-
-                <Avatar size="48px" source={{
-                  uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
-                }} />
-
-                <VStack>
-
-                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
-                    John Doe
-                  </Text>
-
-                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
-                    Hello There! Hello There!
-                  </Text>
-
-                </VStack>
-
-                <Spacer />
-                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
-                  11:15 PM
-                </Text>
-
-              </HStack>
-
-          </Box>
-
-          <Box borderBottomWidth="1" backgroundColor="white" _dark={{
-            borderColor: "gray.600" 
-            }} borderColor="coolGray.200" pl="0" pr="4" py="2">
-
-              <HStack space={3} justifyContent="space-between">
-
-                <Avatar size="48px" source={{
-                  uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
-                }} />
-
-                <VStack>
-
-                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
-                    John Doe
-                  </Text>
-
-                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
-                    Hello There! Hello There!
-                  </Text>
-
-                </VStack>
-
-                <Spacer />
-                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
-                  11:15 PM
-                </Text>
-
-              </HStack>
-
-          </Box>
-
-          <Box borderBottomWidth="0" backgroundColor="white" _dark={{
-            borderColor: "gray.600" 
-            }} borderColor="coolGray.200" pl="0" pr="4" py="2">
-
-              <HStack space={3} justifyContent="space-between">
-
-                <Avatar size="48px" source={{
-                  uri: "https://images.unsplash.com/photo-1565886471538-c4b98b8700d6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1734&q=80"
-                }} />
-
-                <VStack>
-
-                  <Text _dark={{color: "warmGray.50"}} color="coolGray.800" bold>
-                    John Doe
-                  </Text>
-
-                  <Text color="coolGray.600" _dark={{color: "warmGray.200"}} maxW="175px">
-                    Hello There! Hello There!
-                  </Text>
-
-                </VStack>
-
-                <Spacer />
-                <Text fontSize="xs" _dark={{color: "warmGray.50"}} color="coolGray.800" alignSelf="flex-start">
-                  11:15 PM
-                </Text>
-
-              </HStack>
-
-          </Box> */}
-
-        {/* </VStack> */}
-
         <Box backgroundColor="white"pb="5" pt="1" pl="4">
           <HStack>
             <Input type={"text"} w="80%" height="12" py="0" borderRadius="8" 
@@ -820,7 +603,6 @@ const EventDetailPage = ({ route }) => {
           </HStack>
         </Box>
 
-
     </ScrollView>
 
   )
@@ -831,14 +613,22 @@ const EventDetailPage = ({ route }) => {
 
 function saveUserProfileDetails(userData){
 
-  return fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/auth_signup", {
+  return new Promise((resolve, reject) => {
+
+    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/auth_signup", {
     method: 'POST',
     body: JSON.stringify(userData),
     headers: {
       'Content-Type': 'application/json'
     }
+  }).then((response) => response.json()).then((responseJson) => {
+    resolve(responseJson)
+    // console.log('response-json:', responseJson)
   })
 
+
+  })
+  
 }
   
 
@@ -847,29 +637,59 @@ async function google_sign_in(user_device_token, user_state_cb) {
   try {      
     await GoogleSignin.hasPlayServices()
     const userInfo = await GoogleSignin.signIn()
-    userInfo['user_device_token'] = user_device_token
+    // userInfo['user_device_token'] = user_device_token
+
     console.log('user-info:', userInfo)
 
-    saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
-      console.log('JSON-response:', responseJson)
-      
+    saveUserProfileDetails(userInfo).then(function(responseJson){
+      console.log('promise-res:', responseJson)
+
       if (responseJson['success'] === true ) { // user has been created in backend
 
         GoogleSignin.getTokens().then((tokRes) => {
-          console.log('GOOGLE TOKEN-DATA:', tokRes)
           var idTok = tokRes['idToken']
           var accessTok = tokRes['accessToken']
-          var di = {'userInfo': {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
+          var di = {
+            'login_error': false, 
+            'userLoggedIn': true,
+            'userInfo': {'access_token': accessTok, 'id_token': idTok}, 
+            'userProfileInfo': userInfo
+          }
           user_state_cb(di)
         })
 
-      } else {  // user does not exist in our app so 'successful-login' should be removed
-        GoogleSignin.revokeAccess(),then(() => {
+      } 
+
+      else {  // user does not exist in our app so 'successful-login' should be removed
+        GoogleSignin.revokeAccess().then(() => {
           GoogleSignin.signOut()
+          // mainState.login_error 
+          user_state_cb({'login_error': true})
+          
         })
       }
 
     })
+
+    // // saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
+    // saveUserProfileDetails(userInfo).then((responseJson) => {
+      
+    //   if (responseJson['success'] === true ) { // user has been created in backend
+
+    //     GoogleSignin.getTokens().then((tokRes) => {
+    //       var idTok = tokRes['idToken']
+    //       var accessTok = tokRes['accessToken']
+    //       var di = {'userInfo': {'access_token': accessTok, 'id_token': idTok}, 'userLoggedIn': true}
+    //       user_state_cb(di)
+    //     })
+
+    //   } else {  // user does not exist in our app so 'successful-login' should be removed
+    //     GoogleSignin.revokeAccess(),then(() => {
+    //       GoogleSignin.signOut()
+    //     })
+    //   }
+
+    // })
 
   } 
   catch(error) {  // TODO: update state to display error message on this screen 
@@ -889,7 +709,6 @@ async function google_sign_in(user_device_token, user_state_cb) {
 
 
 
-// TODO: ensure user-id and other user-based information is passed to validate form (ie. double-check on postman/mitmproxy)
 const EventFormComponent = ({ mainState, handler }) => {
 
   var tmp_navigation = useNavigation();
@@ -897,7 +716,6 @@ const EventFormComponent = ({ mainState, handler }) => {
   let [parkVal, setParkVal] = React.useState("");
   let [timeVal, setTimeVal] = React.useState("");
 
-  // const [date, setDate] = useState(new Date(1649967016478));
   const [date, setDate] = useState(new Date());
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
@@ -948,64 +766,69 @@ const EventFormComponent = ({ mainState, handler }) => {
 
  
   const onEventFormSubmit = () => {
-    handler({'event_submit_loading': true})
+    // handler({'event_submit_loading': true})
+    // // TODO: 
+    //   // have the loader/create-event functionality with notifications (test once on our device then include right logic)
+    //     // and go from there
+    
 
-    // setErrors({});
+    setErrors({});
 
-    // var userData = mainState.userInfo
-    // var user_access_token = userData['access_token']
-    // formData['access_token'] = user_access_token
-    // console.log('new-form-data', formData)
+    var userData = mainState.userInfo
+    var user_access_token = userData['access_token']
+    formData['access_token'] = user_access_token
+    console.log('new-form-data', formData)
 
-    // if (formData['event_title'] === "" || formData['event_description'] === "" || formData['park_name'] === "" | formData['event_date'] === "" | formData['event_time'] === ""){
-    //   setErrors({ ...errors,
-    //     error_msg: 'Please fill all fields before submitting!'
-    //   });
-    //   return false;
-    // }
+    if (formData['event_title'] === "" || formData['event_description'] === "" || formData['park_name'] === "" | formData['event_date'] === "" | formData['event_time'] === ""){
+      setErrors({ ...errors,
+        error_msg: 'Please fill all fields before submitting!'
+      });
+      return false;
+    }
 
-    // var todayDate = new Date()
-    // if (new Date(formData['event_date']).getTime() < todayDate.getTime()){ // date must be greater or equal to current date
-    //   console.log('error on date...')
-    //   setErrors({ ...errors,
-    //     error_msg: 'Invalid Date!'
-    //   });
-    //   return false;
+    var todayDate = new Date()
+    if (new Date(formData['event_date']).getTime() < todayDate.getTime()){ // date must be greater or equal to current date
+      console.log('error on date...')
+      setErrors({ ...errors,
+        error_msg: 'Invalid Date!'
+      });
+      return false;
       
-    // } 
+    } 
 
     // handler({'event_submit_loading': true})
 
-    // fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_event", {
-    //   method: 'POST',
-    //   body: JSON.stringify(formData),
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // }).then((response) => response.json()).then((responseJson) => {
-    //   console.log('create-evnet-form:', responseJson)
-    //   if (responseJson['success'] === true ) {
+    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_event", {
+      method: 'POST',
+      body: JSON.stringify(formData),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => response.json()).then((responseJson) => {
+      console.log('create-evnet-form:', responseJson)
+      if (responseJson['success'] === true ) {
         
-    //     // redirect to homepage showing event
-    //     // handler({'event_submitted': true})
-    //     handler({'event_list_refresh': true, 'event_submit_loading': false})
-    //     setData({
-    //       event_title: '', 
-    //       event_description: '',
-    //       park_name: '',
-    //       event_date: new Date(),
-    //       event_time: ''
-    //     })
-    //     tmp_navigation.navigate('MainEventList')
+        // redirect to homepage showing event
+        // handler({'event_submitted': true})
+        // handler({'event_list_refresh': true, 'event_submit_loading': false})
+        handler({'event_list_refresh': true})
+        setData({
+          event_title: '', 
+          event_description: '',
+          park_name: '',
+          event_date: new Date(),
+          event_time: ''
+        })
+        tmp_navigation.navigate('MainEventList')
         
 
-    //   } else{
-    //     setErrors({ ...errors,
-    //       error_msg: 'Form did not submit successfully!'
-    //     });
-    //   }
+      } else{
+        setErrors({ ...errors,
+          error_msg: 'Form did not submit successfully!'
+        });
+      }
 
-    // })
+    })
 
   }
 
@@ -1212,9 +1035,9 @@ const EventFormComponent = ({ mainState, handler }) => {
 
 const UserLoginComponent = ({ mainState, handler }) => {
 
-  // var tmp_navigation = useNavigation()
-  // console.log('ua-ndavig:', tmp_navigation, handler)
+  var loginError = mainState.login_error 
 
+  
   return (
 
     <View style={{
@@ -1223,7 +1046,6 @@ const UserLoginComponent = ({ mainState, handler }) => {
       justifyContent: 'center', 
       backgroundColor: 'white'}}>
 
-      {/* <Icon name="basketball-court" group="miscellaneous" height="30" width="30"/> */}
       <Icon name="log-in" group="ui-interface" height="30" width="30"/>
 
       <Text fontSize={20} fontWeight={'medium'}>Signup or Login</Text>
@@ -1237,16 +1059,17 @@ const UserLoginComponent = ({ mainState, handler }) => {
         />
       </HStack>
 
+      {loginError ? <Text color={"red"}>Unexpected Error occured when creating account...</Text> : null}
+
     </View>
 
   )
+
 
 }
 
 
 const CreateEventPage = ({ mainState, handler }) => {
-
-  // return <EventFormComponent mainState={mainState} />
 
   var userLoggedIn = mainState.userLoggedIn
 
@@ -1263,7 +1086,6 @@ const CreateEventPage = ({ mainState, handler }) => {
 const SettingsComponent = ({ mainState }) => {
  
   var userProfile = mainState.userProfileInfo 
-  // 'user_full_name': userProfileInfo.user.name, 'user_profile_pic': userProfileInfo.user.photo}
   const [groupValues, setGroupValues] = React.useState([]);
 
   return (
@@ -1316,101 +1138,11 @@ const SettingsPage = ({ mainState, handler }) => {
 }
 
 
-
-const NotificationExample = ({ mainState }) => {
-
-  // async function onDisplayNotification() {
-  //   // Create a channel
-  //   const channelId = await notifee.createChannel({
-  //     id: 'default',
-  //     name: 'Default Channel',
-  //   });
-
-  //   // Display a notification
-  //   await notifee.displayNotification({
-  //     title: 'Notification Title',
-  //     body: 'Main body content of the notification',
-  //     android: {
-  //       channelId,
-  //       smallIcon: 'ic_launcher', // optional, defaults to 'ic_launcher'.
-  //     },
-  //   });
-  // }
-
-
-
-  async function fbMessage(){
-
-    // TODO: get the firebase/push-notif to work
-
-    // // Initialize Firebase
-    // admin.initializeApp({
-    //   credential: admin.credential.applicationDefault()
-    // });
-
-    // // Register the device with FCM
-    // await messaging().registerDeviceForRemoteMessages();
-    // // Get the token
-    // const token = await messaging().getToken();
-    // console.log('device-token:', token)
-    
-    // console.log('firebase-app:', mainState.firebase_app)
-    // var deviceToken = 'dGziePteRsKH2GWGWp6yeM:APA91bES_afjuthXSIzI1E4KhjrWDt8NFy61dUeNZ8JocEmdkqH2Wgjo8GyGvwaG6AcOOAHHmkg_q5r-JAtgsoa4d46tvl1-cvzhjICvFpf5rQ7ntd0tbu6atQdQiADd19Ccq94rtHRJ'
-    // var tokens = [deviceToken]
-
-    // console.log('messaging:', messaging())    
-
-    // // Send a message to devices with the registered tokens
-    // await messaging().sendMulticast({
-    //   tokens, 
-    //   data: { hello: 'world!' },
-    // });
-
-    // notifee.displayNotification(JSON.parse({hello: 'world!'}))
-
-  }
-
-  // fbMessage();
-  
-
-  return (
-
-    <View>
-      {/* <Button onPress={() => onDisplayNotification()}>Test Notifications</Button> */}
-      <Text>Notifications</Text>
-    </View>
-
-  )
-
-
-}
-
-
-
-
-
-
 const MainScreen = ({ mainState, handler, navigation }) => {
   
   var userLoggedIn = mainState.userLoggedIn
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
-
-  // const [refreshing, setRefreshing] = React.useState(false);
-
-  // const refreshWait = () => {
-  //   // return new Promise(resolve => setTimeout(resolve, timeout));
-  //   internetCB().then(function(res){
-  //     setRefreshing(false)
-  //   })
-  // }
-  
-  // const onRefresh = React.useCallback(() => {
-  //   setRefreshing(true);
-  //   // refreshWait().then(() => setRefreshing(false));
-  //   refreshWait()
-    
-  // }, []);
 
   
   if (internetConnected) {
@@ -1430,17 +1162,6 @@ const MainScreen = ({ mainState, handler, navigation }) => {
 
         <Tab.Screen options={{headerShown: false, tabBarIcon: ({ color, size }) => (<Icon name="add-plus-button" group="material-design" />)}} 
         name="Create Event" children={()=><CreateEventPage mainState={mainState} handler={handler} navigation={navigation}/>} />
-
-        {/* <Tab.Screen options={{headerShown: false, tabBarIcon: ({color, size}) => (<Icon name="settings" group="ui-interface" />)}} 
-        name="Settings" children={()=><SettingsPage mainState={mainState} navigation={navigation} handler={handler}/>} /> */}
-
-
-        {/* <Tab.Screen options={{headerShown: false}} 
-        name="NotificationExample" children={()=><NotificationExample mainState={mainState}/>} /> */}
-
-        {/* <Tab.Screen options={{headerShown: false}} name="Create Event">
-          {props => <CreateEventPage {...props} userData={userData} handler={handler}/>}
-        </Tab.Screen> */}
         
       </Tab.Navigator> 
 
@@ -1455,20 +1176,6 @@ const MainScreen = ({ mainState, handler, navigation }) => {
           No Internet Connection! Please connect to Wifi and restart app!
         </Text>
       </View>
-
-      //   <ScrollView
-      //     refreshControl={
-      //       <RefreshControl
-      //         refreshing={refreshing}
-      //         onRefresh={onRefresh}
-      //       />
-      //     }
-      //   >
-      //     <Text fontSize={16} >
-      //       No Internet Connection! Please connect to Wifi and reload the app!
-      //     </Text>
-
-      // </ScrollView>
 
     )
 
@@ -1488,11 +1195,10 @@ export default class App extends React.Component{
       internetConnected: false,
       userLoggedIn: false,
       userInfo: undefined,
+      userProfileInfo: undefined,
       all_events_list: [],
       event_list_refresh: false,
       user_device_token: undefined,
-      // event_comment_refresh: false,
-      // event_comment_list: []
       event_id_comment_dict: undefined
     };
 
@@ -1502,89 +1208,107 @@ export default class App extends React.Component{
 
  
   handler = (update_val) => { // to-update user state after signup/login
-    console.log('handle-update:', update_val)
     this.setState(update_val)
-    
-    // for (const [key, value] of Object.entries(update_val)) {
-    //   console.log("K/V:", key, value)
-    //   this.setState({ key: value })
-    // }
-
-    console.log('new-state:', this.state)
-      
-    // this.setState({
-    //   userInfo: update_val, 
-    //   userLoggedIn: true
-    // })
-
   }
 
 
-  comment_handler = (update_val) => {
+  comment_handler = (update_val) => { // TODO: is this being used anywhere? (don't think so...)
     console.log('comment-upate-handle:', update_val)
     // 'event_id': eventID, 'comment': user_comment}
     var event_dict = this.state.event_id_dict[eventID]
   }
 
-
   
 
   async getCurrentUser() {
-    try { 
+
+    try{
       const google_userInfo = await GoogleSignin.signInSilently();
-      console.log('google-user-info:', google_userInfo)      
+      console.log('google-user-info:', google_userInfo)
       const userAccessTokens = await GoogleSignin.getTokens()
-      var di = {'access_token': userAccessTokens['accessToken'], 'id_token': userAccessTokens['idToken']}
- 
-      this.setState({ 
-        userLoggedIn: true,
-        userInfo: di,
-        userProfileInfo: google_userInfo
+
+      return new Promise((resolve, reject) => {
+
+        var di = {'access_token': userAccessTokens['accessToken'], 'id_token': userAccessTokens['idToken']}
+        // console.log('di:', di)
+        // console.log('set-state:', this.setState)
+
+        this.setState({ 
+          userLoggedIn: true,
+          userInfo: di,
+          userProfileInfo: google_userInfo
+        }, 
+        () => {this.getCurrentUserCB()}
+        )
+        
+        // resolve({'user_logged_in': true, 'user_profile_info': google_userInfo, 'user_token_info': di})
+
       })
-      
-      // fetch('https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/get_user_profile_info', {
-      //   method: 'POST',
-      //   body: JSON.stringify(di),
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   }
-      // }).then((response) => response.json()).then((responseJson) => {
 
-      //   if (responseJson['success'] === true) {
-
-      //     this.setState({ 
-      //       userLoggedIn: true,
-      //       userInfo: di,
-      //       userProfileInfo: responseJson['data']
-      //     })
-
-      //   } else {
-
-      //     this.setState({ 
-      //       userLoggedIn: true,
-      //       userInfo: di,
-      //       userProfileInfo: google_userInfo
-      //     })
-
-      //   }
-
-      // })
-
-
-    } catch (error) {
-
-      this.setState({ 
-        userInfo: undefined, 
-        userLoggedIn: false
-      })
+    } catch(error) {
+      //
+      console.log('error:', error)
 
     }
+
+    // try { 
+    //   const google_userInfo = await GoogleSignin.signInSilently();
+    //   console.log('google-user-info:', google_userInfo)      
+    //   const userAccessTokens = await GoogleSignin.getTokens()
+    //   var di = {'access_token': userAccessTokens['accessToken'], 'id_token': userAccessTokens['idToken']}
+ 
+    //   this.setState({ 
+    //     userLoggedIn: true,
+    //     userInfo: di,
+    //     userProfileInfo: google_userInfo
+    //   })
+      
+    //   // fetch('https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/get_user_profile_info', {
+    //   //   method: 'POST',
+    //   //   body: JSON.stringify(di),
+    //   //   headers: {
+    //   //     'Content-Type': 'application/json'
+    //   //   }
+    //   // }).then((response) => response.json()).then((responseJson) => {
+
+    //   //   if (responseJson['success'] === true) {
+
+    //   //     this.setState({ 
+    //   //       userLoggedIn: true,
+    //   //       userInfo: di,
+    //   //       userProfileInfo: responseJson['data']
+    //   //     })
+
+    //   //   } else {
+
+    //   //     this.setState({ 
+    //   //       userLoggedIn: true,
+    //   //       userInfo: di,
+    //   //       userProfileInfo: google_userInfo
+    //   //     })
+
+    //   //   }
+
+    //   // })
+
+
+    // } catch (error) {
+
+    //   this.setState({ 
+    //     userInfo: undefined, 
+    //     userLoggedIn: false
+    //   })
+
+    // }
+    
   }
 
 
   async getAllEvents() {
 
     var getEventFormData = this.state.userInfo
+    console.log(getEventFormData)
+    
     fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/get_events", {
       method: 'POST',
       body: JSON.stringify(getEventFormData),
@@ -1611,10 +1335,13 @@ export default class App extends React.Component{
 
 
   async getDeviceToken() {
+
+    // console.log('main-state:', this.state)
+
     await messaging().registerDeviceForRemoteMessages();
     const token = await messaging().getToken();
     console.log('device-token:', token)
-    
+
     this.setState({ user_device_token: token})
 
     if (this.state.userLoggedIn === true){
@@ -1636,6 +1363,39 @@ export default class App extends React.Component{
       })
 
     }
+
+    // return new Promise((resolve, reject) => {
+    //   this.setState({ user_device_token: token})
+
+    //   if (current_user_info['user_logged_in'] === true){
+
+    //     var formData = {
+    //       "userDeviceToken": this.state.user_device_token, 
+    //       "access_token": this.state.userInfo['access_token']
+    //     }
+
+    //     // var formData = {
+    //     //   "userDeviceToken": token, 
+    //     //   "access_token": current_user_info['user_token_info']['access_token']
+    //     // }
+        
+    //     fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
+    //       method: 'POST',
+    //       body: JSON.stringify(formData),
+    //       headers: {
+    //         'Content-Type': 'application/json'
+    //       }
+    //     }).then((response) => response.json()).then((responseJson) => {
+    //       console.log('user-device-token-updated:', responseJson)
+    //       resolve(true)
+
+    //     })
+
+    //   }
+
+    //   resolve(true)
+
+    // })
 
   }
 
@@ -1678,18 +1438,20 @@ export default class App extends React.Component{
 
 
   onMessageReceived(message) {
-    console.log('message-received:', message, message['data']['notifee'])
-    notifee.displayNotification(JSON.parse(message['data']['notifee']));
-    // TODO: 
-      // display notification with image and correct app-name on create-event for select users (sent from django)
-        // go from there...
+    notifee.displayNotification(JSON.parse(message['data']['notifee']));    
   }
 
 
-  async componentDidMount() {
-    // console.log('state-info:', this.state)
+  getCurrentUserCB() {
+    this.getDeviceToken()
+    this.getAllEvents()
+    // console.log('current-user-state-updated:', this.state)
+    // this.getAllEvents()
 
-    // GoogleSignin.configure({});
+  }
+  
+
+  async componentDidMount() {
     GoogleSignin.configure({
       webClientId: '770095547736-vnejub7rlnb4gsl6pmkl2or9q6qgceeb.apps.googleusercontent.com'
     });
@@ -1697,15 +1459,74 @@ export default class App extends React.Component{
     SplashScreen.hide();
 
     NetInfo.fetch().then(state => {
-      // console.log("Connection type", state.type);
-      // console.log("Is connected?", state.isConnected);
       this.setState({ internetConnected: state.isConnected })
+      
+      if (this.state.internetConnected === true){
+
+        this.getCurrentUser()
+        // this.getCurrentUser().then(function(){
+        //   console.log('updated-state:', this.state)
+        // })
+
+        // this.getCurrentUser().then(function(current_user_info){
+        
+        //   this.getDeviceToken(current_user_info).then(function(){
+        //     this.getAllEvents()
+        //   })
+
+        // }) 
+
+        // this.getCurrentUser().then(this.getDeviceToken())
+
+        // this.getCurrentUser().then(this.getDeviceToken().then(this.getAllEvents()))
+
+        // // TODO: fix this and test extensively before continuning...
+        // this.getCurrentUser().then(this.getDeviceToken().then(this.getAllEvents().then(function(){
+            
+        //   if (this.state.userLoggedIn === true){
+
+        //     var formData = {"userDeviceToken": this.state.user_device_token}
+      
+        //     fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
+        //       method: 'POST',
+        //       body: JSON.stringify(formData),
+        //       headers: {
+        //         'Content-Type': 'application/json'
+        //       }
+        //     }).then((response) => response.json()).then((responseJson) => {
+        //       console.log('user-device-token-updated:', responseJson)
+        //     })
+
+        //   }
+
+        // })))
+  
+    //   // if (this.state.userLoggedIn === true){
+        
+    //   //   var formData = {"userDeviceToken": this.state.user_device_token}
+  
+    //   //   fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
+    //   //     method: 'POST',
+    //   //     body: JSON.stringify(formData),
+    //   //     headers: {
+    //   //       'Content-Type': 'application/json'
+    //   //     }
+    //   //   }).then((response) => response.json()).then((responseJson) => {
+    //   //     console.log('save-user-attend:', responseJson)
+    //   //     // TODO: 
+    //   //       // need to mark-state for this event that user is not going or user is going
+    //   //         // show not-going-button and going-button
+    //   //   })
+  
+    //   // }
+
+    // }
+        
+      }
+      
     })
-
-    await this.getCurrentUser();
-    await this.getAllEvents();
-    await this.getDeviceToken();
-
+   
+    
     messaging().onMessage(this.onMessageReceived);
     messaging().setBackgroundMessageHandler(this.onMessageReceived);
 
@@ -1778,11 +1599,8 @@ export default class App extends React.Component{
 
   async componentDidUpdate(previousProps, previousState){
     if (this.state.event_list_refresh === true){
-      console.log('event-list-refresh')
       await this.getAllEvents();
     }
-    // console.log('STATE HAS UPDATED:', this.state)
-    // console.log('updating-component...', this.state.userInfo)
     
   }
 
@@ -1820,9 +1638,17 @@ export default class App extends React.Component{
 
 
 
-
-
-
+// error React Native CLI uses autolinking for native dependencies, but the following modules are linked manually:                                                                    
+//   - react-native-safe-area-context (to unlink run: "react-native unlink react-native-safe-area-context")                                                                           
+//   - react-native-splash-screen (to unlink run: "react-native unlink react-native-splash-screen")                                                                                   
+//   - react-native-svg (to unlink run: "react-native unlink react-native-svg")                                                                                                       
+//   - react-native-vector-icons (to unlink run: "react-native unlink react-native-vector-icons")                                                                                     
+// This is likely happening when upgrading React Native from below 0.60 to 0.60 or above. Going forward, you can unlink this dependency via "react-native unlink <dependency>" and it 
+// will be included in your app automatically. If a library isn't compatible with autolinking, disregard this message and notify the library maintainers.                             
+// Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md                                                                         
+// error Could not find the following native modules: RNNotifee, RNDateTimePicker, react-native-netinfo, react-native-viewpager, RNFBApp, RNFBMessaging, RNGoogleSignin, ReactNativeGe
+// tLocation, react-native-location, react-native-pager-view, react-native-safe-area-context, RNScreens, react-native-splash-screen, RNSVG, RNVectorIcons. Did you forget to run "pod 
+// install" ?  
 
 
 
