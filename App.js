@@ -21,7 +21,8 @@ import {
 import NetInfo from "@react-native-community/netinfo";
 // import { initializeApp } from 'firebase/app';
 import messaging from '@react-native-firebase/messaging';
-import notifee from '@notifee/react-native';
+// import notifee from '@notifee/react-native';
+import notifee, { AuthorizationStatus } from '@notifee/react-native';
 
 
 // // Node.js
@@ -1363,39 +1364,6 @@ export default class App extends React.Component{
 
     }
 
-    // return new Promise((resolve, reject) => {
-    //   this.setState({ user_device_token: token})
-
-    //   if (current_user_info['user_logged_in'] === true){
-
-    //     var formData = {
-    //       "userDeviceToken": this.state.user_device_token, 
-    //       "access_token": this.state.userInfo['access_token']
-    //     }
-
-    //     // var formData = {
-    //     //   "userDeviceToken": token, 
-    //     //   "access_token": current_user_info['user_token_info']['access_token']
-    //     // }
-        
-    //     fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
-    //       method: 'POST',
-    //       body: JSON.stringify(formData),
-    //       headers: {
-    //         'Content-Type': 'application/json'
-    //       }
-    //     }).then((response) => response.json()).then((responseJson) => {
-    //       console.log('user-device-token-updated:', responseJson)
-    //       resolve(true)
-
-    //     })
-
-    //   }
-
-    //   resolve(true)
-
-    // })
-
   }
 
 
@@ -1436,9 +1404,50 @@ export default class App extends React.Component{
   // }
 
 
-  onMessageReceived(message) {
+  async onMessageReceived(message) {
     console.log('notification-msg:', message)
-    notifee.displayNotification(JSON.parse(message['data']['notifee']));
+    // notifee.displayNotification(JSON.parse(message['data']['notifee']));    
+
+    const channelId = await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+    });
+
+    notifee.displayNotification({
+      title: 'Someone commented on your post!',
+      body: '...',
+      android: {
+        channelId: channelId,
+        smallIcon: 'ic_stat_sports_basketball'
+      },
+    });
+
+    // var notification_type = JSON.parse(message['data'])['type']
+
+    // if (notification_type == 'create_event'){
+
+    //   notifee.displayNotification({
+    //     title: 'New Basketball Run Posted',
+    //     body: 'See if you can make it!',
+    //     android: {
+    //       channelId: channelId,
+    //       smallIcon: 'ic_stat_sports_basketball'
+    //     },
+    //   });
+
+    // } else if (notification_type == 'create_comment') {
+
+    //   notifee.displayNotification({
+    //     title: 'Someone commented on your post!',
+    //     body: '...',
+    //     android: {
+    //       channelId: channelId,
+    //       smallIcon: 'ic_stat_sports_basketball'
+    //     },
+    //   });
+
+    // }
+
   }
 
 
@@ -1451,6 +1460,30 @@ export default class App extends React.Component{
   }
   
 
+  async requestUserPermission() {
+    const settings = await notifee.requestPermission();
+  
+    if (settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED) {
+      console.log('Permission settings:', settings);
+    } else {
+      console.log('User declined permissions');
+    }
+  }
+
+  async checkApplicationPermission() {
+    const settings = await notifee.requestPermission();
+  
+    if (settings.authorizationStatus) {
+      console.log('User has notification permissions enabled')
+    } else {
+      console.log('User has notification permissions disabled')
+      await this.requestUserPermission()
+    }
+  
+    console.log('iOS settings: ', settings.ios);
+  }
+
+
   async componentDidMount() {
     GoogleSignin.configure({
       webClientId: '770095547736-vnejub7rlnb4gsl6pmkl2or9q6qgceeb.apps.googleusercontent.com'
@@ -1458,12 +1491,35 @@ export default class App extends React.Component{
 
     SplashScreen.hide();
 
+    await this.checkApplicationPermission()
+
+    // await this.requestUserPermission()
+ 
+
     NetInfo.fetch().then(state => {
       this.setState({ internetConnected: state.isConnected })
       
       if (this.state.internetConnected === true){
+        
+        // this.getDeviceToken()
 
-        this.getCurrentUser()
+        // TODO: after notifications, productionize the backend (don't want to change the ngrok urls everytime...)
+          // why isn't the notification showing?
+
+        // var di = {
+        //   "title": 'New Run Posted!',
+        //   "body": 'Check out the New Basketball Run Posted!',
+        //   "android": {
+        //     "channelId": 'default',
+        //     "smallIcon": 'ic_stat_sports_basketball',
+        //   },
+        // }
+        // notifee.displayNotification(di);
+
+   
+
+
+        // this.getCurrentUser()
         // this.getCurrentUser().then(function(){
         //   console.log('updated-state:', this.state)
         // })
