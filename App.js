@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { useState, useEffect } from "react";
-import { RefreshControl, Alert, ActivityIndicator } from 'react-native';
+import { useState } from "react";
+import { Alert, ActivityIndicator } from 'react-native';
 import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
   Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
-  FormControl, Select, CheckIcon, TextArea, Modal, List, ListItem, Checkbox, Spinner } from "native-base";
-import { NavigationContainer, useNavigation, useIsFocused } from '@react-navigation/native';
+  FormControl, Select, CheckIcon, TextArea, Modal, List, Checkbox, Spinner } from "native-base";
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-ico';
@@ -19,11 +19,9 @@ import {
 } from '@react-native-google-signin/google-signin';
 
 import NetInfo from "@react-native-community/netinfo";
-
-import { initializeApp } from 'firebase/app';
+// import { initializeApp } from 'firebase/app';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
-import { resolve } from 'url';
 
 
 // // Node.js
@@ -517,31 +515,32 @@ const EventDetailPage = ({ route }) => {
             : <Button colorScheme="info" isDisabled={!userLoggedIn} onPress={() => saveUserAttend()}>Attend</Button>
           }
 
-
-        { userCreatedEventList.includes(eventID) ? 
+          {/* { userCreatedEventList.includes(eventID) && userEventGoingList.includes(eventID) ? 
           null : 
+          null
+          } */}
+
+          { userEventGoingList.includes(eventID) && !userCreatedEventList.includes(eventID) ?
           <HStack>
-            <Pressable pt="3" pl="3" onPress={() => {
-            Alert.alert(
-              "Unattend Event?",
-              "you sure...",
-              [
-                {
-                  text: "Cancel",
-                  onPress: () => {},
-                  style: "cancel"
-                },
-                { text: "Confirm", onPress: () => unAttendEvent() }
-              ]
-            );
-          }}>
-              <Icon name="cancel" group="ui-interface"/>
-            </Pressable>
-          </HStack>
-            
+          <Pressable pt="3" pl="3" onPress={() => {
+          Alert.alert(
+            "Unattend Event?",
+            "you sure...",
+            [
+              {
+                text: "Cancel",
+                onPress: () => {},
+                style: "cancel"
+              },
+              { text: "Confirm", onPress: () => unAttendEvent() }
+            ]
+          );
+        }}>
+            <Icon name="cancel" group="ui-interface"/>
+          </Pressable>
+        </HStack> : null          
         }
 
-          
         </HStack>
 
       </View>
@@ -1438,7 +1437,8 @@ export default class App extends React.Component{
 
 
   onMessageReceived(message) {
-    notifee.displayNotification(JSON.parse(message['data']['notifee']));    
+    console.log('notification-msg:', message)
+    notifee.displayNotification(JSON.parse(message['data']['notifee']));
   }
 
 
@@ -1639,10 +1639,10 @@ export default class App extends React.Component{
 
 
 // error React Native CLI uses autolinking for native dependencies, but the following modules are linked manually:                                                                    
-//   - react-native-safe-area-context (to unlink run: "react-native unlink react-native-safe-area-context")                                                                           
-//   - react-native-splash-screen (to unlink run: "react-native unlink react-native-splash-screen")                                                                                   
-//   - react-native-svg (to unlink run: "react-native unlink react-native-svg")                                                                                                       
-//   - react-native-vector-icons (to unlink run: "react-native unlink react-native-vector-icons")                                                                                     
+//   - react-native-safe-area-context (to unlink run: "react-native unlink react-native-safe-area-context")
+//   - react-native-splash-screen (to unlink run: "react-native unlink react-native-splash-screen")
+//   - react-native-svg (to unlink run: "react-native unlink react-native-svg")
+//   - react-native-vector-icons (to unlink run: "react-native unlink react-native-vector-icons")
 // This is likely happening when upgrading React Native from below 0.60 to 0.60 or above. Going forward, you can unlink this dependency via "react-native unlink <dependency>" and it 
 // will be included in your app automatically. If a library isn't compatible with autolinking, disregard this message and notify the library maintainers.                             
 // Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md                                                                         
