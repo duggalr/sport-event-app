@@ -98,12 +98,11 @@ const Tab = createBottomTabNavigator();
 
 
 
-async function getAllEvents(cb_state) {
+async function getAllEvents(main_state, cb_state) {
 
   cb_state({event_list_refresh: true})
 
-  var getEventFormData = this.state.userInfo
-  console.log(getEventFormData)
+  var getEventFormData = main_state.userInfo
 
   fetch(API_URL + "/get_events", {
     method: 'POST',
@@ -129,7 +128,6 @@ async function getAllEvents(cb_state) {
       event_id_comment_dict: responseJson['event_id_comment_dict'][0]
     })
 
-
     // console.log('events-list:', responseJson)
     // eventData = responseJson['data']
     // console.log('events-list-data:', eventData, eventData[0])
@@ -139,10 +137,10 @@ async function getAllEvents(cb_state) {
 }
 
 
-
-const MainHeading = ({ handler }) => {
+const MainHeading = ({ mainState, handler }) => {
 
   var tmp_navigation = useNavigation()
+  console.log('main-heading-state:', mainState)
 
   return (
 
@@ -153,7 +151,7 @@ const MainHeading = ({ handler }) => {
       </Heading>
       <Spacer />
 
-      <Pressable onPress={() => getAllEvents(handler)}>
+      <Pressable onPress={() => getAllEvents(mainState, handler)}>
         <Icon name="refresh" group="basic" style={{ marginTop: 1, marginRight: 16}} height="28" width="28"/>
       </Pressable>
 
@@ -193,7 +191,7 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
       <View style={{ flex: 1, backgroundColor: 'white', padding: 15}}>
 
-        <MainHeading handler={handler} />
+        <MainHeading handler={handler} mainState={mainState} />
 
         <HStack space={2} justifyContent="center" pt="10">
           <Spinner accessibilityLabel="Loading posts" />
@@ -217,7 +215,7 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
       <View style={{ flex: 1, justifyContent: 'center', backgroundColor: 'white', padding: 15}}>
   
-        <MainHeading />
+        <MainHeading handler={handler} mainState={mainState} />
   
         <FlatList data={eventData} renderItem={({
           item
@@ -317,7 +315,7 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
 
       <View style={{ flex: 1, backgroundColor: 'white', padding: 15}}>
 
-        <MainHeading handler={handler} />
+        <MainHeading handler={handler} mainState={mainState} />
         
         <Text style={{ justifyContent: 'center', backgroundColor: 'white', padding: 15, fontSize: 15, marginTop: 20}}>
           No Upcoming Runs Posted. Be the first to post and notify everyone!
@@ -1209,12 +1207,44 @@ const SettingsPage = ({ mainState, handler }) => {
 
 const MainScreen = ({ mainState, handler, navigation }) => {
   
+  var inital_loading_state = mainState.initialLoadingState
   var userLoggedIn = mainState.userLoggedIn
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
 
   
-  if (internetConnected) {
+  console.log('inital-state:', inital_loading_state)
+
+  if (inital_loading_state === true) {
+
+    return (
+
+      <View style={{flex: 1, justifyContent: "center"}}>
+        <HStack space={2} justifyContent="center">
+          <Spinner accessibilityLabel="Loading posts" />
+          <Heading color="primary.500" fontSize="md">
+            Loading...
+          </Heading>
+        </HStack>
+      </View>
+
+    )
+    
+
+  } else if (inital_loading_state === false & internetConnected === false) {
+
+    return (
+
+      <View style={{flex: 1, justifyContent: "center"}}>
+        <Text style={{textAlign: "center", fontSize: 17}}>
+          No Internet Connection! Please connect to Wifi and restart app!
+        </Text>
+      </View>
+      
+    )
+
+
+  } else if (inital_loading_state === false & internetConnected === true){
 
     return (
 
@@ -1236,19 +1266,8 @@ const MainScreen = ({ mainState, handler, navigation }) => {
 
     )
 
-  } else {
-
-    return (
-
-      <View style={{flex: 1, justifyContent: "center"}}>
-        <Text style={{textAlign: "center", fontSize: 17}}>
-          No Internet Connection! Please connect to Wifi and restart app!
-        </Text>
-      </View>
-
-    )
-
   }
+  
 
 }
 
@@ -1261,6 +1280,7 @@ export default class App extends React.Component{
     super(props);
     
     this.state = {
+      initialLoadingState: true,
       internetConnected: false,
       userLoggedIn: false,
       userInfo: undefined,
@@ -1563,13 +1583,16 @@ export default class App extends React.Component{
     await this.checkApplicationPermission()
 
     // await this.requestUserPermission()
- 
 
     NetInfo.fetch().then(state => {
-      this.setState({ internetConnected: state.isConnected })
+      this.setState({ internetConnected: state.isConnected, initialLoadingState: false })
       
       if (this.state.internetConnected === true){
         
+        // test notifications first 
+          // then proceed to adding-back/testing/fixing all the functionality on android & emulator
+
+
         // this.getDeviceToken()
 
         // TODO: after notifications, productionize the backend (don't want to change the ngrok urls everytime...)
@@ -1584,7 +1607,6 @@ export default class App extends React.Component{
         //   },
         // }
         // notifee.displayNotification(di);
-
 
 
         // this.getCurrentUser()
@@ -1761,18 +1783,6 @@ export default class App extends React.Component{
 
 
 
-
-// error React Native CLI uses autolinking for native dependencies, but the following modules are linked manually:                                                                    
-//   - react-native-safe-area-context (to unlink run: "react-native unlink react-native-safe-area-context")
-//   - react-native-splash-screen (to unlink run: "react-native unlink react-native-splash-screen")
-//   - react-native-svg (to unlink run: "react-native unlink react-native-svg")
-//   - react-native-vector-icons (to unlink run: "react-native unlink react-native-vector-icons")
-// This is likely happening when upgrading React Native from below 0.60 to 0.60 or above. Going forward, you can unlink this dependency via "react-native unlink <dependency>" and it 
-// will be included in your app automatically. If a library isn't compatible with autolinking, disregard this message and notify the library maintainers.                             
-// Read more about autolinking: https://github.com/react-native-community/cli/blob/master/docs/autolinking.md                                                                         
-// error Could not find the following native modules: RNNotifee, RNDateTimePicker, react-native-netinfo, react-native-viewpager, RNFBApp, RNFBMessaging, RNGoogleSignin, ReactNativeGe
-// tLocation, react-native-location, react-native-pager-view, react-native-safe-area-context, RNScreens, react-native-splash-screen, RNSVG, RNVectorIcons. Did you forget to run "pod 
-// install" ?  
 
 
 
