@@ -92,13 +92,55 @@ import notifee, { AuthorizationStatus } from '@notifee/react-native';
   
 
 
-  
+const API_URL = 'http://event-backend-env.eba-jqqemta3.ca-central-1.elasticbeanstalk.com'
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 
 
-const MainHeading = () => {
+async function getAllEvents(cb_state) {
+
+  cb_state({event_list_refresh: true})
+
+  var getEventFormData = this.state.userInfo
+  console.log(getEventFormData)
+
+  fetch(API_URL + "/get_events", {
+    method: 'POST',
+    body: JSON.stringify(getEventFormData),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then((response) => response.json()).then((responseJson) => {      
+    // this.setState({ 
+    //   all_events_list: responseJson['data'], 
+    //   event_id_dict: responseJson['event_id_dict'][0],
+    //   user_event_going_list: responseJson['user_event_going_list'][0],
+    //   user_created_event_list: responseJson['user_created_event_list'][0],
+    //   event_list_refresh: false,
+    //   event_id_comment_dict: responseJson['event_id_comment_dict'][0]
+    // })
+    cb_state({ 
+      all_events_list: responseJson['data'], 
+      event_id_dict: responseJson['event_id_dict'][0],
+      user_event_going_list: responseJson['user_event_going_list'][0],
+      user_created_event_list: responseJson['user_created_event_list'][0],
+      event_list_refresh: false,
+      event_id_comment_dict: responseJson['event_id_comment_dict'][0]
+    })
+
+
+    // console.log('events-list:', responseJson)
+    // eventData = responseJson['data']
+    // console.log('events-list-data:', eventData, eventData[0])
+    // this.setState({ all_events_list: eventData })
+  })
+
+}
+
+
+
+const MainHeading = ({ handler }) => {
 
   var tmp_navigation = useNavigation()
 
@@ -110,6 +152,10 @@ const MainHeading = () => {
         Open Runs Nearby
       </Heading>
       <Spacer />
+
+      <Pressable onPress={() => getAllEvents(handler)}>
+        <Icon name="refresh" group="basic" style={{ marginTop: 1, marginRight: 16}} height="28" width="28"/>
+      </Pressable>
 
       <Pressable onPress={() => tmp_navigation.navigate('Create Event')}>
         <Icon name="plus" group="ui-interface" style={{ marginTop: 1, marginRight: 12}} height="28" width="28"/>
@@ -140,8 +186,32 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
   // if (mainState.event_comment_refresh === false){
   //   handler({'event_comment_refresh': true}) // so when user clicks on eventDetail, they will see an updated comments-state
   // }
-  
-  if (eventData.length > 0) {
+
+  if (mainState.event_list_refresh === true){
+
+    return (
+
+      <View style={{ flex: 1, backgroundColor: 'white', padding: 15}}>
+
+        <MainHeading handler={handler} />
+
+        <HStack space={2} justifyContent="center" pt="10">
+          <Spinner accessibilityLabel="Loading posts" />
+          <Heading color="primary.500" fontSize="md">
+            Loading
+          </Heading>
+        </HStack>
+        
+        {/* <Text style={{ justifyContent: 'center', backgroundColor: 'white', padding: 15, fontSize: 15, marginTop: 20}}>
+          No Upcoming Runs Posted. Be the first to post and notify everyone!
+        </Text> */}
+
+      </View>
+
+    )
+
+
+  } else if (eventData.length > 0) {
 
     return (
 
@@ -240,13 +310,14 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
   
     )
 
-  } else {
+
+  } else if (eventData.length == 0){
 
     return (
 
       <View style={{ flex: 1, backgroundColor: 'white', padding: 15}}>
 
-        <MainHeading />
+        <MainHeading handler={handler} />
         
         <Text style={{ justifyContent: 'center', backgroundColor: 'white', padding: 15, fontSize: 15, marginTop: 20}}>
           No Upcoming Runs Posted. Be the first to post and notify everyone!
@@ -257,8 +328,6 @@ const EventListNew = ({ mainState, handler, comment_handler, navigation }) => {
     )
 
   }
-
-
 
 
 }
@@ -290,7 +359,7 @@ const EventDetailPage = ({ route }) => {
   function saveUserAttend() {
     var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
     
-    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/user_attending_event", {
+    fetch(API_URL + "/user_attending_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
@@ -317,7 +386,7 @@ const EventDetailPage = ({ route }) => {
   function deleteEvent(){
     var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
 
-    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/delete_event", {
+    fetch(API_URL + "/delete_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
@@ -348,7 +417,7 @@ const EventDetailPage = ({ route }) => {
 
       var saveCommentFormData = {'event_id': eventID, 'comment': user_comment, 'access_token': userInfo['access_token']}
 
-      fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_comment", {
+      fetch(API_URL + "/create_comment", {
         method: 'POST',
         body: JSON.stringify(saveCommentFormData),
         headers: {
@@ -370,7 +439,7 @@ const EventDetailPage = ({ route }) => {
 
     var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
     
-    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/unattend_event", {
+    fetch(API_URL + "/unattend_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
@@ -615,7 +684,7 @@ function saveUserProfileDetails(userData){
 
   return new Promise((resolve, reject) => {
 
-    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/auth_signup", {
+    fetch(API_URL + "/auth_signup", {
     method: 'POST',
     body: JSON.stringify(userData),
     headers: {
@@ -637,7 +706,7 @@ async function google_sign_in(user_device_token, user_state_cb) {
   try {      
     await GoogleSignin.hasPlayServices()
     const userInfo = await GoogleSignin.signIn()
-    // userInfo['user_device_token'] = user_device_token
+    userInfo['user_device_token'] = user_device_token
 
     console.log('user-info:', userInfo)
 
@@ -798,7 +867,7 @@ const EventFormComponent = ({ mainState, handler }) => {
 
     // handler({'event_submit_loading': true})
 
-    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/create_event", {
+    fetch(API_URL + "/create_event", {
       method: 'POST',
       body: JSON.stringify(formData),
       headers: {
@@ -1207,7 +1276,7 @@ export default class App extends React.Component{
   }
 
  
-  handler = (update_val) => { // to-update user state after signup/login
+  handler = (update_val, cb) => { // to-update user state after signup/login
     this.setState(update_val)
   }
 
@@ -1309,7 +1378,7 @@ export default class App extends React.Component{
     var getEventFormData = this.state.userInfo
     console.log(getEventFormData)
     
-    fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/get_events", {
+    fetch(API_URL + "/get_events", {
       method: 'POST',
       body: JSON.stringify(getEventFormData),
       headers: {
@@ -1351,7 +1420,7 @@ export default class App extends React.Component{
         "access_token": this.state.userInfo['access_token']
       }
       
-      fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
+      fetch(API_URL + "/update_user_device_token", {
         method: 'POST',
         body: JSON.stringify(formData),
         headers: {
@@ -1516,7 +1585,6 @@ export default class App extends React.Component{
         // }
         // notifee.displayNotification(di);
 
-   
 
 
         // this.getCurrentUser()
