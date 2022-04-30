@@ -355,6 +355,8 @@ const EventDetailPage = ({ route }) => {
 
 
   function saveUserAttend() {
+    console.log('save-user-attend:', eventIdDict, eventID)
+
     var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
     
     fetch(API_URL + "/user_attending_event", {
@@ -365,16 +367,17 @@ const EventDetailPage = ({ route }) => {
       }
     }).then((response) => response.json()).then((responseJson) => {      
       userEventGoingList.push(eventID)
-      var prev_user_going_list = eventIdDict.user_going_list
+      var prev_user_going_list = eventIdDict['user_going_list']
       prev_user_going_list.push({
         'ug_id': userProfileInfo['user']['id'],
         'profile_picture': userProfileInfo['user']['photo'],
         'name': userProfileInfo['user']['name']
       })
 
+      mainState.event_id_dict[eventID] = eventIdDict
       cb_handler({
         'user_event_going_list': userEventGoingList, 
-        'event_id_dict': eventIdDict
+        'event_id_dict': mainState.event_id_dict
       })
 
     })
@@ -856,10 +859,10 @@ const EventFormComponent = ({ mainState, handler }) => {
     }
 
     var todayDate = new Date()
-    if (new Date(formData['event_date']).getTime() < todayDate.getTime()){ // date must be greater or equal to current date
+    if (new Date(formData['event_date']).getTime() <= todayDate.getTime()){ // date must be greater or equal to current date
       console.log('error on date...')
       setErrors({ ...errors,
-        error_msg: 'Invalid Date!'
+        error_msg: 'Date should be greater than today!'
       });
       return false;
       
@@ -1496,8 +1499,8 @@ export default class App extends React.Component{
 
 
   async onMessageReceived(message) {
-    console.log('notification-msg:', message)
-    console.log('notification-msg-type:', JSON.parse(message['data'])['type'])
+    // console.log('notification-msg:', message)
+    // console.log('notification-msg-type:', JSON.parse(message['data'])['type'])
     // notifee.displayNotification(JSON.parse(message['data']['notifee']));    
 
     const channelId = await notifee.createChannel({
@@ -1505,8 +1508,8 @@ export default class App extends React.Component{
       name: 'Default Channel',
     });
 
-    var notification_type = JSON.parse(message['data'])['type']
-    console.log('message:', message)
+    var notification_type = message['data']['type']
+    console.log('noitf-message:', message, notification_type)
 
     if (notification_type == 'create_event'){
 

@@ -17,14 +17,32 @@ messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     name: 'Default Channel',
   });
 
-  notifee.displayNotification({
-    title: 'testing one',
-    body: 'Main body content of the notification',
-    android: {
-      channelId: channelId,
-      smallIcon: 'ic_stat_sports_basketball'
-    },
-  });
+  var notification_type = remoteMessage['data']['type']
+  console.log('noitf-message:', remoteMessage, notification_type)
+
+  if (notification_type == 'create_event'){
+
+    notifee.displayNotification({
+      title: 'New Basketball Run Posted',
+      body: 'See if you can make it!',
+      android: {
+        channelId: channelId,
+        smallIcon: 'ic_stat_sports_basketball'
+      },
+    });
+
+  } else if (notification_type == 'create_comment') {
+
+    notifee.displayNotification({
+      title: 'Someone commented on your post!',
+      body: '...',
+      android: {
+        channelId: channelId,
+        smallIcon: 'ic_stat_sports_basketball'
+      },
+    });
+
+  }
 
 });
 
