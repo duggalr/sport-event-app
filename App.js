@@ -92,10 +92,10 @@ import notifee, { AuthorizationStatus } from '@notifee/react-native';
   
 
 
-const API_URL = 'http://event-backend-env.eba-jqqemta3.ca-central-1.elasticbeanstalk.com'
+// const API_URL = 'http://event-backend-env.eba-jqqemta3.ca-central-1.elasticbeanstalk.com'
+const API_URL = "https://ecc9-2607-fea8-4360-f100-b55f-970f-d7f0-5e0a.ngrok.io"
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-
 
 
 async function getAllEvents(main_state, cb_state) {
@@ -682,7 +682,7 @@ function saveUserProfileDetails(userData){
 
   return new Promise((resolve, reject) => {
 
-    fetch(API_URL + "/auth_signup", {
+  fetch(API_URL + "/auth_signup", {
     method: 'POST',
     body: JSON.stringify(userData),
     headers: {
@@ -737,6 +737,7 @@ async function google_sign_in(user_device_token, user_state_cb) {
       }
 
     })
+
 
     // // saveUserProfileDetails(userInfo).then((response) => response.json()).then((responseJson) => {
     // saveUserProfileDetails(userInfo).then((responseJson) => {
@@ -1425,8 +1426,6 @@ export default class App extends React.Component{
 
   async getDeviceToken() {
 
-    // console.log('main-state:', this.state)
-
     await messaging().registerDeviceForRemoteMessages();
     const token = await messaging().getToken();
     console.log('device-token:', token)
@@ -1502,40 +1501,33 @@ export default class App extends React.Component{
       name: 'Default Channel',
     });
 
-    notifee.displayNotification({
-      title: 'Someone commented on your post!',
-      body: '...',
-      android: {
-        channelId: channelId,
-        smallIcon: 'ic_stat_sports_basketball'
-      },
-    });
+    var notification_type = JSON.parse(message['data'])['type']
+    console.log('message:', message)
 
-    // var notification_type = JSON.parse(message['data'])['type']
+    if (notification_type == 'create_event'){
 
-    // if (notification_type == 'create_event'){
+      notifee.displayNotification({
+        title: 'New Basketball Run Posted',
+        body: 'See if you can make it!',
+        android: {
+          channelId: channelId,
+          smallIcon: 'ic_stat_sports_basketball'
+        },
+      });
 
-    //   notifee.displayNotification({
-    //     title: 'New Basketball Run Posted',
-    //     body: 'See if you can make it!',
-    //     android: {
-    //       channelId: channelId,
-    //       smallIcon: 'ic_stat_sports_basketball'
-    //     },
-    //   });
+    } else if (notification_type == 'create_comment') {
 
-    // } else if (notification_type == 'create_comment') {
+      notifee.displayNotification({
+        title: 'Someone commented on your post!',
+        body: '...',
+        android: {
+          channelId: channelId,
+          smallIcon: 'ic_stat_sports_basketball'
+        },
+      });
 
-    //   notifee.displayNotification({
-    //     title: 'Someone commented on your post!',
-    //     body: '...',
-    //     android: {
-    //       channelId: channelId,
-    //       smallIcon: 'ic_stat_sports_basketball'
-    //     },
-    //   });
+    }
 
-    // }
 
   }
 
@@ -1588,30 +1580,13 @@ export default class App extends React.Component{
       this.setState({ internetConnected: state.isConnected, initialLoadingState: false })
       
       if (this.state.internetConnected === true){
-        
-        // test notifications first 
-          // then proceed to adding-back/testing/fixing all the functionality on android & emulator
-
-
-        // this.getDeviceToken()
-
-        // TODO: after notifications, productionize the backend (don't want to change the ngrok urls everytime...)
-          // why isn't the notification showing?
-
-        // var di = {
-        //   "title": 'New Run Posted!',
-        //   "body": 'Check out the New Basketball Run Posted!',
-        //   "android": {
-        //     "channelId": 'default',
-        //     "smallIcon": 'ic_stat_sports_basketball',
-        //   },
-        // }
-        // notifee.displayNotification(di);
-
 
         // this.getCurrentUser()
+
+        this.getDeviceToken()
+
         // this.getCurrentUser().then(function(){
-        //   console.log('updated-state:', this.state)
+        //   // console.log('updated-state:', this.state)
         // })
 
         // this.getCurrentUser().then(function(current_user_info){
