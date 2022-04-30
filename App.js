@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useState } from "react";
 import { Alert, ActivityIndicator } from 'react-native';
-import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer, Flex, 
-  Badge, FlatList, Button, Avatar, Image, Fab, ScrollView, Divider, Input, Center, KeyboardAvoidingView,
-  FormControl, Select, CheckIcon, TextArea, Modal, List, Checkbox, Spinner } from "native-base";
+import { NativeBaseProvider, Heading, Text, VStack, View, Box, Pressable, HStack, Spacer,
+  Badge, FlatList, Button, Avatar, Image, ScrollView, Divider, Input, Center,
+  FormControl, Select, CheckIcon, TextArea, Modal, Checkbox, Spinner } from "native-base";
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -18,36 +18,28 @@ import {
 } from '@react-native-google-signin/google-signin';
 
 import NetInfo from "@react-native-community/netinfo";
-// import { initializeApp } from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import messaging from '@react-native-firebase/messaging';
-// import notifee from '@notifee/react-native';
 import notifee, { AuthorizationStatus } from '@notifee/react-native';
 
 
-// // TODO: Replace the following with your app's Firebase project configuration
-// initializeApp({})
 
-
-// // Node.js
-// var admin = require('firebase-admin');
-// //
-// const { initializeApp } = require("firebase-admin/app");
-// initializeApp();
-
-// const firebaseConfig = {
-//   "client_id": "770095547736-7kq0ent6qtcpu1rf731bkvhmsc7cpg46.apps.googleusercontent.com",
-// }
-// const firebaseConfig = {
-//   apiKey: "",
-//   authDomain: "",
-//   projectId: "",
-//   storageBucket: "",
-//   messagingSenderId: "",
-//   appId: "",
-//   measurementId: ""
+// // Your secondary Firebase project credentials...
+// const credentials = {
+//   clientId: '770095547736-3fupjhjq7ved1maaphr310fqb1bmb9e8.apps.googleusercontent.com',
+//   appId: '',
+//   apiKey: 'AIzaSyBZjt-rkuJtOImglOYnjPOoRxcceiuH4bQ',
+//   databaseURL: '',
+//   storageBucket: '',
+//   messagingSenderId: '',
+//   projectId: 'proximity-personal',
 // };
-// const firebaseApp = initializeApp(firebaseConfig);
 
+// const config = {
+//   name: 'SECONDARY_APP',
+// };
+
+// initializeApp(credentials, config);
 
 
 // TODO:   
@@ -1583,6 +1575,11 @@ export default class App extends React.Component{
     SplashScreen.hide();
 
     await this.checkApplicationPermission()
+
+    const config = {
+      name: 'SECONDARY_APP',
+    };
+    await initializeApp({});
 
     // await this.requestUserPermission()
 
