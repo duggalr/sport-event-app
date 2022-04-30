@@ -14,7 +14,6 @@ import SplashScreen from 'react-native-splash-screen'
 import {
   GoogleSignin,
   GoogleSigninButton,
-  NativeModuleError,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 
@@ -23,6 +22,10 @@ import NetInfo from "@react-native-community/netinfo";
 import messaging from '@react-native-firebase/messaging';
 // import notifee from '@notifee/react-native';
 import notifee, { AuthorizationStatus } from '@notifee/react-native';
+
+
+// // TODO: Replace the following with your app's Firebase project configuration
+// initializeApp({})
 
 
 // // Node.js
