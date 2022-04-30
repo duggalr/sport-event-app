@@ -92,8 +92,8 @@ import notifee, { AuthorizationStatus } from '@notifee/react-native';
   
 
 
-// const API_URL = 'http://event-backend-env.eba-jqqemta3.ca-central-1.elasticbeanstalk.com'
-const API_URL = "https://ecc9-2607-fea8-4360-f100-b55f-970f-d7f0-5e0a.ngrok.io"
+const API_URL = 'http://event-backend-env.eba-jqqemta3.ca-central-1.elasticbeanstalk.com'
+// const API_URL = "https://ecc9-2607-fea8-4360-f100-b55f-970f-d7f0-5e0a.ngrok.io"
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -422,6 +422,7 @@ const EventDetailPage = ({ route }) => {
           'Content-Type': 'application/json'
         }
       }).then((response) => response.json()).then((responseJson) => {
+        console.log('response-json:', responseJson)
         var di = {'comment': user_comment, 'user_full_name': userProfileInfo.user.name, 'user_profile_pic': userProfileInfo.user.photo}
         var prev_comment_dict = mainState.event_id_comment_dict
         prev_comment_dict[eventID].push(di)
@@ -1338,6 +1339,7 @@ export default class App extends React.Component{
     } catch(error) {
       //
       console.log('error:', error)
+      this.getCurrentUserCB()
 
     }
 
@@ -1412,7 +1414,8 @@ export default class App extends React.Component{
         user_event_going_list: responseJson['user_event_going_list'][0],
         user_created_event_list: responseJson['user_created_event_list'][0],
         event_list_refresh: false,
-        event_id_comment_dict: responseJson['event_id_comment_dict'][0]
+        event_id_comment_dict: responseJson['event_id_comment_dict'][0],
+        initialLoadingState: false 
       })
 
       // console.log('events-list:', responseJson)
@@ -1494,6 +1497,7 @@ export default class App extends React.Component{
 
   async onMessageReceived(message) {
     console.log('notification-msg:', message)
+    console.log('notification-msg-type:', JSON.parse(message['data'])['type'])
     // notifee.displayNotification(JSON.parse(message['data']['notifee']));    
 
     const channelId = await notifee.createChannel({
@@ -1577,13 +1581,13 @@ export default class App extends React.Component{
     // await this.requestUserPermission()
 
     NetInfo.fetch().then(state => {
-      this.setState({ internetConnected: state.isConnected, initialLoadingState: false })
+      this.setState({ internetConnected: state.isConnected })
       
       if (this.state.internetConnected === true){
 
-        // this.getCurrentUser()
+        this.getCurrentUser()
 
-        this.getDeviceToken()
+        // this.getDeviceToken()
 
         // this.getCurrentUser().then(function(){
         //   // console.log('updated-state:', this.state)
