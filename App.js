@@ -89,7 +89,7 @@ import notifee, { AuthorizationStatus } from '@notifee/react-native';
 
 
 const API_URL = 'http://event-backend-env.eba-jqqemta3.ca-central-1.elasticbeanstalk.com'
-// const API_URL = "https://ecc9-2607-fea8-4360-f100-b55f-970f-d7f0-5e0a.ngrok.io"
+// const API_URL = "https://5e23-2607-fea8-4360-f100-3e-e3fe-ccc8-4bf8.ngrok.io"
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -874,8 +874,8 @@ const EventFormComponent = ({ mainState, handler }) => {
       }
     }).then((response) => response.json()).then((responseJson) => {
       console.log('create-evnet-form:', responseJson)
+
       if (responseJson['success'] === true ) {
-        
         // redirect to homepage showing event
         // handler({'event_submitted': true})
         // handler({'event_list_refresh': true, 'event_submit_loading': false})
@@ -1656,6 +1656,12 @@ export default class App extends React.Component{
 
     // }
         
+      } else {
+
+        this.setState({ 
+          initialLoadingState: false 
+        })
+
       }
       
     })
