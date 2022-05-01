@@ -18,9 +18,10 @@ import {
 } from '@react-native-google-signin/google-signin';
 
 import NetInfo from "@react-native-community/netinfo";
-import { initializeApp } from 'firebase/app';
+// import { initializeApp } from 'firebase/app';
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AuthorizationStatus } from '@notifee/react-native';
+
 
 
 
@@ -1568,6 +1569,8 @@ export default class App extends React.Component{
 
 
   async componentDidMount() {
+    console.log('firebase-num-apps:', firebase.apps.length)
+
     GoogleSignin.configure({
       webClientId: '770095547736-vnejub7rlnb4gsl6pmkl2or9q6qgceeb.apps.googleusercontent.com'
     });
@@ -1576,10 +1579,11 @@ export default class App extends React.Component{
 
     await this.checkApplicationPermission()
 
-    const config = {
-      name: 'SECONDARY_APP',
-    };
-    await initializeApp({});
+    // const config = {
+    //   name: 'SECONDARY_APP',
+    // };
+    // await initializeApp({});
+    
 
     // await this.requestUserPermission()
 
@@ -1588,9 +1592,8 @@ export default class App extends React.Component{
       
       if (this.state.internetConnected === true){
 
-        this.getCurrentUser()
-
-        // this.getDeviceToken()
+        // this.getCurrentUser()
+        this.getDeviceToken()
 
         // this.getCurrentUser().then(function(){
         //   // console.log('updated-state:', this.state)

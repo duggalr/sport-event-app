@@ -13,7 +13,7 @@
     "@notifee/react-native": "^5.2.0",
     "@react-native-community/datetimepicker": "^6.1.2",
     "@react-native-community/netinfo": "^8.2.0",
-    "@react-native-firebase/app": "^14.8.0",
+    "@react-native-firebase/app": "^14.9.1",
     "@react-native-firebase/messaging": "^14.8.0",
     "@react-native-google-signin/google-signin": "^7.2.2",
     "@react-navigation/bottom-tabs": "^6.3.1",
