@@ -25,67 +25,6 @@ import notifee, { AuthorizationStatus } from '@notifee/react-native';
 
 
 
-// // Your secondary Firebase project credentials...
-// const credentials = {
-//   clientId: '770095547736-3fupjhjq7ved1maaphr310fqb1bmb9e8.apps.googleusercontent.com',
-//   appId: '',
-//   apiKey: 'AIzaSyBZjt-rkuJtOImglOYnjPOoRxcceiuH4bQ',
-//   databaseURL: '',
-//   storageBucket: '',
-//   messagingSenderId: '',
-//   projectId: 'proximity-personal',
-// };
-
-// const config = {
-//   name: 'SECONDARY_APP',
-// };
-
-// initializeApp(credentials, config);
-
-
-// TODO:   
-  // backend/frontend-functionality
-    // Event-List:
-      // test to ensure everything works; 
-      // experiment with some shadows and possibly different colurs for buttons/icons, etc. 
-        // then, event-detail + comments + going-button
- 
-  // **ENSURE THE GOOGLE CLIENT-ID ON THIS PAGE IS SET AS ENV VARIABLE BEFORE OS**
-  // **For splash-screen, include toronto** (also in appstore description)
-
-  // backdrop-shadows/colors & font (read typography chapter in book) on event-page and main-page; (ignore comment-section for now)
-    // re-add all the icons (deal with icon/modal issue)
-  // scroll animations (fade-in) on main-page <-- shouldn't take long to add and will look good
-    // experiment with animations a bit...
-  // need to make responsive and test on bunch of different android phones (along with virtual/physical Iphone)
-  // Start implementation (will be interfaced with UI/backend <-- but basic core UI is laid out)
-  
-
-// TODO: 
-    // figure out why I signed out (handle this exception) and ensure comment with profile-pic works properly
-    // test the signup/login extensively before continuning
-    // notifications (add and ensure functionality works)
-    // test app once more for functionality (actually use it to post first event) <-- test production version
-      // -(speed/smoothness/functionality)
-    // then, see test how UI looks on all devices (iOS and android)
-      // ^fix any errors here 
-    // productionize django-api and RN app <-- final test and then release... 
-
-
-// TODO: 
-  // start with event-list <-- when no events, adjust UI and go from there 
-    // go through each functionality again, etc. (<-- test for speed, ease-of-use, functionality, etc.)
-
-  // **need a loading-screen on create-event (alot of stuff happening and takes a few seconds)
-  // **user-device-token/authentication returns invalid-credentials at times <-- why is this? (sometimes it takes long too)**
-  // redownload app and test signup/login extensively
-  // **delete all the stuff in DB, fix all the API, test everything again to ensure it works (with production-logic)
-    // Productionize backend and final-testing; everything good, release...
-    // go through all TODO's, etc. in both RN/API files (don't waste time refactoring...)
-  // fix all (majority of key ones) the React-Native warnings
-  // test in production without any console.logs... (<-- main focus is testing speed here)
-  // UI-testing on many different devices
-  
 
 
 const API_URL = 'http://event-backend-env.eba-jqqemta3.ca-central-1.elasticbeanstalk.com'
@@ -115,6 +54,7 @@ async function getAllEvents(main_state, cb_state) {
     //   event_list_refresh: false,
     //   event_id_comment_dict: responseJson['event_id_comment_dict'][0]
     // })
+    // console.log('all-event-data:', responseJson)
     cb_state({ 
       all_events_list: responseJson['data'], 
       event_id_dict: responseJson['event_id_dict'][0],
@@ -136,7 +76,7 @@ async function getAllEvents(main_state, cb_state) {
 const MainHeading = ({ mainState, handler }) => {
 
   var tmp_navigation = useNavigation()
-  console.log('main-heading-state:', mainState)
+  // console.log('main-heading-state:', mainState)
 
   return (
 
@@ -351,7 +291,7 @@ const EventDetailPage = ({ route }) => {
 
 
   function saveUserAttend() {
-    console.log('save-user-attend:', eventIdDict, eventID)
+    // console.log('save-user-attend:', eventIdDict, eventID)
 
     var formData = {'access_token': userInfo.access_token, 'event_id': eventID}
     
@@ -421,7 +361,7 @@ const EventDetailPage = ({ route }) => {
           'Content-Type': 'application/json'
         }
       }).then((response) => response.json()).then((responseJson) => {
-        console.log('response-json:', responseJson)
+        // console.log('response-json:', responseJson)
         var di = {'comment': user_comment, 'user_full_name': userProfileInfo.user.name, 'user_profile_pic': userProfileInfo.user.photo}
         var prev_comment_dict = mainState.event_id_comment_dict
         prev_comment_dict[eventID].push(di)
@@ -706,10 +646,10 @@ async function google_sign_in(user_device_token, user_state_cb) {
     const userInfo = await GoogleSignin.signIn()
     userInfo['user_device_token'] = user_device_token
 
-    console.log('user-info:', userInfo)
+    // console.log('user-info:', userInfo)
 
     saveUserProfileDetails(userInfo).then(function(responseJson){
-      console.log('promise-res:', responseJson)
+      // console.log('promise-res:', responseJson)
 
       if (responseJson['success'] === true ) { // user has been created in backend
 
@@ -816,7 +756,7 @@ const EventFormComponent = ({ mainState, handler }) => {
   };
 
   const parkValueChange = (value) => {
-    console.log('select-val:', value)
+    // console.log('select-val:', value)
     setData({ ...formData,
       park_name: value
     })
@@ -824,7 +764,7 @@ const EventFormComponent = ({ mainState, handler }) => {
   }
 
   const timeValueChange = (value) => {
-    console.log('select-val:', value)
+    // console.log('select-val:', value)
     setData({ ...formData,
       event_time: value
     })
@@ -834,18 +774,13 @@ const EventFormComponent = ({ mainState, handler }) => {
 
  
   const onEventFormSubmit = () => {
-    // handler({'event_submit_loading': true})
-    // // TODO: 
-    //   // have the loader/create-event functionality with notifications (test once on our device then include right logic)
-    //     // and go from there
-    
 
     setErrors({});
 
     var userData = mainState.userInfo
     var user_access_token = userData['access_token']
     formData['access_token'] = user_access_token
-    console.log('new-form-data', formData)
+    // console.log('new-form-data', formData)
 
     if (formData['event_title'] === "" || formData['event_description'] === "" || formData['park_name'] === "" | formData['event_date'] === "" | formData['event_time'] === ""){
       setErrors({ ...errors,
@@ -856,7 +791,7 @@ const EventFormComponent = ({ mainState, handler }) => {
 
     var todayDate = new Date()
     if (new Date(formData['event_date']).getTime() <= todayDate.getTime()){ // date must be greater or equal to current date
-      console.log('error on date...')
+      // console.log('error on date...')
       setErrors({ ...errors,
         error_msg: 'Date should be greater than today!'
       });
@@ -864,7 +799,7 @@ const EventFormComponent = ({ mainState, handler }) => {
       
     } 
 
-    // handler({'event_submit_loading': true})
+    handler({'event_submit_loading': true})
 
     fetch(API_URL + "/create_event", {
       method: 'POST',
@@ -873,13 +808,13 @@ const EventFormComponent = ({ mainState, handler }) => {
         'Content-Type': 'application/json'
       }
     }).then((response) => response.json()).then((responseJson) => {
-      console.log('create-evnet-form:', responseJson)
+      // console.log('create-evnet-form:', responseJson)
 
       if (responseJson['success'] === true ) {
         // redirect to homepage showing event
         // handler({'event_submitted': true})
         // handler({'event_list_refresh': true, 'event_submit_loading': false})
-        handler({'event_list_refresh': true})
+        handler({'event_list_refresh': true, 'event_submit_loading': false})
         setData({
           event_title: '', 
           event_description: '',
@@ -888,9 +823,9 @@ const EventFormComponent = ({ mainState, handler }) => {
           event_time: ''
         })
         tmp_navigation.navigate('MainEventList')
-        
 
       } else{
+        handler({'event_submit_loading': false})
         setErrors({ ...errors,
           error_msg: 'Form did not submit successfully!'
         });
@@ -899,35 +834,43 @@ const EventFormComponent = ({ mainState, handler }) => {
     })
 
   }
-
-
   
 
   if (mainState.event_submit_loading === true) {
 
     return (
       
-      // <HStack space={2} justifyContent="center">
-      //   <Spinner accessibilityLabel="Loading posts" />
-      //   <Heading color="primary.500" fontSize="md">
-      //     Loading
-      //   </Heading>
-      // </HStack>
-      <View style={{
-        // flex: 1,
-        // justifyContent: "center", 
-        // flexDirection: "row",
-        // justifyContent: "space-around",
-        // padding: 10
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: 0,
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
-        <ActivityIndicator size="large" />
+      // // <HStack space={2} justifyContent="center">
+      // //   <Spinner accessibilityLabel="Loading posts" />
+      // //   <Heading color="primary.500" fontSize="md">
+      // //     Loading
+      // //   </Heading>
+      // // </HStack>
+      // <View style={{
+      //   // flex: 1,
+      //   // justifyContent: "center", 
+      //   // flexDirection: "row",
+      //   // justifyContent: "space-around",
+      //   // padding: 10
+      //   position: 'absolute',
+      //   left: 0,
+      //   right: 0,
+      //   top: 0,
+      //   bottom: 0,
+      //   alignItems: 'center',
+      //   justifyContent: 'center'
+      // }}>
+      //   <ActivityIndicator size="large" />
+      // </View>
+
+
+      <View style={{flex: 1, justifyContent: "center"}}>
+        <HStack space={2} justifyContent="center">
+          <Spinner accessibilityLabel="Loading posts" />
+          <Heading color="primary.500" fontSize="md">
+            Notifying Everyone...
+          </Heading>
+        </HStack>
       </View>
 
     )
@@ -1213,9 +1156,6 @@ const MainScreen = ({ mainState, handler, navigation }) => {
   var userData = mainState.userInfo
   var internetConnected = mainState.internetConnected
 
-  
-  console.log('inital-state:', inital_loading_state)
-
   if (inital_loading_state === true) {
 
     return (
@@ -1303,7 +1243,6 @@ export default class App extends React.Component{
 
 
   comment_handler = (update_val) => { // TODO: is this being used anywhere? (don't think so...)
-    console.log('comment-upate-handle:', update_val)
     // 'event_id': eventID, 'comment': user_comment}
     var event_dict = this.state.event_id_dict[eventID]
   }
@@ -1314,14 +1253,12 @@ export default class App extends React.Component{
 
     try{
       const google_userInfo = await GoogleSignin.signInSilently();
-      console.log('google-user-info:', google_userInfo)
+      // console.log('google-user-info:', google_userInfo)
       const userAccessTokens = await GoogleSignin.getTokens()
 
       return new Promise((resolve, reject) => {
 
         var di = {'access_token': userAccessTokens['accessToken'], 'id_token': userAccessTokens['idToken']}
-        // console.log('di:', di)
-        // console.log('set-state:', this.setState)
 
         this.setState({ 
           userLoggedIn: true,
@@ -1330,14 +1267,11 @@ export default class App extends React.Component{
         }, 
         () => {this.getCurrentUserCB()}
         )
-        
-        // resolve({'user_logged_in': true, 'user_profile_info': google_userInfo, 'user_token_info': di})
 
       })
 
     } catch(error) {
-      //
-      console.log('error:', error)
+      // console.log('error:', error)
       this.getCurrentUserCB()
 
     }
@@ -1398,7 +1332,7 @@ export default class App extends React.Component{
   async getAllEvents() {
 
     var getEventFormData = this.state.userInfo
-    console.log(getEventFormData)
+    // console.log(getEventFormData)
     
     fetch(API_URL + "/get_events", {
       method: 'POST',
@@ -1406,7 +1340,9 @@ export default class App extends React.Component{
       headers: {
         'Content-Type': 'application/json'
       }
-    }).then((response) => response.json()).then((responseJson) => {      
+    }).then((response) => response.json()).then((responseJson) => {   
+      // console.log('all-event-data:', responseJson)
+
       this.setState({ 
         all_events_list: responseJson['data'], 
         event_id_dict: responseJson['event_id_dict'][0],
@@ -1430,7 +1366,7 @@ export default class App extends React.Component{
 
     await messaging().registerDeviceForRemoteMessages();
     const token = await messaging().getToken();
-    console.log('device-token:', token)
+    // console.log('device-token:', token)
 
     this.setState({ user_device_token: token})
 
@@ -1448,7 +1384,7 @@ export default class App extends React.Component{
           'Content-Type': 'application/json'
         }
       }).then((response) => response.json()).then((responseJson) => {
-        console.log('user-device-token-updated:', responseJson)
+        // console.log('user-device-token-updated:', responseJson)
 
       })
 
@@ -1505,7 +1441,7 @@ export default class App extends React.Component{
     });
 
     var notification_type = message['data']['type']
-    console.log('noitf-message:', message, notification_type)
+    // console.log('noitf-message:', message, notification_type)
 
     if (notification_type == 'create_event'){
 
@@ -1548,9 +1484,9 @@ export default class App extends React.Component{
     const settings = await notifee.requestPermission();
   
     if (settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED) {
-      console.log('Permission settings:', settings);
+      // console.log('Permission settings:', settings);
     } else {
-      console.log('User declined permissions');
+      // console.log('User declined permissions');
     }
   }
 
@@ -1558,9 +1494,9 @@ export default class App extends React.Component{
     const settings = await notifee.requestPermission();
   
     if (settings.authorizationStatus) {
-      console.log('User has notification permissions enabled')
+      // console.log('User has notification permissions enabled')
     } else {
-      console.log('User has notification permissions disabled')
+      // console.log('User has notification permissions disabled')
       await this.requestUserPermission()
     }
   
@@ -1587,74 +1523,12 @@ export default class App extends React.Component{
     // await this.requestUserPermission()
 
     NetInfo.fetch().then(state => {
-      console.log('network-state:', state)
+      // console.log('network-state:', state)
       this.setState({ internetConnected: state.isConnected })
       
       if (this.state.internetConnected === true){
 
-        // TODO: before testing iOS app (create another gmail-account) and ensure notif-permis are not asked everytime, 
-        // make splash-screen / icons 
         this.getCurrentUser()
-
-        // this.getDeviceToken()
-
-        // this.getCurrentUser().then(function(){
-        //   // console.log('updated-state:', this.state)
-        // })
-
-        // this.getCurrentUser().then(function(current_user_info){
-        
-        //   this.getDeviceToken(current_user_info).then(function(){
-        //     this.getAllEvents()
-        //   })
-
-        // }) 
-
-        // this.getCurrentUser().then(this.getDeviceToken())
-
-        // this.getCurrentUser().then(this.getDeviceToken().then(this.getAllEvents()))
-
-        // // TODO: fix this and test extensively before continuning...
-        // this.getCurrentUser().then(this.getDeviceToken().then(this.getAllEvents().then(function(){
-            
-        //   if (this.state.userLoggedIn === true){
-
-        //     var formData = {"userDeviceToken": this.state.user_device_token}
-      
-        //     fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
-        //       method: 'POST',
-        //       body: JSON.stringify(formData),
-        //       headers: {
-        //         'Content-Type': 'application/json'
-        //       }
-        //     }).then((response) => response.json()).then((responseJson) => {
-        //       console.log('user-device-token-updated:', responseJson)
-        //     })
-
-        //   }
-
-        // })))
-  
-    //   // if (this.state.userLoggedIn === true){
-        
-    //   //   var formData = {"userDeviceToken": this.state.user_device_token}
-  
-    //   //   fetch("https://07b7-2607-fea8-4360-f100-a476-956b-eb-6def.ngrok.io/update_user_device_token", {
-    //   //     method: 'POST',
-    //   //     body: JSON.stringify(formData),
-    //   //     headers: {
-    //   //       'Content-Type': 'application/json'
-    //   //     }
-    //   //   }).then((response) => response.json()).then((responseJson) => {
-    //   //     console.log('save-user-attend:', responseJson)
-    //   //     // TODO: 
-    //   //       // need to mark-state for this event that user is not going or user is going
-    //   //         // show not-going-button and going-button
-    //   //   })
-  
-    //   // }
-
-    // }
         
       } else {
 
